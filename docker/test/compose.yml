@@ -1,0 +1,19 @@
+services:
+  php:
+    build:
+      dockerfile: docker/Dockerfile
+      context: ..
+      target: dev
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    env_file:
+      - path: ./test/.env
+      - path: ./test/override.env
+        required: false
+    volumes:
+      - ../:/app
+      - ../runtime:/app/runtime
+      - caddy_data:/data
+      - caddy_config:/config
+    tty: true
