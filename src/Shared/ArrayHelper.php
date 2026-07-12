@@ -24,4 +24,9 @@ final class ArrayHelper
 
         return $result;
     }
+
+    public static function toString(mixed $value, string $default = ''): string
+    {
+        return is_string($value) ? $value : $default;
+    }
 }

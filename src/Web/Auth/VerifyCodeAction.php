@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Web\Auth;
 
 use App\Application\Auth\VerifyEmailCode\VerifyEmailCodeHandler;
+use App\Shared\ArrayHelper;
 use App\Web\Shared\JsonBodyParser;
 use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
@@ -24,8 +25,8 @@ final class VerifyCodeAction
     {
         try {
             $payload = JsonBodyParser::parse($request);
-            $email = is_string($payload['email'] ?? null) ? $payload['email'] : '';
-            $code = is_string($payload['code'] ?? null) ? $payload['code'] : '';
+            $email = ArrayHelper::toString($payload['email'] ?? null);
+            $code = ArrayHelper::toString($payload['code'] ?? null);
             $this->handler->handle($email, $code);
 
             return $this->jsonResponseFactory->success([

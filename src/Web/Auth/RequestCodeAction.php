@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace App\Web\Auth;
 
 use App\Application\Auth\RequestVerificationCode\RequestVerificationCodeHandler;
-use App\Web\Shared\JsonResponseFactory;
+use App\Shared\ArrayHelper;
 use App\Web\Shared\JsonBodyParser;
+use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -22,7 +23,7 @@ final class RequestCodeAction
     {
         try {
             $payload = JsonBodyParser::parse($request);
-            $email = is_string($payload['email'] ?? null) ? $payload['email'] : '';
+            $email = ArrayHelper::toString($payload['email'] ?? null);
             $this->handler->handle($email);
 
             return $this->jsonResponseFactory->success([

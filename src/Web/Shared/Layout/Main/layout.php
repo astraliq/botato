@@ -33,7 +33,7 @@ $showLandingHeader = $showLandingHeader ?? true;
 $includeAuthModal = $includeAuthModal ?? true;
 $includePricingScript = $includePricingScript ?? false;
 $includePhoneMask = $includePhoneMask ?? false;
-$csrfToken = isset($csrf) && is_string($csrf) ? $csrf : '';
+$csrfToken = $csrf ?? '';
 
 $this->beginPage();
 ?>

@@ -13,6 +13,7 @@ use Yiisoft\View\WebView;
  * @var array{full_name: string, company_name: string, description: string, phone: string, gender: string} $formValues
  * @var string|null $successMessage
  * @var string|null $errorMessage
+ * @var string|null $csrf
  */
 
 $this->setTitle('Личный кабинет — Botato');

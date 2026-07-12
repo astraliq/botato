@@ -29,7 +29,7 @@ final class JsonResponseFactory
     private function json(array $data, int $status): ResponseInterface
     {
         $response = $this->responseFactory->createResponse($status);
-        $response->getBody()->write((string) json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
+        $response->getBody()->write(json_encode($data, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));
 
         return $response->withHeader('Content-Type', 'application/json; charset=UTF-8');
     }

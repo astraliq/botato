@@ -28,7 +28,7 @@ final class AuthMiddleware implements MiddlewareInterface
 
         if ($this->isJsonRequest($request)) {
             $response = $this->responseFactory->createResponse(401);
-            $response->getBody()->write((string) json_encode([
+            $response->getBody()->write(json_encode([
                 'success' => false,
                 'message' => 'Требуется авторизация.',
             ], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE));

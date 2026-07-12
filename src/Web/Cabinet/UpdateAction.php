@@ -43,11 +43,11 @@ final class UpdateAction
         }
 
         $formValues = [
-            'full_name' => is_string($formData['full_name'] ?? null) ? $formData['full_name'] : $user->getFullName(),
-            'company_name' => is_string($formData['company_name'] ?? null) ? $formData['company_name'] : $user->getCompanyName(),
-            'description' => is_string($formData['description'] ?? null) ? $formData['description'] : $user->getDescription(),
-            'phone' => is_string($formData['phone'] ?? null) ? $formData['phone'] : $user->getPhone(),
-            'gender' => is_string($formData['gender'] ?? null) ? $formData['gender'] : ($user->getGender()?->value ?? ''),
+            'full_name' => ArrayHelper::toString($formData['full_name'] ?? null, $user->getFullName()),
+            'company_name' => ArrayHelper::toString($formData['company_name'] ?? null, $user->getCompanyName()),
+            'description' => ArrayHelper::toString($formData['description'] ?? null, $user->getDescription()),
+            'phone' => ArrayHelper::toString($formData['phone'] ?? null, $user->getPhone()),
+            'gender' => ArrayHelper::toString($formData['gender'] ?? null, $user->getGender()?->value ?? ''),
         ];
 
         try {

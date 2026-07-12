@@ -50,8 +50,14 @@ final class MigrateUpCommand extends Command
             }
 
             /** @psalm-suppress UnresolvableInclude */
-            $migration = require $migrationFile;
-            $migration['up']($this->connection);
+            $migrationDefinition = require $migrationFile;
+            if (!is_array($migrationDefinition) || !is_callable($migrationDefinition['up'] ?? null)) {
+                throw new \RuntimeException("Invalid migration file: {$migrationFile}");
+            }
+
+            /** @var callable(ConnectionInterface): void $migrationUp */
+            $migrationUp = $migrationDefinition['up'];
+            $migrationUp($this->connection);
 
             $this->connection
                 ->createCommand('INSERT INTO migration (version) VALUES (:version)')
