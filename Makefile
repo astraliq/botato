@@ -125,19 +125,44 @@ endif
 # Tests and analysis
 #
 
+CODECEPT := php ./vendor/bin/codecept
+CODECEPT_ENV := APP_ENV=test APP_DEBUG=false APP_C3=true
+
 ifeq ($(PRIMARY_GOAL),test)
-test: ## Run tests.
-	$(DOCKER_COMPOSE_TEST) run --rm php ./vendor/bin/codecept run $(CLI_ARGS)
+test: ## Run tests (host: Docker Compose; in container: directly).
+	@if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then \
+		$(DOCKER_COMPOSE_TEST) run --rm php $(CODECEPT) run $(CLI_ARGS); \
+	else \
+		$(CODECEPT_ENV) $(CODECEPT) run $(CLI_ARGS); \
+	fi
+endif
+
+ifeq ($(PRIMARY_GOAL),test-app)
+test-app: ## Alias for make test inside container.
+	@$(MAKE) test $(CLI_ARGS)
 endif
 
 ifeq ($(PRIMARY_GOAL),test-coverage)
 test-coverage: ## Run tests with coverage.
-	$(DOCKER_COMPOSE_TEST) run --rm php ./vendor/bin/codecept run --coverage --coverage-html --disable-coverage-php
+	@if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then \
+		$(DOCKER_COMPOSE_TEST) run --rm php $(CODECEPT) run --coverage --coverage-html --disable-coverage-php $(CLI_ARGS); \
+	else \
+		$(CODECEPT_ENV) $(CODECEPT) run --coverage --coverage-html --disable-coverage-php $(CLI_ARGS); \
+	fi
+endif
+
+ifeq ($(PRIMARY_GOAL),test-app-coverage)
+test-app-coverage: ## Alias for make test-coverage inside container.
+	@$(MAKE) test-coverage $(CLI_ARGS)
 endif
 
 ifeq ($(PRIMARY_GOAL),codecept)
 codecept: ## Run Codeception.
-	$(DOCKER_COMPOSE_TEST) run --rm php ./vendor/bin/codecept $(CLI_ARGS)
+	@if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then \
+		$(DOCKER_COMPOSE_TEST) run --rm php $(CODECEPT) $(CLI_ARGS); \
+	else \
+		$(CODECEPT_ENV) $(CODECEPT) $(CLI_ARGS); \
+	fi
 endif
 
 ifeq ($(PRIMARY_GOAL),psalm)

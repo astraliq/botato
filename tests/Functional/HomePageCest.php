@@ -20,7 +20,7 @@ final class HomePageCest
 
         assertSame(200, $response->getStatusCode());
         assertStringContainsString(
-            'Don\'t forget to check the guide',
+            'Botato',
             $response->getBody()->getContents(),
         );
     }

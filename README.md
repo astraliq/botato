@@ -89,6 +89,12 @@ make shell
 # Yii console
 make yii migrate/up
 make yii list
+
+# Тесты (с хоста или из контейнера make shell — команда одна)
+cp docker/test/.env.example docker/test/.env   # один раз, для make test с хоста
+make test                  # все наборы
+make test -- Unit          # один набор: Unit | Functional | Console | Web
+make test-coverage         # с HTML-покрытием
 ```
 
 ## Переменные окружения
