@@ -13,7 +13,6 @@ services:
         required: false
     volumes:
       - ../:/app
-      - ../runtime:/app/runtime
       - caddy_data:/data
       - caddy_config:/config
     tty: true

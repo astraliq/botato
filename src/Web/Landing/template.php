@@ -9,6 +9,7 @@ use Yiisoft\View\WebView;
  * @var WebView $this
  * @var bool $isAuthenticated
  * @var string $cabinetUrl
+ * @var string $mailerFrom
  */
 
 $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Instagram');
@@ -266,6 +267,6 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
 <footer class="site-footer">
     <div class="container site-footer__inner">
         <div>© <?= date('Y') ?> Botato</div>
-        <div>info@botato.local</div>
+        <div><?= Html::encode($mailerFrom) ?></div>
     </div>
 </footer>

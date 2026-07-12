@@ -43,9 +43,13 @@ services:
     networks:
       - internal
     deploy:
+      replicas: 1
       placement:
         constraints:
           - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 5s
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U app -d botato"]
       interval: 10s

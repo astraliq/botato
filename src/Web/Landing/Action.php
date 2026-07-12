@@ -15,6 +15,7 @@ final class Action
         private readonly ViewRenderer $viewRenderer,
         private readonly AuthSessionService $authSessionService,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly string $mailerFrom,
     ) {}
 
     public function __invoke(): ResponseInterface
@@ -22,6 +23,7 @@ final class Action
         return $this->viewRenderer->render(__DIR__ . '/template', [
             'isAuthenticated' => $this->authSessionService->isAuthenticated(),
             'cabinetUrl' => $this->urlGenerator->generate('cabinet'),
+            'mailerFrom' => $this->mailerFrom,
             'includePricingScript' => true,
             'includeAuthModal' => !$this->authSessionService->isAuthenticated(),
             'includePhoneMask' => false,

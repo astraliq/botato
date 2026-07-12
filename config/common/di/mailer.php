@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Infrastructure\Mail\VerificationCodeMailer;
+use App\Web\Landing\Action as LandingAction;
 
 /** @var array $params */
 
@@ -11,6 +12,12 @@ return [
         '__construct()' => [
             'mailerDsn' => $params['mailer']['dsn'],
             'fromEmail' => $params['mailer']['from'],
+        ],
+    ],
+
+    LandingAction::class => [
+        '__construct()' => [
+            'mailerFrom' => $params['mailer']['from'],
         ],
     ],
 ];

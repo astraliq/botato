@@ -118,10 +118,10 @@ STACK_NAME=botato
 
 ## Если уже был запущен старый проект
 
-Старые контейнеры `docker-*` или `business-assistant-*` нужно остановить:
+Старые контейнеры `docker-*` или `botato-*` нужно остановить:
 
 ```bash
-docker compose -p business-assistant -f docker/compose.yml -f docker/dev/compose.yml down
+docker compose -p botato -f docker/compose.yml -f docker/dev/compose.yml down
 docker compose -p docker -f docker/compose.yml -f docker/dev/compose.yml down
 ```
 
