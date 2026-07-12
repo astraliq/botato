@@ -137,20 +137,46 @@ jobs:
             exit 1
           fi
           install -m 700 -d ~/.ssh
-          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/deploy_key
+          printf '%s' "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts
+          if ! grep -q 'BEGIN .*PRIVATE KEY' ~/.ssh/deploy_key; then
+            echo 'VPS_SSH_PRIVATE_KEY does not look like an OpenSSH private key.'
+            exit 1
+          fi
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+            echo 'VPS_SSH_PRIVATE_KEY is invalid. Re-copy the private key from ~/.ssh/botato_deploy into GitHub Secrets.'
+            exit 1
+          fi
+          echo "Deploy key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy_key | awk '{print $2}')"
+          ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
           {
             printf '%s\n' \
               'Host docker-web' \
               "  HostName ${VPS_HOST}" \
               "  User ${VPS_USER}" \
               '  IdentityFile ~/.ssh/deploy_key' \
+              '  IdentitiesOnly yes' \
+              '  PreferredAuthentications publickey' \
+              '  StrictHostKeyChecking yes' \
+              '  BatchMode yes' \
+              '' \
+              "Host ${VPS_HOST}" \
+              "  User ${VPS_USER}" \
+              '  IdentityFile ~/.ssh/deploy_key' \
+              '  IdentitiesOnly yes' \
+              '  PreferredAuthentications publickey' \
               '  StrictHostKeyChecking yes' \
               '  BatchMode yes'
           } >> ~/.ssh/config
           chmod 600 ~/.ssh/config
-          ssh -o ConnectTimeout=15 docker-web 'echo "SSH connection OK"'
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            "${VPS_USER}@${VPS_HOST}" 'echo "SSH connection OK"'
+          echo "VPS_USER=${VPS_USER}" >> "${GITHUB_ENV}"
+          echo "VPS_HOST=${VPS_HOST}" >> "${GITHUB_ENV}"
 
       - name: Log in to registry on VPS.
         env:
@@ -160,15 +186,37 @@ jobs:
         run: |
           set -euo pipefail
           token="${GHCR_PULL_TOKEN:-${GITHUB_TOKEN}}"
-          echo "${token}" | ssh docker-web "docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin"
+          echo "${token}" | ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            "docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin"
 
       - name: Sync production environment files to VPS.
         run: |
           set -euo pipefail
-          ssh docker-web 'install -d -m 700 /opt/botato/docker/prod'
-          scp docker/prod/.env docker-web:/opt/botato/docker/prod/.env
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            'install -d -m 700 /opt/botato/docker/prod'
+          scp -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            docker/prod/.env "${VPS_USER}@${VPS_HOST}:/opt/botato/docker/prod/.env"
           if [ -f docker/prod/override.env ]; then
-            scp docker/prod/override.env docker-web:/opt/botato/docker/prod/override.env
+            scp -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o PreferredAuthentications=publickey \
+              -o StrictHostKeyChecking=yes \
+              -o BatchMode=yes \
+              docker/prod/override.env "${VPS_USER}@${VPS_HOST}:/opt/botato/docker/prod/override.env"
           fi
 
       - name: Deploy stack to Docker Swarm.
@@ -181,7 +229,7 @@ jobs:
           export IMAGE="${{ env.IMAGE }}"
           export STACK_NAME="${{ env.STACK_NAME }}"
           export PROD_HOST="${PROD_HOST}"
-          docker context create prod --docker "host=ssh://docker-web"
+          docker context create prod --docker "host=ssh://${VPS_USER}@${VPS_HOST}"
           docker --context prod stack deploy \
             --prune \
             --detach=false \
@@ -197,7 +245,13 @@ jobs:
           STACK_NAME: ${{ env.STACK_NAME }}
         run: |
           set -euo pipefail
-          ssh docker-web "docker run --rm \
-            --network ${STACK_NAME}_internal \
-            --env-file /opt/botato/docker/prod/.env \
-            ${IMAGE}:${IMAGE_TAG} php ./yii migrate/up --interactive=0"
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o PreferredAuthentications=publickey \
+            -o StrictHostKeyChecking=yes \
+            -o BatchMode=yes \
+            "${VPS_USER}@${VPS_HOST}" \
+            "docker run --rm \
+              --network ${STACK_NAME}_internal \
+              --env-file /opt/botato/docker/prod/.env \
+              ${IMAGE}:${IMAGE_TAG} php ./yii migrate/up --interactive=0"
