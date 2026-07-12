@@ -1,0 +1,26 @@
+# Одноразовый стек Caddy на VPS. Сеть caddy_public должна существовать до deploy.
+# docker network create --driver=overlay caddy_public
+# docker stack deploy -c docker/infra/caddy-stack.yml caddy
+
+services:
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_data:/data
+    networks:
+      - caddy_public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+
+volumes:
+  caddy_data:
+
+networks:
+  caddy_public:
+    external: true

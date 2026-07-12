@@ -3,6 +3,7 @@ services:
     image: ${IMAGE}:${IMAGE_TAG}
     networks:
       - caddy_public
+      - internal
     volumes:
       - runtime:/app/runtime
       - caddy_data:/data
@@ -31,9 +32,32 @@ services:
         caddy: ${PROD_HOST:-app.example.com}
         caddy.reverse_proxy: "{{upstreams 80}}"
 
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: botato
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d botato"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   runtime:
+  postgres_data:
 
 networks:
   caddy_public:
     external: true
+  internal:
+    driver: overlay
