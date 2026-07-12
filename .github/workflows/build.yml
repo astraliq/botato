@@ -140,14 +140,17 @@ jobs:
           printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts
-          cat >> ~/.ssh/config <<EOF
-          Host docker-web
-              HostName ${VPS_HOST}
-              User ${VPS_USER}
-              IdentityFile ~/.ssh/deploy_key
-              StrictHostKeyChecking yes
-          EOF
+          {
+            printf '%s\n' \
+              'Host docker-web' \
+              "  HostName ${VPS_HOST}" \
+              "  User ${VPS_USER}" \
+              '  IdentityFile ~/.ssh/deploy_key' \
+              '  StrictHostKeyChecking yes' \
+              '  BatchMode yes'
+          } >> ~/.ssh/config
           chmod 600 ~/.ssh/config
+          ssh -o ConnectTimeout=15 docker-web 'echo "SSH connection OK"'
 
       - name: Log in to registry on VPS.
         env:
