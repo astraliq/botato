@@ -1,6 +1,6 @@
 # Деплой на VPS через GitHub Actions
 
-Инструкция по настройке CI/CD для проекта **Botato**: автоматический деплой на удалённый VPS после успешных тестов в ветке `master`.
+Инструкция по настройке CI/CD для проекта **Botato**: автоматический деплой на удалённый VPS после успешных тестов в ветке `main`.
 
 ## Архитектура
 
@@ -19,7 +19,7 @@ PostgreSQL 16
 
 | Компонент | Назначение |
 |-----------|------------|
-| GitHub Actions `build.yml` | CI: тесты на push в `master` |
+| GitHub Actions `build.yml` | CI: тесты на push в `main` |
 | GitHub Actions `deploy.yml` | CD: сборка образа, push в GHCR, деплой на VPS |
 | Docker Swarm | Оркестрация на сервере |
 | Caddy Docker Proxy | Автоматический HTTPS и маршрутизация |
@@ -28,7 +28,7 @@ PostgreSQL 16
 ### Схема CI/CD
 
 ```
-Push в master
+Push в main
       │
       ▼
 build.yml (тесты)
@@ -302,7 +302,7 @@ cat botato_2026-07-12.sql | docker exec -i $(docker ps -q -f name=botato_postgre
 
 ## Часть 4. Первый деплой
 
-1. Закоммитьте и запушьте изменения в ветку `master`.
+1. Закоммитьте и запушьте изменения в ветку `main`.
 2. Дождитесь успешного завершения workflow **build** (тесты).
 3. Автоматически запустится workflow **deploy**.
 

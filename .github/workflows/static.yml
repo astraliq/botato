@@ -12,7 +12,7 @@ on:
       - 'yii'
       - 'yii.bat'
   push:
-    branches: ['master']
+    branches: ['main']
     paths: *paths
 
 concurrency:
