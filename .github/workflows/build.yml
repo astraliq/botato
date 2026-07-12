@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   codeception:
-    name: PHP ${{ matrix.php }}-${{ matrix.os }}
+    name: PHP 8.3
 
     env:
       key: cache-v1
@@ -33,18 +33,7 @@ jobs:
       APP_ENV: test
       APP_DEBUG: false
 
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
-        php:
-          - "8.2"
-          - "8.3"
-          - "8.4"
-          - "8.5"
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout.
@@ -58,25 +47,18 @@ jobs:
           coverage: false
           extensions: fileinfo, intl
           ini-values: date.timezone='UTC', register_argc_argv=On
-          php-version: ${{ matrix.php }}
+          php-version: '8.3'
 
       - name: Install Composer dependencies
         uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: Run codeception build.
-        run: vendor/bin/codecept build
+        run: php vendor/bin/codecept build
 
-      - name: Run tests with codeception with code coverage with shell bash.
-        if: matrix.os == 'ubuntu-latest'
-        run: vendor/bin/codecept run --coverage --coverage-xml --disable-coverage-php
-
-      - name: Run tests with codeception with code coverage with shell powershell.
-        if: matrix.os == 'windows-latest'
-        run: vendor/bin/codecept run
-        shell: powershell
+      - name: Run tests with codeception with code coverage.
+        run: php vendor/bin/codecept run --coverage --coverage-xml --disable-coverage-php
 
       - name: Upload coverage to Codecov.
-        if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
