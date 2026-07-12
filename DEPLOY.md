@@ -19,8 +19,7 @@ PostgreSQL 16
 
 | Компонент | Назначение |
 |-----------|------------|
-| GitHub Actions `build.yml` | CI: тесты на push в `main` |
-| GitHub Actions `deploy.yml` | CD: сборка образа, push в GHCR, деплой на VPS |
+| GitHub Actions `build.yml` | CI: тесты и деплой на push в `main` |
 | Docker Swarm | Оркестрация на сервере |
 | Caddy Docker Proxy | Автоматический HTTPS и маршрутизация |
 | GHCR | Хранение Docker-образов (`ghcr.io/astraliq/botato`) |
@@ -31,16 +30,9 @@ PostgreSQL 16
 Push в main
       │
       ▼
-build.yml (тесты)
-      │
-      │ успех
-      ▼
-deploy.yml
-      ├─ сборка prod-образа
-      ├─ push в ghcr.io
-      ├─ SSH на VPS
-      ├─ docker stack deploy
-      └─ миграции БД
+build.yml
+      ├─ codeception (тесты)
+      └─ deploy (VPS, после успешных тестов)
 ```
 
 ## Требования
@@ -54,7 +46,7 @@ deploy.yml
 
 | Файл | Описание |
 |------|----------|
-| `.github/workflows/deploy.yml` | Workflow автоматического деплоя |
+| `.github/workflows/build.yml` | CI: тесты и деплой на VPS |
 | `docker/prod/compose.yml` | Prod-стек: PHP + PostgreSQL |
 | `docker/prod/.env.example` | Шаблон переменных приложения |
 | `docker/prod/override.env.example` | Шаблон секретов (пароль SMTP и т.п.) |
@@ -303,10 +295,9 @@ cat botato_2026-07-12.sql | docker exec -i $(docker ps -q -f name=botato_postgre
 ## Часть 4. Первый деплой
 
 1. Закоммитьте и запушьте изменения в ветку `main`.
-2. Дождитесь успешного завершения workflow **build** (тесты).
-3. Автоматически запустится workflow **deploy**.
+2. Workflow **build** запустит тесты, затем job **Deploy to VPS**.
 
-Ручной деплой: **Actions → deploy → Run workflow**.
+Ручной деплой: **Actions → build → Run workflow** (только push/main или workflow_dispatch запускает deploy).
 
 ### Проверка на VPS
 

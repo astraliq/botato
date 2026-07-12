@@ -6,6 +6,7 @@ namespace App\Infrastructure\Persistence;
 
 use App\Domain\Auth\EmailVerificationCode;
 use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
+use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
@@ -50,7 +51,7 @@ final class PgsqlEmailVerificationCodeRepository implements EmailVerificationCod
             ])
             ->queryOne();
 
-        return is_array($row) ? EmailVerificationCode::fromRow($row) : null;
+        return is_array($row) ? EmailVerificationCode::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function markUsed(int $id, DateTimeImmutable $usedAt): void

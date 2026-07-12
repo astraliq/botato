@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Web\Auth;
 
 use App\Application\Auth\VerifyEmailCode\VerifyEmailCodeHandler;
+use App\Web\Shared\JsonBodyParser;
 use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
@@ -22,9 +23,9 @@ final class VerifyCodeAction
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $payload = $this->parseJsonBody($request);
-            $email = (string) ($payload['email'] ?? '');
-            $code = (string) ($payload['code'] ?? '');
+            $payload = JsonBodyParser::parse($request);
+            $email = is_string($payload['email'] ?? null) ? $payload['email'] : '';
+            $code = is_string($payload['code'] ?? null) ? $payload['code'] : '';
             $this->handler->handle($email, $code);
 
             return $this->jsonResponseFactory->success([
@@ -36,24 +37,5 @@ final class VerifyCodeAction
         } catch (\Throwable) {
             return $this->jsonResponseFactory->error('Не удалось подтвердить код.', 500);
         }
-    }
-
-    /** @return array<string, mixed> */
-    private function parseJsonBody(ServerRequestInterface $request): array
-    {
-        $parsedBody = $request->getParsedBody();
-        if (is_array($parsedBody) && $parsedBody !== []) {
-            return $parsedBody;
-        }
-
-        $body = $request->getBody();
-        if ($body->isSeekable()) {
-            $body->rewind();
-        }
-
-        $rawBody = (string) $body->getContents();
-        $payload = json_decode($rawBody, true);
-
-        return is_array($payload) ? $payload : [];
     }
 }

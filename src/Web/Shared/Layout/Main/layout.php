@@ -33,6 +33,7 @@ $showLandingHeader = $showLandingHeader ?? true;
 $includeAuthModal = $includeAuthModal ?? true;
 $includePricingScript = $includePricingScript ?? false;
 $includePhoneMask = $includePhoneMask ?? false;
+$csrfToken = isset($csrf) && is_string($csrf) ? $csrf : '';
 
 $this->beginPage();
 ?>
@@ -41,7 +42,7 @@ $this->beginPage();
 <head>
     <meta charset="<?= Html::encode($applicationParams->charset) ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="<?= Html::encode($csrf ?? '') ?>">
+    <meta name="csrf-token" content="<?= Html::encode($csrfToken) ?>">
     <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
     <title><?= Html::encode($this->getTitle()) ?></title>
     <?php $this->head() ?>

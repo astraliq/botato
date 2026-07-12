@@ -6,6 +6,7 @@ namespace App\Web\Auth;
 
 use App\Application\Auth\RequestVerificationCode\RequestVerificationCodeHandler;
 use App\Web\Shared\JsonResponseFactory;
+use App\Web\Shared\JsonBodyParser;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,8 +21,8 @@ final class RequestCodeAction
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
         try {
-            $payload = $this->parseJsonBody($request);
-            $email = (string) ($payload['email'] ?? '');
+            $payload = JsonBodyParser::parse($request);
+            $email = is_string($payload['email'] ?? null) ? $payload['email'] : '';
             $this->handler->handle($email);
 
             return $this->jsonResponseFactory->success([
@@ -32,24 +33,5 @@ final class RequestCodeAction
         } catch (\Throwable) {
             return $this->jsonResponseFactory->error('Не удалось отправить код.', 500);
         }
-    }
-
-    /** @return array<string, mixed> */
-    private function parseJsonBody(ServerRequestInterface $request): array
-    {
-        $parsedBody = $request->getParsedBody();
-        if (is_array($parsedBody) && $parsedBody !== []) {
-            return $parsedBody;
-        }
-
-        $body = $request->getBody();
-        if ($body->isSeekable()) {
-            $body->rewind();
-        }
-
-        $rawBody = (string) $body->getContents();
-        $payload = json_decode($rawBody, true);
-
-        return is_array($payload) ? $payload : [];
     }
 }

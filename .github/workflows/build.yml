@@ -10,11 +10,13 @@ on:
       - 'tests/**'
       - 'codeception.yml'
       - 'composer.json'
+      - 'composer.lock'
       - 'yii'
       - 'yii.bat'
   push:
     branches: ['main']
     paths: *paths
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,6 +24,10 @@ concurrency:
 
 permissions:
   contents: read
+
+env:
+  STACK_NAME: botato
+  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   codeception:
@@ -59,7 +65,136 @@ jobs:
         run: php vendor/bin/codecept run --coverage --coverage-xml --disable-coverage-php
 
       - name: Upload coverage to Codecov.
+        continue-on-error: true
         uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: runtime/tests/_output/coverage.xml
+
+  deploy:
+    name: Deploy to VPS
+    needs: codeception
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx.
+        uses: docker/setup-buildx-action@v3.11.1
+
+      - name: Log in to GitHub Container Registry.
+        uses: docker/login-action@v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push production image.
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: prod
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Prepare production environment files.
+        env:
+          PROD_ENV_FILE: ${{ secrets.PROD_ENV_FILE }}
+          PROD_OVERRIDE_ENV_FILE: ${{ secrets.PROD_OVERRIDE_ENV_FILE }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PROD_ENV_FILE}" ]; then
+            echo 'Secret PROD_ENV_FILE is not set. Add docker/prod/.env content to repository secrets.'
+            exit 1
+          fi
+          printf '%s\n' "${PROD_ENV_FILE}" > docker/prod/.env
+          if [ -n "${PROD_OVERRIDE_ENV_FILE}" ]; then
+            printf '%s\n' "${PROD_OVERRIDE_ENV_FILE}" > docker/prod/override.env
+          fi
+
+      - name: Configure SSH.
+        env:
+          VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VPS_SSH_PRIVATE_KEY}" ] || [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ]; then
+            echo 'Secrets VPS_SSH_PRIVATE_KEY, VPS_HOST and VPS_USER are required.'
+            exit 1
+          fi
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts
+          cat >> ~/.ssh/config <<EOF
+          Host docker-web
+              HostName ${VPS_HOST}
+              User ${VPS_USER}
+              IdentityFile ~/.ssh/deploy_key
+              StrictHostKeyChecking yes
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Log in to registry on VPS.
+        env:
+          GHCR_PULL_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          set -euo pipefail
+          token="${GHCR_PULL_TOKEN:-${GITHUB_TOKEN}}"
+          echo "${token}" | ssh docker-web "docker login ghcr.io -u ${GITHUB_ACTOR} --password-stdin"
+
+      - name: Sync production environment files to VPS.
+        run: |
+          set -euo pipefail
+          ssh docker-web 'install -d -m 700 /opt/botato/docker/prod'
+          scp docker/prod/.env docker-web:/opt/botato/docker/prod/.env
+          if [ -f docker/prod/override.env ]; then
+            scp docker/prod/override.env docker-web:/opt/botato/docker/prod/override.env
+          fi
+
+      - name: Deploy stack to Docker Swarm.
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+          IMAGE_TAG: ${{ github.sha }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          set -euo pipefail
+          export IMAGE="${{ env.IMAGE }}"
+          export STACK_NAME="${{ env.STACK_NAME }}"
+          export PROD_HOST="${PROD_HOST}"
+          docker context create prod --docker "host=ssh://docker-web"
+          docker --context prod stack deploy \
+            --prune \
+            --detach=false \
+            --with-registry-auth \
+            -c docker/compose.yml \
+            -c docker/prod/compose.yml \
+            "${STACK_NAME}"
+
+      - name: Run database migrations.
+        env:
+          IMAGE: ${{ env.IMAGE }}
+          IMAGE_TAG: ${{ github.sha }}
+          STACK_NAME: ${{ env.STACK_NAME }}
+        run: |
+          set -euo pipefail
+          ssh docker-web "docker run --rm \
+            --network ${STACK_NAME}_internal \
+            --env-file /opt/botato/docker/prod/.env \
+            ${IMAGE}:${IMAGE_TAG} php ./yii migrate/up --interactive=0"

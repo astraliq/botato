@@ -49,7 +49,7 @@ final class MigrateUpCommand extends Command
                 continue;
             }
 
-            /** @var array{up: callable(ConnectionInterface): void} $migration */
+            /** @psalm-suppress UnresolvableInclude */
             $migration = require $migrationFile;
             $migration['up']($this->connection);
 

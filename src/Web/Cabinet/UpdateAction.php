@@ -8,6 +8,7 @@ use App\Application\Auth\AuthSessionService;
 use App\Application\Profile\UpdateProfile\UpdateProfileHandler;
 use App\Domain\User\UserGender;
 use App\Domain\User\UserRepositoryInterface;
+use App\Shared\ArrayHelper;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,7 +32,7 @@ final class UpdateAction
         }
 
         $parsedBody = $request->getParsedBody();
-        $formData = is_array($parsedBody) ? $parsedBody : [];
+        $formData = is_array($parsedBody) ? ArrayHelper::toStringKeyArray($parsedBody) : [];
 
         $errorMessage = null;
         $successMessage = null;
@@ -42,11 +43,11 @@ final class UpdateAction
         }
 
         $formValues = [
-            'full_name' => (string) ($formData['full_name'] ?? $user->getFullName()),
-            'company_name' => (string) ($formData['company_name'] ?? $user->getCompanyName()),
-            'description' => (string) ($formData['description'] ?? $user->getDescription()),
-            'phone' => (string) ($formData['phone'] ?? $user->getPhone()),
-            'gender' => (string) ($formData['gender'] ?? $user->getGender()?->value ?? ''),
+            'full_name' => is_string($formData['full_name'] ?? null) ? $formData['full_name'] : $user->getFullName(),
+            'company_name' => is_string($formData['company_name'] ?? null) ? $formData['company_name'] : $user->getCompanyName(),
+            'description' => is_string($formData['description'] ?? null) ? $formData['description'] : $user->getDescription(),
+            'phone' => is_string($formData['phone'] ?? null) ? $formData['phone'] : $user->getPhone(),
+            'gender' => is_string($formData['gender'] ?? null) ? $formData['gender'] : ($user->getGender()?->value ?? ''),
         ];
 
         try {

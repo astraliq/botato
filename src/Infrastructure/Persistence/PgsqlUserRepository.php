@@ -6,6 +6,7 @@ namespace App\Infrastructure\Persistence;
 
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
+use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use Yiisoft\Db\Connection\ConnectionInterface;
@@ -23,7 +24,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             ->bindValue(':id', $id)
             ->queryOne();
 
-        return is_array($row) ? User::fromRow($row) : null;
+        return is_array($row) ? User::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function findByEmail(string $email): ?User
@@ -33,7 +34,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             ->bindValue(':email', $email)
             ->queryOne();
 
-        return is_array($row) ? User::fromRow($row) : null;
+        return is_array($row) ? User::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function save(User $user): void
