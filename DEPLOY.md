@@ -19,7 +19,7 @@ PostgreSQL 16
 
 | Компонент | Назначение |
 |-----------|------------|
-| GitHub Actions `build.yml` | CI: тесты и деплой на push в `main` |
+| GitHub Actions `build.yml` | CI: проверки, тесты и деплой на push в `main` |
 | Docker Swarm | Оркестрация на сервере |
 | Caddy Docker Proxy | Автоматический HTTPS и маршрутизация |
 | GHCR | Хранение Docker-образов (`ghcr.io/astraliq/botato`) |
@@ -30,9 +30,9 @@ PostgreSQL 16
 Push в main
       │
       ▼
-build.yml
-      ├─ codeception (тесты)
-      └─ deploy (VPS, после успешных тестов)
+CI (build.yml)
+      ├─ zizmor, psalm, composer-dependency-analyzer, codeception (параллельно)
+      └─ deploy (VPS, после успешных проверок)
 ```
 
 ## Требования
@@ -46,7 +46,7 @@ build.yml
 
 | Файл | Описание |
 |------|----------|
-| `.github/workflows/build.yml` | CI: тесты и деплой на VPS |
+| `.github/workflows/build.yml` | Единый CI: проверки, тесты и деплой на VPS |
 | `docker/prod/compose.yml` | Prod-стек: PHP + PostgreSQL |
 | `docker/prod/.env.example` | Шаблон переменных приложения |
 | `docker/prod/override.env.example` | Шаблон секретов (пароль SMTP и т.п.) |
@@ -345,7 +345,7 @@ cat botato_2026-07-12.sql | docker exec -i $(docker ps -q -f name=botato_postgre
 1. Закоммитьте и запушьте изменения в ветку `main`.
 2. Workflow **build** запустит тесты, затем job **Deploy to VPS**.
 
-Ручной деплой: **Actions → build → Run workflow** (только push/main или workflow_dispatch запускает deploy).
+Ручной деплой: **Actions → CI → Run workflow** (деплой только при push в `main` или `workflow_dispatch`).
 
 ### Проверка на VPS
 

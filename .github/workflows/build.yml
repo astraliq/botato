@@ -1,9 +1,11 @@
-name: build
+name: CI
 
 on:
   pull_request:
     paths: &paths
       - '.github/workflows/build.yml'
+      - '.github/**/*.yml'
+      - '.github/**/*.yaml'
       - 'config/**'
       - 'public/**'
       - 'src/**'
@@ -11,6 +13,10 @@ on:
       - 'codeception.yml'
       - 'composer.json'
       - 'composer.lock'
+      - 'composer-dependency-analyser.php'
+      - 'psalm.xml'
+      - '.php-cs-fixer.php'
+      - 'rector.php'
       - 'yii'
       - 'yii.bat'
   push:
@@ -19,10 +25,11 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
+  actions: read
   contents: read
 
 env:
@@ -30,16 +37,65 @@ env:
   IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
+  zizmor:
+    name: Workflow security
+    uses: yiisoft/actions/.github/workflows/zizmor.yml@master
+
+  psalm:
+    name: Psalm PHP 8.3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install PHP with extensions.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          coverage: none
+          php-version: '8.3'
+          tools: composer:v2, cs2pr
+
+      - name: Install Composer dependencies.
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
+
+      - name: Static analysis.
+        run: vendor/bin/psalm --shepherd --stats --output-format=checkstyle --no-cache --php-version=8.3 | cs2pr --graceful-warnings --colorize
+
+  composer-dependency-analyzer:
+    name: Composer dependencies PHP 8.3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install PHP with extensions.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          coverage: none
+          php-version: '8.3'
+          tools: composer:v2, cs2pr
+
+      - name: Install Composer dependencies.
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
+
+      - name: Run composer dependency analyzer.
+        run: vendor/bin/composer-dependency-analyser --config=composer-dependency-analyser.php
+
   codeception:
-    name: PHP 8.3
+    name: Tests PHP 8.3
+    runs-on: ubuntu-latest
 
     env:
       key: cache-v1
       APP_C3: true
       APP_ENV: test
       APP_DEBUG: false
-
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout.
@@ -55,7 +111,7 @@ jobs:
           ini-values: date.timezone='UTC', register_argc_argv=On
           php-version: '8.3'
 
-      - name: Install Composer dependencies
+      - name: Install Composer dependencies.
         uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
       - name: Run codeception build.
@@ -71,9 +127,52 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: runtime/tests/_output/coverage.xml
 
+  cs-fix:
+    name: Code style
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code.
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+
+      - name: Install PHP.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: 8.4
+          tools: composer:v2
+          coverage: none
+
+      - name: Install Composer dependencies.
+        uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
+
+      - name: Run PHP CS Fixer.
+        run: ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.php
+
+      - name: Run Rector.
+        run: ./vendor/bin/rector --output-format=github
+
+      - name: Commit changes.
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global credential.helper '!f() { echo username=x-access-token; echo password=$GITHUB_TOKEN; }; f'
+          git add '*.php'
+          git diff --staged --quiet || git commit -m "Apply PHP CS Fixer and Rector changes (CI)"
+          git push origin "HEAD:${HEAD_REF}"
+
   deploy:
     name: Deploy to VPS
-    needs: codeception
+    needs: [zizmor, psalm, composer-dependency-analyzer, codeception]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
@@ -123,6 +222,8 @@ jobs:
           printf '%s\n' "${PROD_ENV_FILE}" > docker/prod/.env
           if [ -n "${PROD_OVERRIDE_ENV_FILE}" ]; then
             printf '%s\n' "${PROD_OVERRIDE_ENV_FILE}" > docker/prod/override.env
+          else
+            : > docker/prod/override.env
           fi
 
       - name: Configure SSH.

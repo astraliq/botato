@@ -9,9 +9,8 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     env_file:
-      - path: ./prod/.env
-      - path: ./prod/override.env
-        required: false
+      - ./prod/.env
+      - ./prod/override.env
     deploy:
       replicas: 2
       update_config:
