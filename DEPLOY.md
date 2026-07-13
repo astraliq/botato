@@ -31,7 +31,7 @@ Push в main
       │
       ▼
 CI (build.yml)
-      ├─ zizmor, psalm, composer-dependency-analyzer, codeception (параллельно)
+      ├─ psalm, composer-dependency-analyzer, codeception (параллельно)
       └─ deploy (VPS, после успешных проверок)
 ```
 
