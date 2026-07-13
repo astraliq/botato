@@ -319,10 +319,7 @@ docker service ps botato_postgres
 Миграции после деплоя:
 
 ```bash
-docker run --rm \
-  --network botato_internal \
-  --env-file /opt/botato/docker/prod/.env \
-  ghcr.io/astraliq/business-assistant:latest \
+docker exec $(docker ps -q --filter "label=com.docker.swarm.service.name=botato_php" | head -n 1) \
   php ./yii migrate/up --interactive=0
 ```
 

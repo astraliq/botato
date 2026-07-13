@@ -367,8 +367,6 @@ jobs:
 
       - name: Run database migrations.
         env:
-          IMAGE: ${{ env.IMAGE }}
-          IMAGE_TAG: ${{ github.sha }}
           STACK_NAME: ${{ env.STACK_NAME }}
         run: |
           set -euo pipefail
@@ -378,7 +376,9 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o BatchMode=yes \
             "${VPS_USER}@${VPS_HOST}" \
-            "docker run --rm \
-              --network ${STACK_NAME}_internal \
-              --env-file /opt/botato/docker/prod/.env \
-              ${IMAGE}:${IMAGE_TAG} php ./yii migrate/up --interactive=0"
+            "container_id=\$(docker ps -q --filter \"label=com.docker.swarm.service.name=${STACK_NAME}_php\" | head -n 1) && \
+            if [ -z \"\${container_id}\" ]; then \
+              echo 'No running ${STACK_NAME}_php container found.'; \
+              exit 1; \
+            fi && \
+            docker exec \"\${container_id}\" php ./yii migrate/up --interactive=0"
