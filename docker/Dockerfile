@@ -63,5 +63,10 @@ RUN --mount=type=cache,target=/tmp/cache \
 FROM base AS prod
 ENV APP_ENV=prod
 COPY docker/Caddyfile /etc/frankenphp/Caddyfile
+COPY docker/prod/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 COPY --from=prod-builder --chown=www-data:www-data /app /app
-USER www-data
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+USER root
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

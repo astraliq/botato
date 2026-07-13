@@ -5,6 +5,10 @@
 {
     skip_install_trust
 
+    storage file_system {
+        root /tmp/caddy
+    }
+
     frankenphp {
 
     }

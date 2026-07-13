@@ -6,8 +6,6 @@ services:
       - internal
     volumes:
       - runtime:/app/runtime
-      - caddy_data:/data
-      - caddy_config:/config
     env_file:
       - ./prod/.env
       - ./prod/override.env
