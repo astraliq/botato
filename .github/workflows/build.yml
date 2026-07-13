@@ -381,4 +381,4 @@ jobs:
               echo 'No running ${STACK_NAME}_php container found.'; \
               exit 1; \
             fi && \
-            docker exec \"\${container_id}\" php ./yii migrate/up --interactive=0"
+            docker exec \"\${container_id}\" php ./yii migrate/up"

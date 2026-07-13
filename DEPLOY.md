@@ -320,7 +320,7 @@ docker service ps botato_postgres
 
 ```bash
 docker exec $(docker ps -q --filter "label=com.docker.swarm.service.name=botato_php" | head -n 1) \
-  php ./yii migrate/up --interactive=0
+  php ./yii migrate/up
 ```
 
 ### Бэкап PostgreSQL (production)
