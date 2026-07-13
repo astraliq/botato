@@ -140,9 +140,12 @@ jobs:
           fi
           install -m 700 -d ~/.ssh
           if [ -n "${VPS_SSH_PRIVATE_KEY_B64:-}" ]; then
-            echo "${VPS_SSH_PRIVATE_KEY_B64}" | base64 -d | tr -d '\r' > ~/.ssh/deploy_key
+            if ! printf '%s' "${VPS_SSH_PRIVATE_KEY_B64}" | tr -d ' \r\n\t' | base64 -d > ~/.ssh/deploy_key; then
+              echo 'Failed to decode VPS_SSH_PRIVATE_KEY_B64. Re-create the secret from botato_deploy (single line, no spaces).'
+              exit 1
+            fi
           else
-            echo "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/deploy_key
+            printf '%s\n' "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/deploy_key
           fi
           chmod 600 ~/.ssh/deploy_key
           if ! grep -q 'BEGIN .*PRIVATE KEY' ~/.ssh/deploy_key; then
@@ -150,11 +153,18 @@ jobs:
             echo 'Use secret VPS_SSH_PRIVATE_KEY_B64 — see DEPLOY.md.'
             exit 1
           fi
-          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+          if grep -q 'ENCRYPTED' ~/.ssh/deploy_key; then
+            echo 'SSH key is passphrase-protected. Regenerate without passphrase:'
+            echo 'ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/botato_deploy -N ""'
+            exit 1
+          fi
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>~/.ssh/deploy_key.err; then
             echo "SSH key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
             echo "SSH key header: $(head -n1 ~/.ssh/deploy_key)"
+            echo 'ssh-keygen error:'
+            cat ~/.ssh/deploy_key.err
             echo 'Invalid SSH private key in GitHub Secrets.'
-            echo 'Recommended: create VPS_SSH_PRIVATE_KEY_B64 (PowerShell):'
+            echo 'Recreate VPS_SSH_PRIVATE_KEY_B64 (PowerShell):'
             echo '[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\\.ssh\\botato_deploy"))'
             exit 1
           fi

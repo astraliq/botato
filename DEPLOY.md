@@ -136,11 +136,24 @@ PowerShell:
 
 Скопируйте **одну строку** вывода в секрет **`VPS_SSH_PRIVATE_KEY_B64`**.
 
-Проверка локально (должно вывести `OK`):
+Проверка локально (должна вывести публичный ключ):
 
 ```powershell
 ssh-keygen -y -f $env:USERPROFILE\.ssh\botato_deploy
 ```
+
+Проверка round-trip base64 (должна вывести тот же публичный ключ):
+
+```powershell
+$path = "$env:USERPROFILE\.ssh\botato_deploy"
+$testPath = "$env:TEMP\botato_test"
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($path))
+[IO.File]::WriteAllBytes($testPath, [Convert]::FromBase64String($b64))
+ssh-keygen -y -f $testPath
+Remove-Item $testPath
+```
+
+Ключ **без пароля** (`-N ""` при генерации). С паролем CI не сможет его использовать.
 
 > Рекомендуется отдельный пользователь `deploy` в группе `docker` вместо `root`. Для `root` шаги те же.
 
