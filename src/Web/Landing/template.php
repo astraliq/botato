@@ -175,7 +175,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <div class="pricing-card__price" data-price data-base-price="0">0 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для знакомства с платформой</p>
                 <ul>
-                    <li>50 диалогов в месяц</li>
+                    <li>10 диалогов в месяц</li>
                     <li>1 канал</li>
                     <li>1 база знаний</li>
                 </ul>
@@ -187,7 +187,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <div class="pricing-card__price" data-price data-base-price="990">990 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для фрилансеров и малого бизнеса</p>
                 <ul>
-                    <li>300 диалогов в месяц</li>
+                    <li>100 диалогов в месяц</li>
                     <li>2 канала</li>
                     <li>3 базы знаний</li>
                 </ul>
@@ -200,7 +200,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <div class="pricing-card__price" data-price data-base-price="2490">2 490 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для растущих команд</p>
                 <ul>
-                    <li>1 000 диалогов в месяц</li>
+                    <li>300 диалогов в месяц</li>
                     <li>3 канала</li>
                     <li>10 баз знаний</li>
                 </ul>
@@ -212,7 +212,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <div class="pricing-card__price" data-price data-base-price="4990">4 990 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для активного потока клиентов</p>
                 <ul>
-                    <li>3 000 диалогов в месяц</li>
+                    <li>1 000 диалогов в месяц</li>
                     <li>Без лимита каналов</li>
                     <li>30 баз знаний</li>
                 </ul>

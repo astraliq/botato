@@ -24,9 +24,7 @@ final class Action
             'isAuthenticated' => $this->authSessionService->isAuthenticated(),
             'cabinetUrl' => $this->urlGenerator->generate('cabinet'),
             'mailerFrom' => $this->mailerFrom,
-            'includePricingScript' => true,
             'includeAuthModal' => !$this->authSessionService->isAuthenticated(),
-            'includePhoneMask' => false,
         ]);
     }
 }

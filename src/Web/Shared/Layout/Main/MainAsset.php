@@ -16,5 +16,9 @@ final class MainAsset extends AssetBundle
         'site.css',
     ];
 
-    public array $js = [];
+    public array $js = [
+        'js/auth-modal.js',
+        'js/pricing-toggle.js',
+        'js/phone-mask.js',
+    ];
 }

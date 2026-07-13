@@ -10,7 +10,9 @@ return [
             'CREATE TABLE IF NOT EXISTS users (
                 id UUID PRIMARY KEY,
                 email VARCHAR(255) NOT NULL UNIQUE,
-                full_name VARCHAR(255) NOT NULL DEFAULT \'\',
+                surname VARCHAR(255) NOT NULL DEFAULT \'\',
+                name VARCHAR(255) NOT NULL DEFAULT \'\',
+                patronymic VARCHAR(255) NOT NULL DEFAULT \'\',
                 company_name VARCHAR(255) NOT NULL DEFAULT \'\',
                 description TEXT NOT NULL DEFAULT \'\',
                 phone VARCHAR(20) NOT NULL DEFAULT \'\',

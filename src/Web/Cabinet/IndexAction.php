@@ -29,7 +29,9 @@ final class IndexAction
         return $this->viewRenderer->render(__DIR__ . '/template', [
             'user' => $user,
             'formValues' => [
-                'full_name' => $user->getFullName(),
+                'surname' => $user->getSurname(),
+                'name' => $user->getName(),
+                'patronymic' => $user->getPatronymic(),
                 'company_name' => $user->getCompanyName(),
                 'description' => $user->getDescription(),
                 'phone' => $user->getPhone(),
@@ -39,8 +41,6 @@ final class IndexAction
             'errorMessage' => null,
             'isAuthenticated' => true,
             'includeAuthModal' => false,
-            'includePhoneMask' => true,
-            'includePricingScript' => false,
         ]);
     }
 }

@@ -42,7 +42,9 @@ final class PgsqlUserRepository implements UserRepositoryInterface
         $this->connection
             ->createCommand(
                 'UPDATE users SET
-                    full_name = :full_name,
+                    surname = :surname,
+                    name = :name,
+                    patronymic = :patronymic,
                     company_name = :company_name,
                     description = :description,
                     phone = :phone,
@@ -53,7 +55,9 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             )
             ->bindValues([
                 ':id' => $user->getId(),
-                ':full_name' => $user->getFullName(),
+                ':surname' => $user->getSurname(),
+                ':name' => $user->getName(),
+                ':patronymic' => $user->getPatronymic(),
                 ':company_name' => $user->getCompanyName(),
                 ':description' => $user->getDescription(),
                 ':phone' => $user->getPhone(),
@@ -72,17 +76,19 @@ final class PgsqlUserRepository implements UserRepositoryInterface
         $this->connection
             ->createCommand(
                 'INSERT INTO users (
-                    id, email, full_name, company_name, description, phone, gender,
+                    id, email, surname, name, patronymic, company_name, description, phone, gender,
                     email_verified_at, created_at, updated_at
                  ) VALUES (
-                    :id, :email, :full_name, :company_name, :description, :phone, :gender,
+                    :id, :email, :surname, :name, :patronymic, :company_name, :description, :phone, :gender,
                     :email_verified_at, :created_at, :updated_at
                  )',
             )
             ->bindValues([
                 ':id' => $id,
                 ':email' => $email,
-                ':full_name' => '',
+                ':surname' => '',
+                ':name' => '',
+                ':patronymic' => '',
                 ':company_name' => '',
                 ':description' => '',
                 ':phone' => '',

@@ -11,7 +11,9 @@ final class User
     public function __construct(
         private readonly string $id,
         private readonly string $email,
-        private string $fullName,
+        private string $surname,
+        private string $name,
+        private string $patronymic,
         private string $companyName,
         private string $description,
         private string $phone,
@@ -31,9 +33,19 @@ final class User
         return $this->email;
     }
 
-    public function getFullName(): string
+    public function getSurname(): string
     {
-        return $this->fullName;
+        return $this->surname;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getPatronymic(): string
+    {
+        return $this->patronymic;
     }
 
     public function getCompanyName(): string
@@ -72,14 +84,18 @@ final class User
     }
 
     public function updateProfile(
-        string $fullName,
+        string $surname,
+        string $name,
+        string $patronymic,
         string $companyName,
         string $description,
         string $phone,
         ?UserGender $gender,
         DateTimeImmutable $updatedAt,
     ): void {
-        $this->fullName = $fullName;
+        $this->surname = $surname;
+        $this->name = $name;
+        $this->patronymic = $patronymic;
         $this->companyName = $companyName;
         $this->description = $description;
         $this->phone = $phone;
@@ -99,7 +115,9 @@ final class User
         return new self(
             id: (string) $row['id'],
             email: (string) $row['email'],
-            fullName: (string) ($row['full_name'] ?? ''),
+            surname: (string) ($row['surname'] ?? ''),
+            name: (string) ($row['name'] ?? ''),
+            patronymic: (string) ($row['patronymic'] ?? ''),
             companyName: (string) ($row['company_name'] ?? ''),
             description: (string) ($row['description'] ?? ''),
             phone: (string) ($row['phone'] ?? ''),

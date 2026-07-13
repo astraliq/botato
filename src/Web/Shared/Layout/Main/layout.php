@@ -17,8 +17,6 @@ use Yiisoft\Html\Html;
  * @var Yiisoft\Router\UrlGeneratorInterface $urlGenerator
  * @var bool|null $showLandingHeader
  * @var bool|null $includeAuthModal
- * @var bool|null $includePricingScript
- * @var bool|null $includePhoneMask
  */
 
 $assetManager->register(MainAsset::class);
@@ -31,8 +29,6 @@ $this->addJsVars($assetManager->getJsVars());
 
 $showLandingHeader = $showLandingHeader ?? true;
 $includeAuthModal = $includeAuthModal ?? true;
-$includePricingScript = $includePricingScript ?? false;
-$includePhoneMask = $includePhoneMask ?? false;
 $csrfToken = $csrf ?? '';
 
 $this->beginPage();
@@ -45,15 +41,8 @@ $this->beginPage();
     <meta name="csrf-token" content="<?= Html::encode($csrfToken) ?>">
     <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
     <title><?= Html::encode($this->getTitle()) ?></title>
-    <?php $this->head() ?>
     <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js" defer></script>
-    <script src="<?= $aliases->get('@assetsUrl/js/auth-modal.js') ?>" defer></script>
-    <?php if ($includePricingScript): ?>
-        <script src="<?= $aliases->get('@assetsUrl/js/pricing-toggle.js') ?>" defer></script>
-    <?php endif; ?>
-    <?php if ($includePhoneMask): ?>
-        <script src="<?= $aliases->get('@assetsUrl/js/phone-mask.js') ?>" defer></script>
-    <?php endif; ?>
+    <?php $this->head() ?>
 </head>
 <body>
 <?php $this->beginBody() ?>

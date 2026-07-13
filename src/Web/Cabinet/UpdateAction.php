@@ -43,7 +43,9 @@ final class UpdateAction
         }
 
         $formValues = [
-            'full_name' => ArrayHelper::toString($formData['full_name'] ?? null, $user->getFullName()),
+            'surname' => ArrayHelper::toString($formData['surname'] ?? null, $user->getSurname()),
+            'name' => ArrayHelper::toString($formData['name'] ?? null, $user->getName()),
+            'patronymic' => ArrayHelper::toString($formData['patronymic'] ?? null, $user->getPatronymic()),
             'company_name' => ArrayHelper::toString($formData['company_name'] ?? null, $user->getCompanyName()),
             'description' => ArrayHelper::toString($formData['description'] ?? null, $user->getDescription()),
             'phone' => ArrayHelper::toString($formData['phone'] ?? null, $user->getPhone()),
@@ -55,7 +57,9 @@ final class UpdateAction
 
             $user = $this->updateProfileHandler->handle(
                 $userId,
-                $formValues['full_name'],
+                $formValues['surname'],
+                $formValues['name'],
+                $formValues['patronymic'],
                 $formValues['company_name'],
                 $formValues['description'],
                 $formValues['phone'],
@@ -63,7 +67,9 @@ final class UpdateAction
             );
             $successMessage = 'Профиль обновлён.';
             $formValues = [
-                'full_name' => $user->getFullName(),
+                'surname' => $user->getSurname(),
+                'name' => $user->getName(),
+                'patronymic' => $user->getPatronymic(),
                 'company_name' => $user->getCompanyName(),
                 'description' => $user->getDescription(),
                 'phone' => $user->getPhone(),
@@ -80,8 +86,6 @@ final class UpdateAction
             'errorMessage' => $errorMessage,
             'isAuthenticated' => true,
             'includeAuthModal' => false,
-            'includePhoneMask' => true,
-            'includePricingScript' => false,
         ]);
     }
 }

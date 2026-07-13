@@ -422,12 +422,16 @@ a {
     font-size: 32px;
     font-weight: 800;
     letter-spacing: -0.03em;
+    min-height: 72px;
 }
 
 .pricing-card__price small {
+    display: block;
     font-size: 14px;
     font-weight: 500;
     color: var(--color-muted);
+    line-height: 1.4;
+    margin-top: 4px;
 }
 
 .pricing-card ul {
@@ -438,6 +442,11 @@ a {
     gap: 10px;
     color: var(--color-muted);
     font-size: 14px;
+    flex: 1;
+}
+
+.pricing-card > .btn {
+    margin-top: auto;
 }
 
 .pricing-card li::before {
@@ -577,6 +586,22 @@ a {
 .form-field textarea {
     min-height: 120px;
     resize: vertical;
+}
+
+.form-field-row {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (min-width: 640px) {
+    .form-field-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-field-row .form-field {
+        margin-bottom: 0;
+    }
 }
 
 .form-error {

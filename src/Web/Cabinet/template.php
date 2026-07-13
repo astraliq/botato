@@ -10,7 +10,7 @@ use Yiisoft\View\WebView;
 /**
  * @var WebView $this
  * @var User $user
- * @var array{full_name: string, company_name: string, description: string, phone: string, gender: string} $formValues
+ * @var array{surname: string, name: string, patronymic: string, company_name: string, description: string, phone: string, gender: string} $formValues
  * @var string|null $successMessage
  * @var string|null $errorMessage
  * @var string|null $csrf
@@ -44,9 +44,21 @@ $this->setTitle('Личный кабинет — Botato');
                     <input type="email" value="<?= Html::encode($user->getEmail()) ?>" readonly>
                 </div>
 
-                <div class="form-field">
-                    <label for="full_name">ФИО</label>
-                    <input id="full_name" type="text" name="full_name" required maxlength="255" value="<?= Html::encode($formValues['full_name']) ?>">
+                <div class="form-field-row">
+                    <div class="form-field">
+                        <label for="surname">Фамилия</label>
+                        <input id="surname" type="text" name="surname" required maxlength="255" value="<?= Html::encode($formValues['surname']) ?>">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="name">Имя</label>
+                        <input id="name" type="text" name="name" required maxlength="255" value="<?= Html::encode($formValues['name']) ?>">
+                    </div>
+
+                    <div class="form-field">
+                        <label for="patronymic">Отчество</label>
+                        <input id="patronymic" type="text" name="patronymic" maxlength="255" value="<?= Html::encode($formValues['patronymic']) ?>">
+                    </div>
                 </div>
 
                 <div class="form-field">
