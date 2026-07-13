@@ -3,7 +3,9 @@
 
 # except:
 
-!/docker/**/Caddyfile
+!/docker
+!/docker/Caddyfile
+!/docker/prod
 !/docker/prod/docker-entrypoint.sh
 !/config
 !/public
