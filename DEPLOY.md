@@ -122,7 +122,25 @@ echo "содержимое botato_deploy.pub" >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
 
-Приватный ключ (`botato_deploy`, без `.pub`) понадобится для GitHub Secret.
+Приватный ключ понадобится для GitHub Secret (см. ниже).
+
+### 2.3. Секрет для GitHub (рекомендуется base64)
+
+При копировании многострочного ключа в GitHub Secrets с Windows он часто **ломается**. Надёжный способ — **base64**:
+
+PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\.ssh\botato_deploy"))
+```
+
+Скопируйте **одну строку** вывода в секрет **`VPS_SSH_PRIVATE_KEY_B64`**.
+
+Проверка локально (должно вывести `OK`):
+
+```powershell
+ssh-keygen -y -f $env:USERPROFILE\.ssh\botato_deploy
+```
 
 > Рекомендуется отдельный пользователь `deploy` в группе `docker` вместо `root`. Для `root` шаги те же.
 
@@ -136,12 +154,15 @@ chmod 600 ~/.ssh/authorized_keys
 |--------|:------------:|----------|
 | `VPS_HOST` | да | IP или домен VPS |
 | `VPS_USER` | да | `root` или `deploy` |
-| `VPS_SSH_PRIVATE_KEY` | да | Содержимое приватного SSH-ключа |
+| `VPS_SSH_PRIVATE_KEY_B64` | да* | Base64 приватного ключа (рекомендуется, см. выше) |
+| `VPS_SSH_PRIVATE_KEY` | да* | Многострочный приватный ключ (альтернатива base64) |
 | `PROD_HOST` | да | Домен приложения, напр. `botato.example.com` |
 | `DB_PASSWORD` | да | Пароль PostgreSQL |
 | `PROD_ENV_FILE` | да | Полное содержимое `docker/prod/.env` |
 | `PROD_OVERRIDE_ENV_FILE` | нет | Содержимое `docker/prod/override.env` (SMTP-пароль и др.) |
 | `GHCR_PULL_TOKEN` | нет | PAT с `read:packages` для приватного репозитория |
+
+\* Для SSH нужен **один** из секретов: `VPS_SSH_PRIVATE_KEY_B64` (предпочтительно) или `VPS_SSH_PRIVATE_KEY`.
 
 ### Пример `PROD_ENV_FILE`
 

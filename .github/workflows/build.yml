@@ -128,23 +128,34 @@ jobs:
       - name: Configure SSH.
         env:
           VPS_SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          VPS_SSH_PRIVATE_KEY_B64: ${{ secrets.VPS_SSH_PRIVATE_KEY_B64 }}
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
           set -euo pipefail
-          if [ -z "${VPS_SSH_PRIVATE_KEY}" ] || [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ]; then
-            echo 'Secrets VPS_SSH_PRIVATE_KEY, VPS_HOST and VPS_USER are required.'
+          if { [ -z "${VPS_SSH_PRIVATE_KEY_B64:-}" ] && [ -z "${VPS_SSH_PRIVATE_KEY:-}" ]; } \
+            || [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ]; then
+            echo 'Secrets VPS_HOST, VPS_USER and VPS_SSH_PRIVATE_KEY_B64 (or VPS_SSH_PRIVATE_KEY) are required.'
             exit 1
           fi
           install -m 700 -d ~/.ssh
-          printf '%s' "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/deploy_key
+          if [ -n "${VPS_SSH_PRIVATE_KEY_B64:-}" ]; then
+            echo "${VPS_SSH_PRIVATE_KEY_B64}" | base64 -d | tr -d '\r' > ~/.ssh/deploy_key
+          else
+            echo "${VPS_SSH_PRIVATE_KEY}" | tr -d '\r' > ~/.ssh/deploy_key
+          fi
           chmod 600 ~/.ssh/deploy_key
           if ! grep -q 'BEGIN .*PRIVATE KEY' ~/.ssh/deploy_key; then
-            echo 'VPS_SSH_PRIVATE_KEY does not look like an OpenSSH private key.'
+            echo 'SSH private key does not look valid (missing BEGIN marker).'
+            echo 'Use secret VPS_SSH_PRIVATE_KEY_B64 — see DEPLOY.md.'
             exit 1
           fi
           if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>&1; then
-            echo 'VPS_SSH_PRIVATE_KEY is invalid. Re-copy the private key from ~/.ssh/botato_deploy into GitHub Secrets.'
+            echo "SSH key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
+            echo "SSH key header: $(head -n1 ~/.ssh/deploy_key)"
+            echo 'Invalid SSH private key in GitHub Secrets.'
+            echo 'Recommended: create VPS_SSH_PRIVATE_KEY_B64 (PowerShell):'
+            echo '[Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:USERPROFILE\\.ssh\\botato_deploy"))'
             exit 1
           fi
           echo "Deploy key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy_key | awk '{print $2}')"
