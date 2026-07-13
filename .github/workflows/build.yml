@@ -2,10 +2,14 @@ name: CI
 
 on:
   pull_request:
-    paths: &paths
+    paths:
       - '.github/workflows/build.yml'
       - '.github/**/*.yml'
       - '.github/**/*.yaml'
+      - '.dockerignore'
+      - 'docker/**'
+      - 'assets/**'
+      - 'migrations/**'
       - 'config/**'
       - 'public/**'
       - 'src/**'
@@ -21,7 +25,6 @@ on:
       - 'yii.bat'
   push:
     branches: ['main']
-    paths: *paths
   workflow_dispatch:
 
 concurrency:
