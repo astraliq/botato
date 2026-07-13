@@ -62,3 +62,4 @@ networks:
     external: true
   internal:
     driver: overlay
+    attachable: true
