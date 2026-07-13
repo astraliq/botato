@@ -159,6 +159,13 @@ jobs:
             exit 1
           fi
           if ! ssh-keygen -y -f ~/.ssh/deploy_key >/dev/null 2>~/.ssh/deploy_key.err; then
+            if grep -qiE 'passphrase|incorrect passphrase' ~/.ssh/deploy_key.err; then
+              echo 'SSH key is passphrase-protected. GitHub Actions cannot enter a password.'
+              echo 'Remove passphrase (PowerShell): ssh-keygen -p -f $env:USERPROFILE\.ssh\botato_deploy'
+              echo 'Or create a new deploy key without passphrase:'
+              echo 'ssh-keygen -t ed25519 -C "github-actions-deploy" -f $env:USERPROFILE\.ssh\botato_deploy -N ""'
+              exit 1
+            fi
             echo "SSH key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
             echo "SSH key header: $(head -n1 ~/.ssh/deploy_key)"
             echo 'ssh-keygen error:'

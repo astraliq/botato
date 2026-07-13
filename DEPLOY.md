@@ -110,8 +110,22 @@ ufw enable
 
 ### 2.1. Генерация ключа (Windows, PowerShell)
 
+Ключ для CI **без пароля** (`-N ""`):
+
 ```powershell
-ssh-keygen -t ed25519 -C "github-actions-deploy" -f $env:USERPROFILE\.ssh\botato_deploy
+ssh-keygen -t ed25519 -C "github-actions-deploy" -f $env:USERPROFILE\.ssh\botato_deploy -N ""
+```
+
+Если ключ уже создан с паролем — снимите его (введите старый пароль, новый оставьте пустым):
+
+```powershell
+ssh-keygen -p -f $env:USERPROFILE\.ssh\botato_deploy
+```
+
+Проверка: команда ниже **не должна** спрашивать passphrase:
+
+```powershell
+ssh-keygen -y -f $env:USERPROFILE\.ssh\botato_deploy
 ```
 
 ### 2.2. Добавление публичного ключа на VPS
