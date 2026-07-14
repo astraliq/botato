@@ -11,12 +11,15 @@ use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 final class RequestCodeAction
 {
     public function __construct(
         private readonly RequestVerificationCodeHandler $handler,
         private readonly JsonResponseFactory $jsonResponseFactory,
+        private readonly LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -31,7 +34,12 @@ final class RequestCodeAction
             ]);
         } catch (InvalidArgumentException $exception) {
             return $this->jsonResponseFactory->error($exception->getMessage());
-        } catch (\Throwable) {
+        } catch (Throwable $exception) {
+            $this->logger->error('Failed to send verification code.', [
+                'message' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+
             return $this->jsonResponseFactory->error('Не удалось отправить код.', 500);
         }
     }

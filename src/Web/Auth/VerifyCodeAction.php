@@ -11,6 +11,8 @@ use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use Throwable;
 use Yiisoft\Router\UrlGeneratorInterface;
 
 final class VerifyCodeAction
@@ -19,6 +21,7 @@ final class VerifyCodeAction
         private readonly VerifyEmailCodeHandler $handler,
         private readonly JsonResponseFactory $jsonResponseFactory,
         private readonly UrlGeneratorInterface $urlGenerator,
+        private readonly LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
@@ -35,7 +38,12 @@ final class VerifyCodeAction
             ]);
         } catch (InvalidArgumentException $exception) {
             return $this->jsonResponseFactory->error($exception->getMessage());
-        } catch (\Throwable) {
+        } catch (Throwable $exception) {
+            $this->logger->error('Failed to verify email code.', [
+                'message' => $exception->getMessage(),
+                'exception' => $exception,
+            ]);
+
             return $this->jsonResponseFactory->error('Не удалось подтвердить код.', 500);
         }
     }
