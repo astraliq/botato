@@ -7,9 +7,11 @@
 !/docker/Caddyfile
 !/docker/prod
 !/docker/prod/docker-entrypoint.sh
+!/assets
 !/config
 !/public
 !/src
+!/migrations
 !autoload.php
 !yii
 !composer.json
