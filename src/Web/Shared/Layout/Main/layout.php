@@ -40,6 +40,7 @@ $this->beginPage();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= Html::encode($csrfToken) ?>">
     <link rel="icon" href="<?= $aliases->get('@baseUrl/favicon.svg') ?>" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<?= $aliases->get('@baseUrl/images/hero-potato-bot.svg') ?>">
     <title><?= Html::encode($this->getTitle()) ?></title>
     <script src="https://cdn.jsdelivr.net/npm/imask@7.6.1/dist/imask.min.js" defer></script>
     <?php $this->head() ?>
