@@ -15,12 +15,17 @@
     box-sizing: border-box;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
 body {
     margin: 0;
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     color: var(--color-text);
     background: #fff;
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
 a {
@@ -829,6 +834,10 @@ a {
         padding: 10px 12px;
         font-size: 13px;
         white-space: nowrap;
+    }
+
+    .pricing-card--popular {
+        margin-top: 8px;
     }
 
     .pricing-card__price {
