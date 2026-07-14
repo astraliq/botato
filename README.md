@@ -46,11 +46,11 @@ docker compose -f docker/compose.yml -f docker/dev/compose.yml up -d --build
 
 | Сервис | URL |
 |--------|-----|
-| Приложение | http://botato.local:8081 или http://localhost:8081 |
+| Приложение | http://botato.local:8060 или http://localhost:8060 |
 | Mailpit (письма с кодами) | http://localhost:8025 |
 | PostgreSQL | localhost:5432 (user: `app`, password: `secret`, db: `botato`) |
 
-> Порт приложения задаётся в `docker/.env` (`DEV_PORT=8081`).
+> Порт приложения задаётся в `docker/.env` (`DEV_PORT=8060`).
 
 ### Локальный домен `botato.local` (Windows)
 
@@ -68,7 +68,7 @@ docker compose -f docker/compose.yml -f docker/dev/compose.yml up -d --build
 make down && make up
 ```
 
-4. Откройте в браузере Windows: **http://botato.local:8081**
+4. Откройте в браузере Windows: **http://botato.local:8060**
 
 Чтобы открывать **без порта** (`http://botato.local`), в `docker/.env` поставьте `DEV_PORT=80` и перезапустите стек (порт 80 на Windows должен быть свободен).
 
@@ -117,7 +117,7 @@ STACK_NAME=botato
 
 ## Тест входа вручную
 
-1. Откройте http://localhost:8081
+1. Откройте http://localhost:8060
 2. Нажмите **Войти**, введите email
 3. Откройте http://localhost:8025 — скопируйте 6-значный код из письма
 4. Введите код в модалке → попадёте в `/cabinet`

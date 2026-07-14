@@ -114,7 +114,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <div class="channel__icon channel__icon--vk">VK</div>
                 <div>
                     <strong>ВКонтакте</strong>
-                    <div style="color:#64748b;font-size:14px;">Готово к подключению</div>
+                    <div style="color:#64748b;font-size:14px;"><span class="badge">скоро</span></div>
                 </div>
             </div>
             <div class="channel">
@@ -184,7 +184,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
 
             <article class="pricing-card">
                 <h3>Старт</h3>
-                <div class="pricing-card__price" data-price data-base-price="990">990 ₽<small>/мес</small></div>
+                <div class="pricing-card__price" data-price data-base-price="490">490 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для фрилансеров и малого бизнеса</p>
                 <ul>
                     <li>100 диалогов в месяц</li>
@@ -197,7 +197,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
             <article class="pricing-card pricing-card--popular">
                 <span class="pricing-card__label">Популярный</span>
                 <h3>Бизнес</h3>
-                <div class="pricing-card__price" data-price data-base-price="2490">2 490 ₽<small>/мес</small></div>
+                <div class="pricing-card__price" data-price data-base-price="1490">1 490 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для растущих команд</p>
                 <ul>
                     <li>300 диалогов в месяц</li>
@@ -209,7 +209,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
 
             <article class="pricing-card">
                 <h3>Про</h3>
-                <div class="pricing-card__price" data-price data-base-price="4990">4 990 ₽<small>/мес</small></div>
+                <div class="pricing-card__price" data-price data-base-price="2990">2 990 ₽<small>/мес</small></div>
                 <p style="color:#64748b;margin:0;">Для активного потока клиентов</p>
                 <ul>
                     <li>1 000 диалогов в месяц</li>
