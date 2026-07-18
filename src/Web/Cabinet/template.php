@@ -23,7 +23,7 @@ $this->setTitle('Личный кабинет — Botato');
     <div class="container">
         <div class="cabinet__card">
             <div class="cabinet__head">
-                <h1>Личный кабинет</h1>
+                <h1>Профиль</h1>
             </div>
 
             <?php if ($successMessage !== null): ?>

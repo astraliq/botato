@@ -35,7 +35,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
             <div class="hero__stats">
                 <span>От 0 ₽ на старте</span>
                 <span>Настройка за 15 минут</span>
-                <span>Telegram, VK, Instagram</span>
+                <span>Telegram сейчас · VK и Instagram скоро</span>
             </div>
         </div>
         <div class="hero-card">
@@ -100,7 +100,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
     <div class="container">
         <div class="section__head">
             <h2>Каналы связи</h2>
-            <p>Начинаем с Telegram и VK. Instagram — в ближайших обновлениях.</p>
+            <p>Сейчас доступен Telegram. ВКонтакте и Instagram — в ближайших обновлениях.</p>
         </div>
         <div class="channels">
             <div class="channel">
@@ -148,7 +148,7 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
             <article class="step">
                 <div class="step__num">3</div>
                 <h3>Подключите канал</h3>
-                <p>Telegram или VK — ассистент начнёт отвечать клиентам автоматически.</p>
+                <p>Подключите Telegram — ассистент начнёт отвечать клиентам автоматически.</p>
             </article>
         </div>
     </div>
@@ -245,8 +245,8 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
                 <p>Ассистент опирается на вашу базу знаний. Вы можете обновить описание бизнеса, прайс и FAQ в любой момент.</p>
             </details>
             <details>
-                <summary>Когда будет Instagram?</summary>
-                <p>Интеграция Instagram уже в roadmap. Сейчас доступны Telegram и VK.</p>
+                <summary>Когда будут ВКонтакте и Instagram?</summary>
+                <p>Сейчас доступен Telegram. Интеграции ВКонтакте и Instagram уже в ближайших обновлениях.</p>
             </details>
         </div>
     </div>

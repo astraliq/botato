@@ -70,7 +70,7 @@ $this->beginPage();
                             <span class="user-menu__chevron" aria-hidden="true"></span>
                         </button>
                         <div class="user-menu__dropdown" data-user-menu-dropdown hidden>
-                            <a href="<?= $urlGenerator->generate('cabinet') ?>" class="user-menu__item">Настройки</a>
+                            <a href="<?= $urlGenerator->generate('cabinet') ?>" class="user-menu__item">Профиль</a>
                             <button type="button" class="user-menu__item user-menu__item--button" id="logout-button">Выйти</button>
                         </div>
                     </div>
