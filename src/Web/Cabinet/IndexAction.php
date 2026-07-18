@@ -39,8 +39,6 @@ final class IndexAction
             ],
             'successMessage' => null,
             'errorMessage' => null,
-            'isAuthenticated' => true,
-            'includeAuthModal' => false,
         ]);
     }
 }

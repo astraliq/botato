@@ -51,10 +51,6 @@ final class UpdateProfileHandler
             throw new InvalidArgumentException('Укажите название компании.');
         }
 
-        if ($description === '') {
-            throw new InvalidArgumentException('Укажите описание бизнеса.');
-        }
-
         if ($gender === null) {
             throw new InvalidArgumentException('Укажите пол.');
         }

@@ -24,7 +24,6 @@ $this->setTitle('Личный кабинет — Botato');
         <div class="cabinet__card">
             <div class="cabinet__head">
                 <h1>Личный кабинет</h1>
-                <button type="button" class="btn btn-ghost" id="logout-button">Выйти</button>
             </div>
 
             <?php if ($successMessage !== null): ?>
@@ -82,7 +81,7 @@ $this->setTitle('Личный кабинет — Botato');
 
                 <div class="form-field">
                     <label for="description">Описание бизнеса для контекста ИИ</label>
-                    <textarea id="description" name="description" required maxlength="2000" placeholder="Опишите услуги, аудиторию, tone of voice и особенности вашего бизнеса."><?= Html::encode($formValues['description']) ?></textarea>
+                    <textarea id="description" name="description" maxlength="2000" placeholder="Опишите услуги, аудиторию, tone of voice и особенности вашего бизнеса."><?= Html::encode($formValues['description']) ?></textarea>
                 </div>
 
                 <div class="form-field">
@@ -95,18 +94,3 @@ $this->setTitle('Личный кабинет — Botato');
         </div>
     </div>
 </section>
-
-<script>
-document.getElementById('logout-button')?.addEventListener('click', async () => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'X-CSRF-Token': csrfToken,
-        },
-    });
-    const data = await response.json();
-    window.location.href = data.redirect || '/';
-});
-</script>

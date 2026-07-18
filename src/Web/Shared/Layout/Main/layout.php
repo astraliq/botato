@@ -17,6 +17,8 @@ use Yiisoft\Html\Html;
  * @var Yiisoft\Router\UrlGeneratorInterface $urlGenerator
  * @var bool|null $showLandingHeader
  * @var bool|null $includeAuthModal
+ * @var bool|null $isAuthenticated
+ * @var string|null $userEmail
  */
 
 $assetManager->register(MainAsset::class);
@@ -62,8 +64,17 @@ $this->beginPage();
                 <a href="#faq">FAQ</a>
             </nav>
             <div class="site-actions">
-                <?php if (($isAuthenticated ?? false) === true): ?>
-                    <a href="<?= $urlGenerator->generate('cabinet') ?>" class="btn btn-secondary">Личный кабинет</a>
+                <?php if (($isAuthenticated ?? false) === true && $userEmail !== null && $userEmail !== ''): ?>
+                    <div class="user-menu" data-user-menu>
+                        <button type="button" class="user-menu__toggle" data-user-menu-toggle aria-expanded="false" aria-haspopup="true">
+                            <span class="user-menu__email"><?= Html::encode($userEmail) ?></span>
+                            <span class="user-menu__chevron" aria-hidden="true"></span>
+                        </button>
+                        <div class="user-menu__dropdown" data-user-menu-dropdown hidden>
+                            <a href="<?= $urlGenerator->generate('cabinet') ?>" class="user-menu__item">Настройки</a>
+                            <button type="button" class="user-menu__item user-menu__item--button" id="logout-button">Выйти</button>
+                        </div>
+                    </div>
                 <?php else: ?>
                     <button type="button" class="btn btn-primary" data-auth-open>Войти</button>
                 <?php endif; ?>

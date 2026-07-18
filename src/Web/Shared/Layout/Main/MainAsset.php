@@ -20,5 +20,6 @@ final class MainAsset extends AssetBundle
         'js/auth-modal.js',
         'js/pricing-toggle.js',
         'js/phone-mask.js',
+        'js/user-menu.js',
     ];
 }

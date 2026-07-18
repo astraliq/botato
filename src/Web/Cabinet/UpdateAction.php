@@ -84,8 +84,6 @@ final class UpdateAction
             'formValues' => $formValues,
             'successMessage' => $successMessage,
             'errorMessage' => $errorMessage,
-            'isAuthenticated' => true,
-            'includeAuthModal' => false,
         ]);
     }
 }
