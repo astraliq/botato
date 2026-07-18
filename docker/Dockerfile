@@ -18,7 +18,8 @@ RUN install-php-extensions \
     xmlwriter \
     simplexml \
     pdo \
-    pdo_pgsql
+    pdo_pgsql \
+    redis
 
 ENV LC_ALL=C.UTF-8
 

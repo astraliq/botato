@@ -28,6 +28,7 @@ services:
       labels:
         caddy: ${PROD_HOST:-app.example.com}
         caddy.reverse_proxy: "{{upstreams 80}}"
+        caddy.reverse_proxy.lb_policy: cookie
 
   postgres:
     image: postgres:16-alpine
@@ -53,9 +54,31 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 5s
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    command: ["redis-server", "--appendonly", "yes"]
+
 volumes:
   runtime:
   postgres_data:
+  redis_data:
 
 networks:
   caddy_public:

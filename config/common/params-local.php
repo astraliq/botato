@@ -28,6 +28,10 @@ return [
         'username' => getenv('DB_USER') ?: 'app',
         'password' => getenv('DB_PASSWORD') ?: 'secret',
     ],
+    'redis' => [
+        'host' => getenv('REDIS_HOST') ?: 'redis',
+        'port' => (int) (getenv('REDIS_PORT') ?: 6379),
+    ],
     'mailer' => [
         'dsn' => $mailerDsn,
         'from' => getenv('MAILER_FROM') ?: 'botato@list.ru',

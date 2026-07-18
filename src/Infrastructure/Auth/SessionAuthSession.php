@@ -18,6 +18,7 @@ final class SessionAuthSession implements AuthSessionInterface
     public function login(string $userId): void
     {
         $this->session->set(self::SESSION_USER_ID_KEY, $userId);
+        $this->session->regenerateId();
     }
 
     public function logout(): void
