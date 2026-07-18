@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Application\Auth\RequestVerificationCode;
 
+use App\Application\Auth\EmailNormalizer;
+use App\Application\Auth\VerificationCodeMailerInterface;
 use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
-use App\Infrastructure\Mail\VerificationCodeMailer;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
@@ -16,12 +17,12 @@ final class RequestVerificationCodeHandler
 
     public function __construct(
         private readonly EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
-        private readonly VerificationCodeMailer $verificationCodeMailer,
+        private readonly VerificationCodeMailerInterface $verificationCodeMailer,
     ) {}
 
     public function handle(string $email): void
     {
-        $normalizedEmail = $this->normalizeEmail($email);
+        $normalizedEmail = EmailNormalizer::normalize($email);
         $now = new DateTimeImmutable();
 
         if ($this->verificationCodeRepository->hasRecentRequest(
@@ -39,17 +40,6 @@ final class RequestVerificationCodeHandler
         );
 
         $this->verificationCodeMailer->send($normalizedEmail, $code);
-    }
-
-    private function normalizeEmail(string $email): string
-    {
-        $normalizedEmail = strtolower(trim($email));
-
-        if ($normalizedEmail === '' || filter_var($normalizedEmail, FILTER_VALIDATE_EMAIL) === false) {
-            throw new InvalidArgumentException('Укажите корректный email.');
-        }
-
-        return $normalizedEmail;
     }
 
     private function generateCode(): string

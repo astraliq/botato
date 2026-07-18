@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Mail;
 
+use App\Application\Auth\VerificationCodeMailerInterface;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 
-final class VerificationCodeMailer
+final class VerificationCodeMailer implements VerificationCodeMailerInterface
 {
     private readonly MailerInterface $mailer;
 

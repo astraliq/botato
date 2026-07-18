@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Web\Cabinet;
 
-use App\Application\Auth\AuthSessionService;
-use App\Domain\User\UserRepositoryInterface;
+use App\Application\Auth\GetCurrentUser\GetCurrentUserHandler;
+use App\Application\Profile\ProfileFormValues;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\View\Renderer\ViewRenderer;
 
@@ -13,30 +13,16 @@ final class IndexAction
 {
     public function __construct(
         private readonly ViewRenderer $viewRenderer,
-        private readonly AuthSessionService $authSessionService,
-        private readonly UserRepositoryInterface $userRepository,
+        private readonly GetCurrentUserHandler $getCurrentUserHandler,
     ) {}
 
     public function __invoke(): ResponseInterface
     {
-        $userId = $this->authSessionService->getUserId();
-        $user = $userId !== null ? $this->userRepository->findById($userId) : null;
-
-        if ($user === null) {
-            throw new \RuntimeException('Пользователь не найден.');
-        }
+        $user = $this->getCurrentUserHandler->handle();
 
         return $this->viewRenderer->render(__DIR__ . '/template', [
             'user' => $user,
-            'formValues' => [
-                'surname' => $user->getSurname(),
-                'name' => $user->getName(),
-                'patronymic' => $user->getPatronymic(),
-                'company_name' => $user->getCompanyName(),
-                'description' => $user->getDescription(),
-                'phone' => $user->getPhone(),
-                'gender' => $user->getGender()?->value ?? '',
-            ],
+            'formValues' => ProfileFormValues::fromUser($user)->toArray(),
             'successMessage' => null,
             'errorMessage' => null,
         ]);

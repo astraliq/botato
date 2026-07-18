@@ -24,7 +24,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             ->bindValue(':id', $id)
             ->queryOne();
 
-        return is_array($row) ? User::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? UserMapper::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function findByEmail(string $email): ?User
@@ -34,7 +34,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             ->bindValue(':email', $email)
             ->queryOne();
 
-        return is_array($row) ? User::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? UserMapper::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function save(User $user): void

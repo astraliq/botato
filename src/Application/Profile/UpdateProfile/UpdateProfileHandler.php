@@ -16,28 +16,21 @@ final class UpdateProfileHandler
         private readonly UserRepositoryInterface $userRepository,
     ) {}
 
-    public function handle(
-        string $userId,
-        string $surname,
-        string $name,
-        string $patronymic,
-        string $companyName,
-        string $description,
-        string $phone,
-        ?UserGender $gender,
-    ): User {
+    public function handle(string $userId, UpdateProfileCommand $command): User
+    {
         $user = $this->userRepository->findById($userId);
 
         if ($user === null) {
             throw new InvalidArgumentException('Пользователь не найден.');
         }
 
-        $surname = trim($surname);
-        $name = trim($name);
-        $patronymic = trim($patronymic);
-        $companyName = trim($companyName);
-        $description = trim($description);
-        $phone = trim($phone);
+        $surname = trim($command->surname);
+        $name = trim($command->name);
+        $patronymic = trim($command->patronymic);
+        $companyName = trim($command->companyName);
+        $description = trim($command->description);
+        $phone = trim($command->phone);
+        $gender = UserGender::tryFrom(trim($command->gender));
 
         if ($surname === '') {
             throw new InvalidArgumentException('Укажите фамилию.');

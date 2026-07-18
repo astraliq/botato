@@ -51,7 +51,7 @@ final class PgsqlEmailVerificationCodeRepository implements EmailVerificationCod
             ])
             ->queryOne();
 
-        return is_array($row) ? EmailVerificationCode::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? EmailVerificationCodeMapper::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function markUsed(int $id, DateTimeImmutable $usedAt): void

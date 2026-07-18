@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Web\Middleware;
 
-use App\Application\Auth\AuthSessionService;
+use App\Application\Auth\AuthSessionInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -15,14 +15,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
 final class AuthMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly AuthSessionService $authSessionService,
+        private readonly AuthSessionInterface $authSession,
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if ($this->authSessionService->isAuthenticated()) {
+        if ($this->authSession->isAuthenticated()) {
             return $handler->handle($request);
         }
 

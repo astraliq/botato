@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Auth;
+namespace App\Infrastructure\Auth;
 
+use App\Application\Auth\AuthSessionInterface;
 use Yiisoft\Session\SessionInterface;
 
-final class AuthSessionService
+final class SessionAuthSession implements AuthSessionInterface
 {
     private const SESSION_USER_ID_KEY = 'auth_user_id';
 

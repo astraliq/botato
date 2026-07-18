@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Web\Auth;
 
-use App\Application\Auth\AuthSessionService;
+use App\Application\Auth\Logout\LogoutHandler;
 use App\Web\Shared\JsonResponseFactory;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
@@ -12,14 +12,14 @@ use Yiisoft\Router\UrlGeneratorInterface;
 final class LogoutAction
 {
     public function __construct(
-        private readonly AuthSessionService $authSessionService,
+        private readonly LogoutHandler $logoutHandler,
         private readonly JsonResponseFactory $jsonResponseFactory,
         private readonly UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function __invoke(): ResponseInterface
     {
-        $this->authSessionService->logout();
+        $this->logoutHandler->handle();
 
         return $this->jsonResponseFactory->success([
             'message' => 'Вы вышли из аккаунта.',

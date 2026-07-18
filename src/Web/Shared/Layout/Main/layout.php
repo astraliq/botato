@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Application\Auth\AuthSessionService;
 use App\Web\Shared\Layout\Main\MainAsset;
 use Yiisoft\Html\Html;
 
