@@ -34,9 +34,11 @@
     },
     "require": {
         "php": "8.2 - 8.5",
+        "ext-curl": "*",
         "ext-filter": "*",
         "ext-mbstring": "*",
         "ext-redis": "*",
+        "ext-session": "*",
         "ext-sodium": "*",
         "httpsoft/http-message": "^1.1.6",
         "psr/container": "^2.0.2",

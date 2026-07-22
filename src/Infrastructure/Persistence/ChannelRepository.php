@@ -61,9 +61,7 @@ final class ChannelRepository implements ChannelRepositoryInterface
         $channels = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $channels[] = ChannelFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $channels[] = ChannelFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $channels;

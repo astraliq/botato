@@ -53,7 +53,7 @@ $isTelegramConnected = $telegramChannel !== null
                     <div class="form-error"><?= Html::encode($errorMessage) ?></div>
                 <?php endif; ?>
 
-                <?php if ($isTelegramConnected): ?>
+                <?php if ($telegramChannel !== null && $isTelegramConnected): ?>
                     <div class="channel-status">
                         <div class="channel-status__badge">Подключено</div>
                         <div class="channel-status__meta">
@@ -169,7 +169,7 @@ $isTelegramConnected = $telegramChannel !== null
                                 <li>Перейдите в <strong>Мой аккаунт</strong> → <strong>Автоматизация чатов</strong>.</li>
                                 <li>
                                     В поле «Ссылка или @имя бота» укажите username вашего бота
-                                    <?php if ($isTelegramConnected && $telegramChannel->getDisplayName() !== null): ?>
+                                    <?php if ($telegramChannel !== null && $telegramChannel->getDisplayName() !== null): ?>
                                         (<code><?= Html::encode($telegramChannel->getDisplayName()) ?></code>)
                                     <?php else: ?>
                                         (например, <code>@my_salon_bot</code>)

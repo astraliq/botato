@@ -115,7 +115,7 @@ final class KnowledgeArticleRepository implements KnowledgeArticleRepositoryInte
     }
 
     /**
-     * @param array<int, mixed> $rows
+     * @param array<array-key, array<array-key, mixed>> $rows
      * @return list<KnowledgeArticle>
      */
     private function mapRows(array $rows): array
@@ -123,9 +123,7 @@ final class KnowledgeArticleRepository implements KnowledgeArticleRepositoryInte
         $result = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $result[] = KnowledgeArticleFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $result[] = KnowledgeArticleFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $result;

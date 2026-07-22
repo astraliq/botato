@@ -27,9 +27,7 @@ final class PlanRepository implements PlanRepositoryInterface
         $plans = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $plans[] = PlanFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $plans[] = PlanFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $plans;

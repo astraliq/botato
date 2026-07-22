@@ -41,9 +41,7 @@ final class KnowledgeBaseRepository implements KnowledgeBaseRepositoryInterface
         $result = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $result[] = KnowledgeBaseFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $result[] = KnowledgeBaseFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $result;

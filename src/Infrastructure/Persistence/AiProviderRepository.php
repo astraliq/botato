@@ -70,9 +70,7 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
         $providers = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $providers[] = AiProviderFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $providers[] = AiProviderFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $providers;
@@ -223,7 +221,7 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
     }
 
     /**
-     * @param list<mixed> $rows
+     * @param array<array-key, array<array-key, mixed>> $rows
      * @return list<AiModel>
      */
     private function mapModelRows(array $rows): array
@@ -231,9 +229,7 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
         $models = [];
 
         foreach ($rows as $row) {
-            if (is_array($row)) {
-                $models[] = AiModelFactory::fromRow(ArrayHelper::toStringKeyArray($row));
-            }
+            $models[] = AiModelFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $models;

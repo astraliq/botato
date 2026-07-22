@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Telegram;
 
-use App\Application\Channel\Telegram\HandleUpdate\HandleTelegramUpdateHandler;
 use App\Application\Channel\Telegram\TelegramBotApiInterface;
 use App\Application\Channel\Telegram\TelegramBotInfo;
 use InvalidArgumentException;
@@ -43,13 +42,13 @@ final class TelegramBotApiHttpClient implements TelegramBotApiInterface
         $this->call($botToken, 'setWebhook', [
             'url' => $url,
             'secret_token' => $secretToken,
-            'allowed_updates' => array_values($allowedUpdates),
+            'allowed_updates' => $allowedUpdates,
             'drop_pending_updates' => true,
         ]);
     }
 
     public function sendMessage(
-        string $botToken,HandleTelegramUpdateHandler
+        string $botToken,
         int|string $chatId,
         string $text,
         ?string $businessConnectionId = null,
@@ -149,6 +148,10 @@ final class TelegramBotApiHttpClient implements TelegramBotApiInterface
 
             if ($responseBody === false) {
                 throw new RuntimeException('Ошибка запроса к Telegram API: ' . $curlError);
+            }
+
+            if (!is_string($responseBody)) {
+                throw new RuntimeException('Некорректный ответ Telegram API.');
             }
 
             if ($statusCode >= 500) {

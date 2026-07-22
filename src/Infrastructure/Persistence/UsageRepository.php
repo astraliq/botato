@@ -112,7 +112,9 @@ final class UsageRepository implements UsageRepositoryInterface
         }
     }
 
-    /** @return array{window_started_at: mixed, messages_count: mixed} */
+    /**
+     * @return array{window_started_at: mixed, messages_count: mixed}
+     */
     private function ensurePeerWindowLocked(string $userId, string $peerKey, string $nowFormatted): array
     {
         $row = $this->connection
@@ -129,7 +131,7 @@ final class UsageRepository implements UsageRepositoryInterface
             ->queryOne();
 
         if (is_array($row)) {
-            return $row;
+            return $this->peerWindowFromRow($row);
         }
 
         $this->connection
@@ -167,7 +169,19 @@ final class UsageRepository implements UsageRepositoryInterface
             throw new RuntimeException('Не удалось создать окно учёта сообщений.');
         }
 
-        return $row;
+        return $this->peerWindowFromRow($row);
+    }
+
+    /**
+     * @param array<array-key, mixed> $row
+     * @return array{window_started_at: mixed, messages_count: mixed}
+     */
+    private function peerWindowFromRow(array $row): array
+    {
+        return [
+            'window_started_at' => $row['window_started_at'] ?? null,
+            'messages_count' => $row['messages_count'] ?? 0,
+        ];
     }
 
     private function ensureUsageMonthLocked(string $userId, string $periodMonthDate, string $nowFormatted): int
