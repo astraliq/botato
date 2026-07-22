@@ -89,11 +89,31 @@ jobs:
     name: Tests PHP 8.3
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: botato
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d botato"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     env:
       key: cache-v1
       APP_C3: true
       APP_ENV: test
       APP_DEBUG: false
+      APP_SECRET: test-only-change-me-32bytes-key!
+      APP_PUBLIC_URL: https://botato.test
+      DB_DSN: pgsql:host=127.0.0.1;port=5432;dbname=botato
+      DB_USER: app
+      DB_PASSWORD: secret
 
     steps:
       - name: Checkout.
@@ -105,17 +125,20 @@ jobs:
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
           coverage: false
-          extensions: fileinfo, intl
+          extensions: fileinfo, intl, redis, pdo_pgsql
           ini-values: date.timezone='UTC', register_argc_argv=On
           php-version: '8.3'
 
       - name: Install Composer dependencies.
         uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # 4.0.0
 
+      - name: Run database migrations.
+        run: php ./yii migrate/up
+
       - name: Run codeception build.
         run: php vendor/bin/codecept build
 
-      - name: Run tests with codeception with code coverage.
+      - name: Run tests with codeception with coverage.
         run: php vendor/bin/codecept run --coverage --coverage-xml --disable-coverage-php
 
       - name: Upload coverage to Codecov.

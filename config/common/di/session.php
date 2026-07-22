@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Environment;
 use App\Infrastructure\Auth\RedisSessionHandler;
 use Yiisoft\Definitions\Reference;
 use Yiisoft\Session\Session;
@@ -9,12 +10,17 @@ use Yiisoft\Session\SessionInterface;
 
 /** @var array $params */
 
+$sessionOptions = $params['yiisoft/session']['session']['options'] ?? ['cookie_secure' => 0];
+$sessionHandler = Environment::isTest()
+    ? null
+    : Reference::to(RedisSessionHandler::class);
+
 return [
     SessionInterface::class => [
         'class' => Session::class,
         '__construct()' => [
-            $params['yiisoft/session']['session']['options'] ?? ['cookie_secure' => 0],
-            Reference::to(RedisSessionHandler::class),
+            $sessionOptions,
+            $sessionHandler,
         ],
         'reset' => function (): void {
             $this->sessionId = null;
@@ -27,7 +33,7 @@ return [
         '__construct()' => [
             'redisHost' => $params['redis']['host'],
             'redisPort' => $params['redis']['port'],
-            'lifetimeSeconds' => $params['yiisoft/session']['session']['options']['gc_maxlifetime'] ?? 604_800,
+            'lifetimeSeconds' => $sessionOptions['gc_maxlifetime'] ?? 604_800,
         ],
     ],
 ];
