@@ -11,7 +11,7 @@ use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class PgsqlUserRepository implements UserRepositoryInterface
+final class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private readonly ConnectionInterface $connection,
@@ -20,21 +20,21 @@ final class PgsqlUserRepository implements UserRepositoryInterface
     public function findById(string $id): ?User
     {
         $row = $this->connection
-            ->createCommand('SELECT * FROM users WHERE id = :id')
+            ->createCommand('SELECT * FROM users WHERE id = :id AND deleted = FALSE')
             ->bindValue(':id', $id)
             ->queryOne();
 
-        return is_array($row) ? UserMapper::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? UserFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function findByEmail(string $email): ?User
     {
         $row = $this->connection
-            ->createCommand('SELECT * FROM users WHERE email = :email')
+            ->createCommand('SELECT * FROM users WHERE email = :email AND deleted = FALSE')
             ->bindValue(':email', $email)
             ->queryOne();
 
-        return is_array($row) ? UserMapper::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? UserFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function save(User $user): void
@@ -50,6 +50,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
                     phone = :phone,
                     gender = :gender,
                     email_verified_at = :email_verified_at,
+                    deleted = :deleted,
                     updated_at = :updated_at
                  WHERE id = :id',
             )
@@ -63,6 +64,7 @@ final class PgsqlUserRepository implements UserRepositoryInterface
                 ':phone' => $user->getPhone(),
                 ':gender' => $user->getGender()?->value,
                 ':email_verified_at' => $user->getEmailVerifiedAt()?->format('Y-m-d H:i:sP'),
+                ':deleted' => $user->isDeleted(),
                 ':updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:sP'),
             ])
             ->execute();
@@ -77,10 +79,10 @@ final class PgsqlUserRepository implements UserRepositoryInterface
             ->createCommand(
                 'INSERT INTO users (
                     id, email, surname, name, patronymic, company_name, description, phone, gender,
-                    email_verified_at, created_at, updated_at
+                    email_verified_at, deleted, created_at, updated_at
                  ) VALUES (
                     :id, :email, :surname, :name, :patronymic, :company_name, :description, :phone, :gender,
-                    :email_verified_at, :created_at, :updated_at
+                    :email_verified_at, FALSE, :created_at, :updated_at
                  )',
             )
             ->bindValues([

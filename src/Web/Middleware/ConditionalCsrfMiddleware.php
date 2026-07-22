@@ -18,7 +18,9 @@ final class ConditionalCsrfMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (str_starts_with($request->getUri()->getPath(), '/api/')) {
+        if (str_starts_with($request->getUri()->getPath(), '/api/')
+            || str_starts_with($request->getUri()->getPath(), '/webhooks/')
+        ) {
             return $handler->handle($request);
         }
 

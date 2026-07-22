@@ -7,7 +7,7 @@ namespace App\Infrastructure\Persistence;
 use App\Domain\Auth\EmailVerificationCode;
 use DateTimeImmutable;
 
-final class EmailVerificationCodeMapper
+final class EmailVerificationCodeFactory
 {
     /** @param array<string, mixed> $row */
     public static function fromRow(array $row): EmailVerificationCode

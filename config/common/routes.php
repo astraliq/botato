@@ -26,6 +26,10 @@ return [
                 ->action(Web\Auth\LogoutAction::class)
                 ->name('auth/logout'),
 
+            Route::post('/webhooks/telegram/{channelId}')
+                ->action(Web\Webhook\TelegramWebhookAction::class)
+                ->name('webhooks/telegram'),
+
             Group::create('/cabinet')
                 ->middleware(AuthMiddleware::class)
                 ->routes(
@@ -35,6 +39,12 @@ return [
                     Route::post('')
                         ->action(Web\Cabinet\UpdateAction::class)
                         ->name('cabinet/update'),
+                    Route::get('/settings')
+                        ->action(Web\Cabinet\Settings\IndexAction::class)
+                        ->name('cabinet/settings'),
+                    Route::post('/settings/telegram')
+                        ->action(Web\Cabinet\Settings\ConnectTelegramAction::class)
+                        ->name('cabinet/settings/telegram'),
                 ),
         ),
 ];

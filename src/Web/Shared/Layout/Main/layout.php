@@ -71,6 +71,7 @@ $this->beginPage();
                         </button>
                         <div class="user-menu__dropdown" data-user-menu-dropdown hidden>
                             <a href="<?= $urlGenerator->generate('cabinet') ?>" class="user-menu__item">Профиль</a>
+                            <a href="<?= $urlGenerator->generate('cabinet/settings') ?>" class="user-menu__item">Настройки</a>
                             <button type="button" class="user-menu__item user-menu__item--button" id="logout-button">Выйти</button>
                         </div>
                     </div>

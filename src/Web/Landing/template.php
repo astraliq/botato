@@ -10,6 +10,7 @@ use Yiisoft\View\WebView;
  * @var bool $isAuthenticated
  * @var string $cabinetUrl
  * @var string $mailerFrom
+ * @var list<\App\Domain\Plan\Plan> $plans
  */
 
 $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Instagram');
@@ -169,55 +170,37 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
             </div>
         </div>
 
-        <div class="pricing-grid">
-            <article class="pricing-card">
-                <h3>Free</h3>
-                <div class="pricing-card__price" data-price data-base-price="0">0 ₽<small>/мес</small></div>
-                <p style="color:#64748b;margin:0;">Для знакомства с платформой</p>
-                <ul>
-                    <li>10 диалогов в месяц</li>
-                    <li>1 канал</li>
-                    <li>1 база знаний</li>
-                </ul>
-                <button type="button" class="btn btn-secondary" data-auth-open>Начать бесплатно</button>
-            </article>
-
-            <article class="pricing-card">
-                <h3>Старт</h3>
-                <div class="pricing-card__price" data-price data-base-price="490">490 ₽<small>/мес</small></div>
-                <p style="color:#64748b;margin:0;">Для фрилансеров и малого бизнеса</p>
-                <ul>
-                    <li>100 диалогов в месяц</li>
-                    <li>2 канала</li>
-                    <li>3 базы знаний</li>
-                </ul>
-                <button type="button" class="btn btn-secondary" data-auth-open>Попробовать</button>
-            </article>
-
-            <article class="pricing-card pricing-card--popular">
-                <span class="pricing-card__label">Популярный</span>
-                <h3>Бизнес</h3>
-                <div class="pricing-card__price" data-price data-base-price="1490">1 490 ₽<small>/мес</small></div>
-                <p style="color:#64748b;margin:0;">Для растущих команд</p>
-                <ul>
-                    <li>300 диалогов в месяц</li>
-                    <li>3 канала</li>
-                    <li>10 баз знаний</li>
-                </ul>
-                <button type="button" class="btn btn-primary" data-auth-open>Попробовать</button>
-            </article>
-
-            <article class="pricing-card">
-                <h3>Про</h3>
-                <div class="pricing-card__price" data-price data-base-price="2990">2 990 ₽<small>/мес</small></div>
-                <p style="color:#64748b;margin:0;">Для активного потока клиентов</p>
-                <ul>
-                    <li>1 000 диалогов в месяц</li>
-                    <li>Без лимита каналов</li>
-                    <li>30 баз знаний</li>
-                </ul>
-                <button type="button" class="btn btn-secondary" data-auth-open>Попробовать</button>
-            </article>
+        <div class="pricing-grid" style="--pricing-columns: <?= count($plans) ?>">
+            <?php foreach ($plans as $plan): ?>
+                <?php
+                $priceRubles = $plan->getPriceMonthlyRubles();
+                $priceLabel = number_format($priceRubles, 0, '', ' ') . ' ₽';
+                $cardClass = $plan->isPopular() ? 'pricing-card pricing-card--popular' : 'pricing-card';
+                $buttonClass = $plan->isPopular() && $plan->isActive() ? 'btn btn-primary' : 'btn btn-secondary';
+                ?>
+                <article class="<?= Html::encode($cardClass) ?>">
+                    <?php if ($plan->isPopular()): ?>
+                        <span class="pricing-card__label">Популярный</span>
+                    <?php endif; ?>
+                    <h3><?= Html::encode($plan->getName()) ?></h3>
+                    <div
+                        class="pricing-card__price"
+                        data-price
+                        data-base-price="<?= Html::encode((string) $priceRubles) ?>"
+                    ><?= Html::encode($priceLabel) ?><small>/мес</small></div>
+                    <p style="color:#64748b;margin:0;"><?= Html::encode($plan->getDescription()) ?></p>
+                    <ul>
+                        <li><?= Html::encode($plan->getDialogsFeatureLabel()) ?></li>
+                        <li><?= Html::encode($plan->getChannelsFeatureLabel()) ?></li>
+                        <li><?= Html::encode($plan->getKnowledgeBasesFeatureLabel()) ?></li>
+                    </ul>
+                    <?php if ($plan->isActive()): ?>
+                        <button type="button" class="<?= Html::encode($buttonClass) ?>" data-auth-open><?= Html::encode($plan->getButtonLabel()) ?></button>
+                    <?php else: ?>
+                        <button type="button" class="btn btn-secondary" disabled><?= Html::encode($plan->getButtonLabel()) ?></button>
+                    <?php endif; ?>
+                </article>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -238,7 +221,11 @@ $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Insta
             </details>
             <details>
                 <summary>Как считается диалог?</summary>
-                <p>Диалог — вся переписка с одним клиентом в течение 24 часов, независимо от количества сообщений.</p>
+                <p>
+                    Диалог — переписка с одним клиентом в течение календарного месяца.
+                    В один диалог входит до 10 сообщений; каждое следующее сообщение после 10-го
+                    (11-е, 21-е и т.д.) начинает новый диалог и списывается из лимита тарифа.
+                </p>
             </details>
             <details>
                 <summary>Что если ассистент ответит неправильно?</summary>

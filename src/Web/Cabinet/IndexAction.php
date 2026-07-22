@@ -7,12 +7,12 @@ namespace App\Web\Cabinet;
 use App\Application\Auth\GetCurrentUser\GetCurrentUserHandler;
 use App\Application\Profile\ProfileFormValues;
 use Psr\Http\Message\ResponseInterface;
-use Yiisoft\Yii\View\Renderer\ViewRenderer;
+use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 final class IndexAction
 {
     public function __construct(
-        private readonly ViewRenderer $viewRenderer,
+        private readonly WebViewRenderer $viewRenderer,
         private readonly GetCurrentUserHandler $getCurrentUserHandler,
     ) {}
 

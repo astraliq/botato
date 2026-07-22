@@ -27,6 +27,7 @@ return [
         '__construct()' => [
             'redisHost' => $params['redis']['host'],
             'redisPort' => $params['redis']['port'],
+            'lifetimeSeconds' => $params['yiisoft/session']['session']['options']['gc_maxlifetime'] ?? 604_800,
         ],
     ],
 ];

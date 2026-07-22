@@ -57,6 +57,7 @@ class PricingToggle {
      * @param {string} periodMonths
      */
     #setPeriod(periodMonths) {
+        const months = Number(periodMonths);
         const discount = PricingToggle.#periodDiscounts[periodMonths] ?? 0;
         const priceMultiplier = 1 - discount;
 
@@ -67,11 +68,26 @@ class PricingToggle {
         this.#priceElements.forEach((priceElement) => {
             const basePrice = Number(priceElement.dataset.basePrice);
             const monthlyPrice = basePrice * priceMultiplier;
-            const periodLabel = periodMonths === '1'
+            let periodLabel = months === 1 || basePrice === 0
                 ? '/мес'
-                : '/мес при оплате за ' + periodMonths + ' мес';
+                : '/мес при оплате за ' + months + ' мес';
 
-            priceElement.innerHTML = this.#formatPrice(monthlyPrice) + '<small>' + periodLabel + '</small>';
+            if (months > 1 && basePrice > 0) {
+                const totalPrice = basePrice * months * priceMultiplier;
+                periodLabel += ' · ' + this.#formatPrice(totalPrice);
+            }
+
+            let priceHtml = '<span class="pricing-card__price-current">'
+                + this.#formatPrice(monthlyPrice)
+                + '</span>';
+
+            if (discount > 0 && basePrice > 0) {
+                priceHtml += '<span class="pricing-card__price-old">'
+                    + this.#formatPrice(basePrice)
+                    + '</span>';
+            }
+
+            priceElement.innerHTML = priceHtml + '<small>' + periodLabel + '</small>';
         });
     }
 }

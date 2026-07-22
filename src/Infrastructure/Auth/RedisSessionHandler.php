@@ -19,10 +19,12 @@ final class RedisSessionHandler implements SessionHandlerInterface
 
     private readonly int $lifetime;
 
-    public function __construct(string $redisHost, int $redisPort = 6379)
-    {
-        $lifetime = (int) ini_get('session.gc_maxlifetime');
-        $this->lifetime = $lifetime > 0 ? $lifetime : 1440;
+    public function __construct(
+        string $redisHost,
+        int $redisPort = 6379,
+        int $lifetimeSeconds = 604_800,
+    ) {
+        $this->lifetime = $lifetimeSeconds > 0 ? $lifetimeSeconds : 604_800;
 
         $this->redis = new Redis();
         $this->redis->connect($redisHost, $redisPort);

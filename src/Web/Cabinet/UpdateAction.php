@@ -12,12 +12,12 @@ use App\Shared\ArrayHelper;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Yiisoft\Yii\View\Renderer\ViewRenderer;
+use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
 final class UpdateAction
 {
     public function __construct(
-        private readonly ViewRenderer $viewRenderer,
+        private readonly WebViewRenderer $viewRenderer,
         private readonly GetCurrentUserHandler $getCurrentUserHandler,
         private readonly UpdateProfileHandler $updateProfileHandler,
     ) {}

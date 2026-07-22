@@ -19,6 +19,16 @@ return [
         'aliases' => require __DIR__ . '/aliases.php',
     ],
 
+    'yiisoft/session' => [
+        'session' => [
+            'options' => [
+                'cookie_secure' => 0,
+                'cookie_lifetime' => 604_800,
+                'gc_maxlifetime' => 604_800,
+            ],
+        ],
+    ],
+
     'yiisoft/view' => [
         'basePath' => null,
         'parameters' => [

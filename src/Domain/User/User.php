@@ -21,6 +21,7 @@ final class User
         private ?DateTimeImmutable $emailVerifiedAt,
         private readonly DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
+        private bool $deleted = false,
     ) {}
 
     public function getId(): string
@@ -83,6 +84,11 @@ final class User
         return $this->updatedAt;
     }
 
+    public function isDeleted(): bool
+    {
+        return $this->deleted;
+    }
+
     public function updateProfile(
         string $surname,
         string $name,
@@ -106,6 +112,12 @@ final class User
     public function markEmailVerified(DateTimeImmutable $verifiedAt, DateTimeImmutable $updatedAt): void
     {
         $this->emailVerifiedAt = $verifiedAt;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function markDeleted(DateTimeImmutable $updatedAt): void
+    {
+        $this->deleted = true;
         $this->updatedAt = $updatedAt;
     }
 }

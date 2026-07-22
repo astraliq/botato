@@ -7,6 +7,7 @@ namespace App\Application\Auth\VerifyEmailCode;
 use App\Application\Auth\AuthSessionInterface;
 use App\Application\Auth\EmailNormalizer;
 use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
+use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
@@ -17,6 +18,7 @@ final class VerifyEmailCodeHandler
     public function __construct(
         private readonly EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
         private readonly UserRepositoryInterface $userRepository,
+        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
         private readonly AuthSessionInterface $authSession,
     ) {}
 
@@ -43,6 +45,7 @@ final class VerifyEmailCodeHandler
         $this->verificationCodeRepository->markUsed($verificationCode->getId(), $now);
 
         $user = $this->userRepository->findByEmail($normalizedEmail);
+        $isNewUser = $user === null;
 
         if ($user === null) {
             $user = $this->userRepository->create($normalizedEmail);
@@ -51,6 +54,10 @@ final class VerifyEmailCodeHandler
         if ($user->getEmailVerifiedAt() === null) {
             $user->markEmailVerified($now, $now);
             $this->userRepository->save($user);
+        }
+
+        if ($isNewUser) {
+            $this->subscriptionRepository->ensureFreeSubscription($user->getId());
         }
 
         $this->authSession->login($user->getId());
