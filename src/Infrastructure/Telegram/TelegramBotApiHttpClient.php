@@ -11,6 +11,11 @@ use RuntimeException;
 
 final class TelegramBotApiHttpClient implements TelegramBotApiInterface
 {
+    public function __construct(
+        private readonly ?string $proxyUrl = null,
+    ) {
+    }
+
     public function getMe(string $botToken): TelegramBotInfo
     {
         $decoded = $this->call($botToken, 'getMe');
@@ -128,6 +133,10 @@ final class TelegramBotApiHttpClient implements TelegramBotApiInterface
                 CURLOPT_TIMEOUT => 15,
                 CURLOPT_CONNECTTIMEOUT => 5,
             ];
+
+            if ($this->proxyUrl !== null && $this->proxyUrl !== '') {
+                $options[CURLOPT_PROXY] = $this->proxyUrl;
+            }
 
             if ($jsonBody !== null) {
                 $headers[] = 'Content-Type: application/json';

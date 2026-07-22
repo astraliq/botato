@@ -52,7 +52,12 @@ return [
     KnowledgeArticleRepositoryInterface::class => KnowledgeArticleRepository::class,
     AuthSessionInterface::class => SessionAuthSession::class,
     VerificationCodeMailerInterface::class => VerificationCodeMailer::class,
-    TelegramBotApiInterface::class => TelegramBotApiHttpClient::class,
+    TelegramBotApiHttpClient::class => [
+        '__construct()' => [
+            'proxyUrl' => $params['telegram_proxy'] ?? null,
+        ],
+    ],
+    TelegramBotApiInterface::class => Reference::to(TelegramBotApiHttpClient::class),
     SodiumSecretEncryptor::class => [
         '__construct()' => [
             'appSecret' => $params['app_secret'],
