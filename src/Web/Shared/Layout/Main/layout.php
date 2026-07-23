@@ -30,6 +30,7 @@ $this->addJsVars($assetManager->getJsVars());
 
 $showLandingHeader = $showLandingHeader ?? true;
 $includeAuthModal = $includeAuthModal ?? true;
+$showLandingNav = ($currentRoute->getName() ?? null) === 'home';
 $csrfToken = $csrf ?? '';
 
 $this->beginPage();
@@ -56,12 +57,14 @@ $this->beginPage();
                 <span class="logo__mark">Bt</span>
                 <span><?= Html::encode($applicationParams->name) ?></span>
             </a>
-            <nav class="site-nav">
-                <a href="#features">Возможности</a>
-                <a href="#channels">Каналы</a>
-                <a href="#pricing">Тарифы</a>
-                <a href="#faq">FAQ</a>
-            </nav>
+            <?php if ($showLandingNav): ?>
+                <nav class="site-nav" aria-label="Разделы лендинга">
+                    <a href="#features">Возможности</a>
+                    <a href="#channels">Каналы</a>
+                    <a href="#pricing">Тарифы</a>
+                    <a href="#faq">FAQ</a>
+                </nav>
+            <?php endif; ?>
             <div class="site-actions">
                 <?php if (($isAuthenticated ?? false) === true && $userEmail !== null && $userEmail !== ''): ?>
                     <div class="user-menu" data-user-menu>
