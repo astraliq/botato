@@ -72,7 +72,9 @@ return [
     UpdateProfileHandler::class => UpdateProfileHandler::class,
     ConnectTelegramChannelHandler::class => [
         '__construct()' => [
-            'publicBaseUrl' => $params['public_base_url'] ?? '',
+            'webhookBaseUrl' => ($params['telegram_webhook_base_url'] ?? '') !== ''
+                ? $params['telegram_webhook_base_url']
+                : ($params['public_base_url'] ?? ''),
         ],
     ],
     HandleTelegramUpdateHandler::class => HandleTelegramUpdateHandler::class,

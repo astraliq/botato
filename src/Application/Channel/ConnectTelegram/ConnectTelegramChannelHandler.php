@@ -27,7 +27,7 @@ final class ConnectTelegramChannelHandler
     public function __construct(
         private readonly ChannelRepositoryInterface $channelRepository,
         private readonly TelegramBotApiInterface $telegramBotApi,
-        private readonly string $publicBaseUrl,
+        private readonly string $webhookBaseUrl,
     ) {}
 
     public function handle(string $userId, ConnectTelegramChannelCommand $command): Channel
@@ -42,11 +42,12 @@ final class ConnectTelegramChannelHandler
             throw new InvalidArgumentException('Некорректный формат токена Telegram.');
         }
 
-        $publicBaseUrl = rtrim(trim($this->publicBaseUrl), '/');
+        $webhookBaseUrl = rtrim(trim($this->webhookBaseUrl), '/');
 
-        if ($publicBaseUrl === '' || !str_starts_with($publicBaseUrl, 'https://')) {
+        if ($webhookBaseUrl === '' || !str_starts_with($webhookBaseUrl, 'https://')) {
             throw new InvalidArgumentException(
-                'Для webhook укажите APP_PUBLIC_URL с HTTPS (например https://botato.example).',
+                'Для webhook укажите TELEGRAM_WEBHOOK_BASE_URL или APP_PUBLIC_URL с HTTPS'
+                . ' (например https://tg-hook.botato.ru).',
             );
         }
 
@@ -91,7 +92,7 @@ final class ConnectTelegramChannelHandler
 
         $this->channelRepository->save($channel, $secretPayloadJson);
 
-        $webhookUrl = $publicBaseUrl . '/webhooks/telegram/' . $channel->getId();
+        $webhookUrl = $webhookBaseUrl . '/webhooks/telegram/' . $channel->getId();
 
         try {
             $this->telegramBotApi->setWebhook(

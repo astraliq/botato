@@ -1,0 +1,38 @@
+# Пример Caddy на VPS вне РФ: приём Telegram webhook и проксирование на app-сервер.
+#
+# DNS: A-запись tg-hook.example → публичный IP этого VPS.
+# В botato: TELEGRAM_WEBHOOK_BASE_URL=https://tg-hook.example
+# Если 443 занят (например amnezia-xray): сайт на :8443 и
+#   TELEGRAM_WEBHOOK_BASE_URL=https://tg-hook.example:8443
+#   + auto_https disable_redirects (см. TELEGRAM_WEBHOOK_RELAY.md, вариант C).
+#
+# Предпочтительно проксировать через WireGuard на app-сервер (не через публичный
+# botato.ru), иначе VPS→РФ тоже может таймаутиться.
+#
+# Запуск (пример):
+#   caddy run --config telegram-webhook-relay.Caddyfile
+
+{
+	email admin@example.com
+}
+
+tg-hook.example {
+	# Только путь webhook'ов; остальное — 404.
+	handle /webhooks/telegram/* {
+		# Вариант 1 (рекомендуется): app-сервер по WireGuard.
+		# На app-хосте должен слушать HTTP (Caddy/nginx/php) на 10.8.0.10:80
+		# или другой адрес из AllowedIPs туннеля.
+		reverse_proxy 10.8.0.10:80
+
+		# Вариант 2: если с VPS стабильно открывается публичный HTTPS приложения —
+		# раскомментируйте и закомментируйте вариант 1:
+		# reverse_proxy https://botato.ru {
+		# 	header_up Host botato.ru
+		# 	header_up X-Forwarded-Proto https
+		# }
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+}

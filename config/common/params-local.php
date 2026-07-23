@@ -25,6 +25,9 @@ if (!is_string($mailerDsn) || $mailerDsn === '') {
 return [
     'app_secret' => getenv('APP_SECRET') ?: 'dev-only-change-me-32bytes-key!!',
     'public_base_url' => getenv('APP_PUBLIC_URL') ?: '',
+    // Публичный HTTPS URL, который видит Telegram (часто VPS-relay вне РФ).
+    // Если пусто — используется APP_PUBLIC_URL.
+    'telegram_webhook_base_url' => getenv('TELEGRAM_WEBHOOK_BASE_URL') ?: '',
     'database' => [
         'dsn' => getenv('DB_DSN') ?: 'pgsql:host=postgres;port=5432;dbname=botato',
         'username' => getenv('DB_USER') ?: 'app',

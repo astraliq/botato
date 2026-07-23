@@ -1,27 +1,19 @@
-# Прокси для Telegram Bot API (сервер в РФ)
+# Telegram: исходящий прокси и входящий webhook-relay
 
-Исходящие запросы к `api.telegram.org` с серверов в РФ часто блокируются (timeout на порт 443).  
-Приложение ходит в Bot API через переменную окружения `TELEGRAM_PROXY` (SOCKS5 или HTTP).
+При сервере приложения в РФ часто нужны **два** обхода блокировок:
 
-Через прокси уходит **только** трафик Telegram API (`getMe`, `setWebhook`, `sendMessage`).  
-Остальной трафик сервера (сайт, БД, Redis, почта) идёт напрямую.
-
-## Схема
+1. **Исходящие** (PHP → `api.telegram.org`) — SOCKS5 на VPS (`TELEGRAM_PROXY`).
+2. **Входящие** (Telegram → ваш webhook) — приём на VPS и проксирование на app (`TELEGRAM_WEBHOOK_BASE_URL`).
 
 ```
-[PHP / Docker в РФ]
-   └─ TELEGRAM_PROXY ──► SOCKS5 на VPS вне РФ
-                              └─► api.telegram.org
+Telegram ──POST──► VPS (HTTPS, вне РФ) ──► app-сервер в РФ (лучше через WireGuard)
+                      ▲
+PHP в РФ ──SOCKS5─────┘ ──► api.telegram.org  (getMe / setWebhook / sendMessage)
 ```
-
-WireGuard сам по себе приложению не нужен: PHP понимает только URL вида `socks5h://...` или `http://...`.
-
-Рекомендуемый вариант для Docker: SOCKS5 на публичном IP VPS + firewall только с IP сервера приложения.  
-WireGuard можно оставить для личного доступа к VPS.
 
 ---
 
-## Часть A. SOCKS5 на VPS
+## Часть A. SOCKS5 на VPS (исходящие)
 
 ### 1. Установка microsocks
 
@@ -64,87 +56,113 @@ sudo systemctl status microsocks
 ### 3. Firewall: порт 1080 только с IP сервера приложения
 
 ```bash
-# подставьте публичный IP хоста, где крутится botato
 sudo ufw allow from APP_SERVER_PUBLIC_IP to any port 1080 proto tcp
 ```
 
 Не открывайте `1080/tcp` всему интернету без ограничения по IP.
 
-### 4. Проверка с сервера приложения
+### 4. Проверка с сервера приложения / из PHP-контейнера
 
 ```bash
-curl -x socks5h://tgproxy:CHANGE_ME_PASSWORD@VPS_PUBLIC_IP:1080 -I https://api.telegram.org
+curl -sS --max-time 20 -x socks5h://tgproxy:CHANGE_ME_PASSWORD@VPS_PUBLIC_IP:1080 \
+  -I https://api.telegram.org
 ```
 
-Ожидается HTTP-ответ, не timeout.
+Ожидается HTTP-ответ (например 302), не timeout.
 
-`socks5h://` предпочтительнее `socks5://`: DNS резолвится на стороне прокси (важно при блокировках DNS).
+`socks5h://` предпочтительнее `socks5://`: DNS резолвится на стороне прокси.
 
 ---
 
-## Часть B. Настройка botato
+## Часть B. Webhook-relay на VPS (входящие)
 
-В `docker/prod/override.env` (или соответствующий prod env):
+Симптом в `getWebhookInfo`: `last_error_message: Connection timed out`,  
+`url` указывает на `https://botato.ru/...` — Telegram не может достучаться до хоста в РФ.
+
+### Схема
+
+1. DNS: `tg-hook.ваш-домен` → A-запись на IP VPS вне РФ.
+2. На VPS: Caddy/Nginx принимает HTTPS и проксирует `/webhooks/telegram/*` на app-сервер.
+3. В botato: `TELEGRAM_WEBHOOK_BASE_URL=https://tg-hook.ваш-домен`.
+4. При подключении бота `setWebhook` ставит URL вида  
+   `https://tg-hook.ваш-домен/webhooks/telegram/{channelId}`.
+5. Путь и обработчик на app **не меняются** — тот же `/webhooks/telegram/{channelId}`.
+
+### Почему лучше WireGuard, а не `https://botato.ru`
+
+Если VPS сделает `reverse_proxy` на публичный `botato.ru`, запрос Telegram→VPS успешен,  
+но **VPS→РФ** тоже может таймаутиться. Надёжнее проксировать на адрес app в сети WireGuard  
+(например `10.8.0.10:80`).
+
+Пошаговая инструкция: [`docker/infra/TELEGRAM_WEBHOOK_RELAY.md`](docker/infra/TELEGRAM_WEBHOOK_RELAY.md).  
+Пример Caddyfile: [`docker/infra/telegram-webhook-relay.Caddyfile`](docker/infra/telegram-webhook-relay.Caddyfile).
+
+Кратко на VPS:
+
+```bash
+# DNS уже указывает tg-hook.botato.ru на этот VPS
+# Установка Caddy из официального apt-репозитория — см. TELEGRAM_WEBHOOK_RELAY.md §4
+# затем /etc/caddy/Caddyfile и: sudo systemctl reload caddy
+```
+
+На app-сервере в WG-клиенте **не** используйте `AllowedIPs = 0.0.0.0/0` — только сеть VPN, например `10.8.0.0/24`.
+
+Проверка с VPS до app по туннелю:
+
+```bash
+curl -sS --max-time 10 -X POST "http://10.8.0.10/webhooks/telegram/test" \
+  -H "Content-Type: application/json" -d '{}'
+```
+
+Ожидается быстрый ответ приложения (часто `403` без secret — маршрут жив).
+
+Проверка «как Telegram» с любой машины:
+
+```bash
+curl -sS --max-time 15 -X POST "https://tg-hook.ваш-домен/webhooks/telegram/{channelId}" \
+  -H "Content-Type: application/json" -d '{}'
+```
+
+---
+
+## Часть C. Переменные botato
+
+В `docker/prod/.env` или `override.env`:
 
 ```env
+APP_PUBLIC_URL=https://botato.ru
+
+# Исходящие API-вызовы
 TELEGRAM_PROXY=socks5h://tgproxy:CHANGE_ME_PASSWORD@VPS_PUBLIC_IP:1080
+
+# Куда Telegram шлёт webhook (домен на VPS). Если пусто — берётся APP_PUBLIC_URL.
+TELEGRAM_WEBHOOK_BASE_URL=https://tg-hook.ваш-домен
 ```
 
-Примеры форматов:
+После смены env — **stack deploy** / пересоздание PHP-сервиса (правка файла на диске сама по себе Swarm не обновляет).
 
-```env
-# SOCKS5, DNS через прокси (рекомендуется)
-TELEGRAM_PROXY=socks5h://user:pass@host:1080
+Уже подключённых ботов нужно **переподключить** в кабинете (или заново вызвать `setWebhook`),  
+чтобы URL сменился с `botato.ru` на `tg-hook...`.
 
-# SOCKS5 без DNS через прокси
-TELEGRAM_PROXY=socks5://user:pass@host:1080
+Проверка:
 
-# HTTP-прокси
-TELEGRAM_PROXY=http://user:pass@host:8080
+```bash
+curl -sS --max-time 20 -x "$TELEGRAM_PROXY" \
+  "https://api.telegram.org/bot<TOKEN>/getWebhookInfo"
 ```
 
-Перезапустите PHP-контейнеры, чтобы подхватить переменную окружения.
-
-После этого подключение бота в кабинете должно проходить проверку токена через Telegram API.
+Ожидание: `url` начинается с `TELEGRAM_WEBHOOK_BASE_URL`, `last_error_message` пустой/устаревший,  
+после тестового сообщения боту нет свежего `Connection timed out`.
 
 ---
 
 ## Опционально: SOCKS только внутри WireGuard
 
-Если не хотите публиковать порт 1080 наружу:
+1. На VPS SOCKS слушает только `10.8.0.1:1080`.
+2. На хосте приложения — WG-клиент с `AllowedIPs = 10.8.0.0/24`.
+3. `TELEGRAM_PROXY=socks5h://tgproxy:PASS@10.8.0.1:1080`.
 
-1. На VPS SOCKS слушает только адрес WG, например `10.8.0.1:1080`.
-2. На хосте приложения поднимаете WireGuard-клиент.
-3. В env: `TELEGRAM_PROXY=socks5h://tgproxy:PASS@10.8.0.1:1080`.
-
-### Важно: не full tunnel
-
-На сервере приложения **нельзя** использовать:
-
-```ini
-AllowedIPs = 0.0.0.0/0, ::/0
-```
-
-Это уводит весь трафик хоста в VPN. Нужен split tunnel — только сеть WireGuard:
-
-```ini
-[Interface]
-PrivateKey = <client_private_key>
-Address = 10.8.0.10/24
-
-[Peer]
-PublicKey = <server_public_key>
-PresharedKey = <preshared_key>
-AllowedIPs = 10.8.0.0/24
-Endpoint = VPS_PUBLIC_IP:51820
-PersistentKeepalive = 25
-```
-
-Так через туннель доступен только SOCKS в сети `10.8.0.0/24`. Telegram «выезжает» уже с VPS через SOCKS.
-
-### Docker и адрес `10.8.0.1`
-
-Контейнеры часто не видят WireGuard-интерфейс хоста. Если с хоста `curl` к прокси работает, а из контейнера — нет, проще использовать **часть A** (публичный SOCKS + firewall по IP).
+Контейнеры часто не видят WG-интерфейс хоста — тогда оставляйте публичный SOCKS + firewall по IP (часть A).
 
 ---
 
@@ -152,25 +170,27 @@ PersistentKeepalive = 25
 
 | Трафик | Маршрут |
 |--------|---------|
-| Telegram Bot API | через `TELEGRAM_PROXY` → VPS → интернет |
+| `getMe` / `setWebhook` / `sendMessage` | PHP → `TELEGRAM_PROXY` → VPS → api.telegram.org |
+| Входящий webhook | Telegram → VPS (`TELEGRAM_WEBHOOK_BASE_URL`) → app (лучше WG) |
 | Сайт, БД, Redis, почта | напрямую с сервера приложения |
-| Личный WireGuard на ноутбуке | отдельно, на приложение не влияет |
 
 ---
 
 ## Чеклист
 
-1. На VPS: microsocks + пароль + firewall по IP app-сервера.
-2. С app-сервера: `curl -x socks5h://... https://api.telegram.org` — успех.
-3. В `override.env`: `TELEGRAM_PROXY=...`.
-4. Рестарт PHP-контейнеров.
-5. Подключить бота в кабинете.
+1. VPS: microsocks + firewall на 1080.
+2. Из PHP-контейнера: `curl -x "$TELEGRAM_PROXY" -I https://api.telegram.org` — успех.
+3. VPS: Caddy relay + DNS `tg-hook` → VPS.
+4. VPS → app по WG: POST на `/webhooks/telegram/...` отвечает.
+5. В env: `TELEGRAM_PROXY` + `TELEGRAM_WEBHOOK_BASE_URL`.
+6. Redeploy PHP, переподключить бота в кабинете.
+7. `getWebhookInfo`: URL на `tg-hook`, без свежего timeout; бот отвечает заглушкой.
 
 ---
 
 ## Безопасность
 
-- Не коммитьте `override.env` с паролем прокси.
+- Не коммитьте `override.env` с паролями.
 - Не открывайте SOCKS без пароля и без ограничения по IP.
-- Ключи WireGuard и пароли прокси не публикуйте в чатах и репозитории.
-- `AllowedIPs = 0.0.0.0/0` допустим на личном устройстве для полного VPN; на сервере botato — нет.
+- На relay наружу открыты только 80/443 (Let's Encrypt + webhook path).
+- Ключи WireGuard и пароли не публикуйте в чатах и репозитории.
