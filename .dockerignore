@@ -16,4 +16,5 @@
 !yii
 !composer.json
 !composer.lock
+!.rr.yaml
 !.env*

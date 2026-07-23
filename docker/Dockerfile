@@ -3,7 +3,9 @@ FROM composer/composer:2-bin AS composer
 FROM dunglas/frankenphp:1-php8.3-bookworm AS base
 
 RUN apt update && apt -y install \
-    unzip
+    unzip \
+    curl \
+    ca-certificates
 
 RUN install-php-extensions \
     opcache \
@@ -19,7 +21,16 @@ RUN install-php-extensions \
     simplexml \
     pdo \
     pdo_pgsql \
-    redis
+    redis \
+    pcntl
+
+# RoadRunner binary for queue worker supervision
+ARG RR_VERSION=2024.3.5
+RUN curl -sL "https://github.com/roadrunner-server/roadrunner/releases/download/v${RR_VERSION}/roadrunner-${RR_VERSION}-linux-amd64.tar.gz" \
+    | tar -xz -C /tmp \
+ && mv /tmp/roadrunner-${RR_VERSION}-linux-amd64/rr /usr/local/bin/rr \
+ && chmod +x /usr/local/bin/rr \
+ && rm -rf /tmp/roadrunner-${RR_VERSION}-linux-amd64
 
 ENV LC_ALL=C.UTF-8
 
@@ -56,7 +67,7 @@ COPY docker/dev/Caddyfile /etc/frankenphp/Caddyfile
 
 FROM base AS prod-builder
 COPY --from=composer /composer /usr/bin/composer
-COPY .. /app
+COPY . /app
 RUN --mount=type=cache,target=/tmp/cache \
     composer install --no-dev --no-progress --no-interaction --classmap-authoritative && \
     rm composer.lock composer.json
@@ -71,3 +82,13 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER root
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+
+#
+# Queue worker (RoadRunner supervisor)
+#
+
+FROM prod AS worker
+ENV APP_ENV=prod
+WORKDIR /app
+ENTRYPOINT []
+CMD ["rr", "serve", "-c", ".rr.yaml"]

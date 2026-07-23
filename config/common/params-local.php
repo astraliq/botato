@@ -44,4 +44,10 @@ return [
     // HTTP/SOCKS5 proxy for Telegram Bot API (нужен при блокировках api.telegram.org).
     // Примеры: socks5h://user:pass@host:1080  или  http://host:8080
     'telegram_proxy' => getenv('TELEGRAM_PROXY') ?: null,
+    'ai' => [
+        'timeout_seconds' => (int) (getenv('AI_TIMEOUT_SECONDS') ?: 60),
+    ],
+    'queue' => [
+        'default_sleep' => (int) (getenv('QUEUE_SLEEP_SECONDS') ?: 1),
+    ],
 ];

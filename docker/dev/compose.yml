@@ -26,6 +26,29 @@ services:
         condition: service_started
     tty: true
 
+  worker:
+    build:
+      dockerfile: docker/Dockerfile
+      context: ..
+      target: dev
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    command: ["rr", "serve", "-c", ".rr.yaml"]
+    working_dir: /app
+    env_file:
+      - path: ./dev/.env
+      - path: ./dev/override.env
+        required: false
+    volumes:
+      - ../:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    tty: true
+
   postgres:
     image: postgres:16-alpine
     environment:

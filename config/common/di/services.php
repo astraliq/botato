@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Application\Ai\AiChatClientInterface;
 use App\Application\Auth\AuthSessionInterface;
 use App\Application\Auth\GetCurrentUser\GetCurrentUserHandler;
 use App\Application\Auth\Logout\LogoutHandler;
@@ -10,19 +11,24 @@ use App\Application\Auth\VerificationCodeMailerInterface;
 use App\Application\Auth\VerifyEmailCode\VerifyEmailCodeHandler;
 use App\Application\Channel\ConnectTelegram\ConnectTelegramChannelHandler;
 use App\Application\Channel\Telegram\HandleUpdate\HandleTelegramUpdateHandler;
+use App\Application\Channel\Telegram\ProcessMessage\ProcessTelegramMessageJobHandler;
 use App\Application\Channel\Telegram\TelegramBotApiInterface;
 use App\Application\Profile\UpdateProfile\UpdateProfileHandler;
+use App\Application\Queue\ProcessQueueJobHandler;
+use App\Console\QueueConsumeCommand;
 use App\Domain\Ai\AiProviderRepositoryInterface;
 use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
 use App\Domain\Channel\ChannelRepositoryInterface;
 use App\Domain\KnowledgeBase\KnowledgeArticleRepositoryInterface;
 use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use App\Domain\Plan\PlanRepositoryInterface;
+use App\Domain\Queue\QueueJobRepositoryInterface;
 use App\Domain\Security\SecretEncryptorInterface;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\Support\SupportTicketRepositoryInterface;
 use App\Domain\Usage\UsageRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
+use App\Infrastructure\Ai\AiTunnelChatClient;
 use App\Infrastructure\Auth\SessionAuthSession;
 use App\Infrastructure\Mail\VerificationCodeMailer;
 use App\Infrastructure\Persistence\AiProviderRepository;
@@ -31,6 +37,7 @@ use App\Infrastructure\Persistence\EmailVerificationCodeRepository;
 use App\Infrastructure\Persistence\KnowledgeArticleRepository;
 use App\Infrastructure\Persistence\KnowledgeBaseRepository;
 use App\Infrastructure\Persistence\PlanRepository;
+use App\Infrastructure\Persistence\QueueJobRepository;
 use App\Infrastructure\Persistence\SubscriptionRepository;
 use App\Infrastructure\Persistence\SupportTicketRepository;
 use App\Infrastructure\Persistence\UsageRepository;
@@ -53,6 +60,7 @@ return [
     KnowledgeBaseRepositoryInterface::class => KnowledgeBaseRepository::class,
     KnowledgeArticleRepositoryInterface::class => KnowledgeArticleRepository::class,
     SupportTicketRepositoryInterface::class => SupportTicketRepository::class,
+    QueueJobRepositoryInterface::class => QueueJobRepository::class,
     AuthSessionInterface::class => SessionAuthSession::class,
     VerificationCodeMailerInterface::class => VerificationCodeMailer::class,
     TelegramBotApiHttpClient::class => [
@@ -61,6 +69,12 @@ return [
         ],
     ],
     TelegramBotApiInterface::class => Reference::to(TelegramBotApiHttpClient::class),
+    AiTunnelChatClient::class => [
+        '__construct()' => [
+            'timeoutSeconds' => (int) ($params['ai']['timeout_seconds'] ?? 60),
+        ],
+    ],
+    AiChatClientInterface::class => Reference::to(AiTunnelChatClient::class),
     SodiumSecretEncryptor::class => [
         '__construct()' => [
             'appSecret' => $params['app_secret'],
@@ -81,5 +95,12 @@ return [
         ],
     ],
     HandleTelegramUpdateHandler::class => HandleTelegramUpdateHandler::class,
+    ProcessTelegramMessageJobHandler::class => ProcessTelegramMessageJobHandler::class,
+    ProcessQueueJobHandler::class => ProcessQueueJobHandler::class,
+    QueueConsumeCommand::class => [
+        '__construct()' => [
+            'defaultSleepSeconds' => (int) ($params['queue']['default_sleep'] ?? 1),
+        ],
+    ],
     JsonResponseFactory::class => JsonResponseFactory::class,
 ];

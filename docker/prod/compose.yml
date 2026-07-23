@@ -30,6 +30,31 @@ services:
         caddy.reverse_proxy: "{{upstreams 80}}"
         caddy.reverse_proxy.lb_policy: cookie
 
+  worker:
+    image: ${IMAGE}:${IMAGE_TAG}
+    command: ["rr", "serve", "-c", ".rr.yaml"]
+    working_dir: /app
+    networks:
+      - internal
+    volumes:
+      - runtime:/app/runtime
+    env_file:
+      - ./prod/.env
+      - ./prod/override.env
+    deploy:
+      replicas: 1
+      update_config:
+        delay: 10s
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        monitor: 10s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -40,6 +65,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - internal
+    # Только localhost: доступ с ПК через SSH-туннель (DBeaver → 127.0.0.1:5432).
+    ports:
+      - target: 5432
+        published: 5432
+        protocol: tcp
+        mode: host
+        host_ip: 127.0.0.1
     deploy:
       replicas: 1
       placement:

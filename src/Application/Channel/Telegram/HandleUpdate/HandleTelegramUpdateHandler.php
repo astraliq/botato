@@ -4,28 +4,20 @@ declare(strict_types=1);
 
 namespace App\Application\Channel\Telegram\HandleUpdate;
 
-use App\Application\Channel\Telegram\TelegramBotApiInterface;
 use App\Domain\Channel\Channel;
 use App\Domain\Channel\ChannelRepositoryInterface;
 use App\Domain\Channel\ChannelStatus;
-use App\Domain\Subscription\SubscriptionRepositoryInterface;
-use App\Domain\Usage\UsageRepositoryInterface;
+use App\Domain\Queue\QueueJobRepositoryInterface;
+use App\Domain\Queue\QueueJobType;
 use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use InvalidArgumentException;
-use JsonException;
-use RuntimeException;
 
 final class HandleTelegramUpdateHandler
 {
-    private const LIMIT_REACHED_REPLY =
-        'Лимит диалогов на этот месяц исчерпан. Попробуйте позже или обновите тариф в Botato.';
-
     public function __construct(
         private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly UsageRepositoryInterface $usageRepository,
-        private readonly TelegramBotApiInterface $telegramBotApi,
+        private readonly QueueJobRepositoryInterface $queueJobRepository,
     ) {}
 
     /**
@@ -69,39 +61,19 @@ final class HandleTelegramUpdateHandler
             }
         }
 
-        $botToken = $this->resolveBotToken($channel->getId());
-        $subscription = $this->subscriptionRepository->findActiveByUserId($channel->getUserId());
-
-        if ($subscription === null) {
-            throw new RuntimeException('У пользователя нет активной подписки.');
-        }
-
-        $quotaResult = $this->usageRepository->registerPeerMessage(
-            userId: $channel->getUserId(),
-            peerKey: (string) $incomingMessage->chatId,
-            maxDialogsPerMonth: $subscription->getMaxDialogsPerMonth(),
-            now: new DateTimeImmutable(),
-        );
-
-        if ($quotaResult->isLimitReached()) {
-            $this->telegramBotApi->sendMessage(
-                botToken: $botToken,
-                chatId: $incomingMessage->chatId,
-                text: self::LIMIT_REACHED_REPLY,
-                businessConnectionId: $incomingMessage->businessConnectionId,
-                replyToMessageId: $incomingMessage->messageId,
-            );
-
-            return;
-        }
-
-        // Заглушка до подключения AI: подтверждает, что webhook и ответ в личке работают.
-        $this->telegramBotApi->sendMessage(
-            botToken: $botToken,
-            chatId: $incomingMessage->chatId,
-            text: 'Botato получил сообщение. AI-ответы появятся после подключения базы знаний.',
-            businessConnectionId: $incomingMessage->businessConnectionId,
-            replyToMessageId: $incomingMessage->messageId,
+        $this->queueJobRepository->enqueue(
+            queue: 'default',
+            jobType: QueueJobType::TELEGRAM_PROCESS_MESSAGE,
+            payload: [
+                'channel_id' => $channelId,
+                'update_id' => $incomingMessage->updateId,
+                'chat_id' => $incomingMessage->chatId,
+                'message_id' => $incomingMessage->messageId,
+                'text' => $incomingMessage->text,
+                'business_connection_id' => $incomingMessage->businessConnectionId,
+                'from_user_id' => $incomingMessage->fromUserId,
+            ],
+            dedupeKey: $channelId . ':' . $incomingMessage->updateId,
         );
     }
 
@@ -191,32 +163,5 @@ final class HandleTelegramUpdateHandler
             fromIsBot: $fromIsBot,
             businessConnectionId: $businessConnectionId,
         );
-    }
-
-    private function resolveBotToken(string $channelId): string
-    {
-        $secretPayloadJson = $this->channelRepository->getSecretPayload($channelId);
-
-        if ($secretPayloadJson === null || $secretPayloadJson === '') {
-            throw new RuntimeException('Секрет канала не найден.');
-        }
-
-        try {
-            $payload = json_decode($secretPayloadJson, true, 512, JSON_THROW_ON_ERROR);
-        } catch (JsonException $exception) {
-            throw new RuntimeException('Некорректный секрет канала.', previous: $exception);
-        }
-
-        if (!is_array($payload)) {
-            throw new RuntimeException('Некорректный секрет канала.');
-        }
-
-        $botToken = $payload['bot_token'] ?? null;
-
-        if (!is_string($botToken) || $botToken === '') {
-            throw new RuntimeException('Токен бота не найден.');
-        }
-
-        return $botToken;
     }
 }
