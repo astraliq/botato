@@ -20,6 +20,7 @@ use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use App\Domain\Plan\PlanRepositoryInterface;
 use App\Domain\Security\SecretEncryptorInterface;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
+use App\Domain\Support\SupportTicketRepositoryInterface;
 use App\Domain\Usage\UsageRepositoryInterface;
 use App\Domain\User\UserRepositoryInterface;
 use App\Infrastructure\Auth\SessionAuthSession;
@@ -31,6 +32,7 @@ use App\Infrastructure\Persistence\KnowledgeArticleRepository;
 use App\Infrastructure\Persistence\KnowledgeBaseRepository;
 use App\Infrastructure\Persistence\PlanRepository;
 use App\Infrastructure\Persistence\SubscriptionRepository;
+use App\Infrastructure\Persistence\SupportTicketRepository;
 use App\Infrastructure\Persistence\UsageRepository;
 use App\Infrastructure\Persistence\UserRepository;
 use App\Infrastructure\Security\SodiumSecretEncryptor;
@@ -50,6 +52,7 @@ return [
     AiProviderRepositoryInterface::class => AiProviderRepository::class,
     KnowledgeBaseRepositoryInterface::class => KnowledgeBaseRepository::class,
     KnowledgeArticleRepositoryInterface::class => KnowledgeArticleRepository::class,
+    SupportTicketRepositoryInterface::class => SupportTicketRepository::class,
     AuthSessionInterface::class => SessionAuthSession::class,
     VerificationCodeMailerInterface::class => VerificationCodeMailer::class,
     TelegramBotApiHttpClient::class => [

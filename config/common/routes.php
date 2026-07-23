@@ -47,6 +47,12 @@ return [
                     Route::get('/settings')
                         ->action(Web\Cabinet\Settings\IndexAction::class)
                         ->name('cabinet/settings'),
+                    Route::get('/support')
+                        ->action(Web\Cabinet\Support\IndexAction::class)
+                        ->name('cabinet/support'),
+                    Route::post('/support')
+                        ->action(Web\Cabinet\Support\CreateAction::class)
+                        ->name('cabinet/support/create'),
                 ),
         ),
 ];
