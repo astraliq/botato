@@ -34,7 +34,8 @@ services:
       args:
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
-    command: ["rr", "serve", "-c", ".rr.yaml"]
+    entrypoint: ["/usr/local/bin/rr"]
+    command: ["serve", "-c", "/app/.rr.yaml"]
     working_dir: /app
     env_file:
       - path: ./dev/.env

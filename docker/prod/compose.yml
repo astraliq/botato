@@ -32,8 +32,11 @@ services:
 
   worker:
     image: ${IMAGE}:${IMAGE_TAG}
-    command: ["rr", "serve", "-c", ".rr.yaml"]
     working_dir: /app
+    # Без docker-entrypoint (frankenphp): иначе Swarm считает task упавшим при ошибке RR.
+    entrypoint: ["/usr/local/bin/rr"]
+    command: ["serve", "-c", "/app/.rr.yaml"]
+    user: "www-data"
     networks:
       - internal
     volumes:
@@ -47,12 +50,12 @@ services:
         delay: 10s
         parallelism: 1
         order: start-first
-        failure_action: rollback
-        monitor: 10s
+        failure_action: pause
+        monitor: 20s
       restart_policy:
         condition: on-failure
         delay: 5s
-        max_attempts: 3
+        max_attempts: 5
         window: 120s
 
   postgres:

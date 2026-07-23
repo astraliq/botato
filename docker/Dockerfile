@@ -90,5 +90,6 @@ CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
 FROM prod AS worker
 ENV APP_ENV=prod
 WORKDIR /app
-ENTRYPOINT []
-CMD ["rr", "serve", "-c", ".rr.yaml"]
+USER www-data
+ENTRYPOINT ["/usr/local/bin/rr"]
+CMD ["serve", "-c", "/app/.rr.yaml"]
