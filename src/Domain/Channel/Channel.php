@@ -11,6 +11,7 @@ final class Channel
 {
     /**
      * @param array<string, mixed> $settings
+     * @param list<string> $knowledgeBaseIds
      */
     public function __construct(
         private readonly string $id,
@@ -23,11 +24,12 @@ final class Channel
         private ?DateTimeImmutable $connectedAt,
         private readonly DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
-        private ?string $knowledgeBaseId = null,
+        private array $knowledgeBaseIds = [],
     ) {}
 
     /**
      * @param array<string, mixed> $settings
+     * @param list<string> $knowledgeBaseIds
      */
     public static function create(
         string $id,
@@ -35,7 +37,7 @@ final class Channel
         ChannelProvider $provider,
         DateTimeImmutable $createdAt,
         array $settings = [],
-        ?string $knowledgeBaseId = null,
+        array $knowledgeBaseIds = [],
     ): self {
         return new self(
             id: $id,
@@ -48,7 +50,7 @@ final class Channel
             connectedAt: null,
             createdAt: $createdAt,
             updatedAt: $createdAt,
-            knowledgeBaseId: $knowledgeBaseId,
+            knowledgeBaseIds: $knowledgeBaseIds,
         );
     }
 
@@ -103,14 +105,33 @@ final class Channel
         return $this->updatedAt;
     }
 
-    public function getKnowledgeBaseId(): ?string
+    /** @return list<string> */
+    public function getKnowledgeBaseIds(): array
     {
-        return $this->knowledgeBaseId;
+        return $this->knowledgeBaseIds;
     }
 
-    public function assignKnowledgeBase(?string $knowledgeBaseId, DateTimeImmutable $updatedAt): void
+    public function hasKnowledgeBase(string $knowledgeBaseId): bool
     {
-        $this->knowledgeBaseId = $knowledgeBaseId;
+        return in_array($knowledgeBaseId, $this->knowledgeBaseIds, true);
+    }
+
+    /** @param list<string> $knowledgeBaseIds */
+    public function assignKnowledgeBases(array $knowledgeBaseIds, DateTimeImmutable $updatedAt): void
+    {
+        $normalized = [];
+
+        foreach ($knowledgeBaseIds as $knowledgeBaseId) {
+            if (!is_string($knowledgeBaseId) || $knowledgeBaseId === '') {
+                continue;
+            }
+
+            if (!in_array($knowledgeBaseId, $normalized, true)) {
+                $normalized[] = $knowledgeBaseId;
+            }
+        }
+
+        $this->knowledgeBaseIds = $normalized;
         $this->updatedAt = $updatedAt;
     }
 

@@ -43,15 +43,41 @@ final class KnowledgeArticleRepository implements KnowledgeArticleRepositoryInte
 
     public function listActiveForPrompt(string $knowledgeBaseId): array
     {
+        return $this->listActiveForPromptByKnowledgeBaseIds([$knowledgeBaseId]);
+    }
+
+    public function listActiveForPromptByKnowledgeBaseIds(array $knowledgeBaseIds): array
+    {
+        $normalizedIds = [];
+
+        foreach ($knowledgeBaseIds as $knowledgeBaseId) {
+            if (is_string($knowledgeBaseId) && $knowledgeBaseId !== '' && !in_array($knowledgeBaseId, $normalizedIds, true)) {
+                $normalizedIds[] = $knowledgeBaseId;
+            }
+        }
+
+        if ($normalizedIds === []) {
+            return [];
+        }
+
+        $placeholders = [];
+        $bindValues = [];
+
+        foreach ($normalizedIds as $index => $knowledgeBaseId) {
+            $placeholder = ':knowledge_base_id_' . $index;
+            $placeholders[] = $placeholder;
+            $bindValues[$placeholder] = $knowledgeBaseId;
+        }
+
         $rows = $this->connection
             ->createCommand(
                 'SELECT * FROM knowledge_articles
-                 WHERE knowledge_base_id = :knowledge_base_id
+                 WHERE knowledge_base_id IN (' . implode(', ', $placeholders) . ')
                    AND deleted = FALSE
                    AND is_active = TRUE
-                 ORDER BY sort_order ASC, created_at ASC',
+                 ORDER BY knowledge_base_id ASC, sort_order ASC, created_at ASC',
             )
-            ->bindValue(':knowledge_base_id', $knowledgeBaseId)
+            ->bindValues($bindValues)
             ->queryAll();
 
         return $this->mapRows($rows);

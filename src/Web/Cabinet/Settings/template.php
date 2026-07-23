@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Domain\Channel\Channel;
 use App\Domain\Channel\ChannelStatus;
+use App\Domain\KnowledgeBase\KnowledgeBase;
 use Yiisoft\Html\Html;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\View\WebView;
@@ -13,16 +14,23 @@ use Yiisoft\View\WebView;
  * @var UrlGeneratorInterface $urlGenerator
  * @var Channel|null $telegramChannel
  * @var string|null $telegramSecretHint
+ * @var list<KnowledgeBase> $knowledgeBases
+ * @var list<string> $assignedKnowledgeBaseIds
+ * @var int $maxKnowledgeBases
  */
 
 $this->setTitle('Настройки — Botato');
 
 $connectTelegramUrl = $urlGenerator->generate('api/cabinet/settings/telegram');
+$assignKnowledgeUrl = $urlGenerator->generate('api/cabinet/settings/knowledge');
+$knowledgeSettingsUrl = $urlGenerator->generate('cabinet/settings/knowledge');
 $botFatherUrl = 'https://t.me/BotFather';
 $tooltipId = 'botfather-tooltip';
 $isTelegramConnected = $telegramChannel !== null
     && $telegramChannel->getStatus() === ChannelStatus::Connected;
 $telegramDisplayName = $telegramChannel?->getDisplayName();
+$hasKnowledgeBases = $knowledgeBases !== [];
+$assignedCount = count($assignedKnowledgeBaseIds);
 ?>
 
 <section class="cabinet">
@@ -220,6 +228,82 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
 
                     <li class="instruction-step">
                         <div class="instruction-step__num" aria-hidden="true">6</div>
+                        <div class="instruction-step__body">
+                            <h2>Укажите базы знаний</h2>
+                            <p>
+                                Выберите одну или несколько баз, на которые ассистент будет опираться в ответах.
+                                По тарифу доступно до <?= Html::encode((string) $maxKnowledgeBases) ?>
+                                <?= $maxKnowledgeBases === 1 ? 'базы' : 'баз' ?>.
+                                Статьи редактируются в разделе
+                                <a href="<?= Html::encode($knowledgeSettingsUrl) ?>">Базы знаний</a>.
+                            </p>
+
+                            <div data-assign-kb-section>
+                                <?php if (!$isTelegramConnected): ?>
+                                    <p class="instruction-step__note" data-assign-kb-need-bot>
+                                        Сначала подключите бота на шаге 4 — после этого здесь появится выбор баз.
+                                    </p>
+                                <?php endif; ?>
+
+                                <?php if (!$hasKnowledgeBases): ?>
+                                    <p class="instruction-step__note" data-assign-kb-empty<?= $isTelegramConnected ? '' : ' hidden' ?>>
+                                        Пока нет баз знаний.
+                                        <a href="<?= Html::encode($knowledgeSettingsUrl) ?>">Создайте первую</a>,
+                                        затем вернитесь и привяжите её к Telegram.
+                                    </p>
+                                <?php else: ?>
+                                    <form
+                                        method="post"
+                                        action="<?= Html::encode($assignKnowledgeUrl) ?>"
+                                        class="telegram-kb-form has-form-preloader"
+                                        data-assign-kb-form
+                                        data-assign-kb-max="<?= Html::encode((string) $maxKnowledgeBases) ?>"
+                                        <?= $isTelegramConnected ? '' : 'hidden' ?>
+                                    >
+                                        <input type="hidden" name="form_action" value="assign_telegram">
+                                        <fieldset class="telegram-kb-form__fieldset">
+                                            <legend>Базы знаний для Telegram</legend>
+                                            <p class="form-field__hint" data-assign-kb-counter>
+                                                Выбрано: <?= Html::encode((string) $assignedCount) ?> из <?= Html::encode((string) $maxKnowledgeBases) ?>
+                                            </p>
+                                            <div class="telegram-kb-checkboxes">
+                                                <?php foreach ($knowledgeBases as $knowledgeBase): ?>
+                                                    <?php
+                                                    $isAssigned = in_array($knowledgeBase->getId(), $assignedKnowledgeBaseIds, true);
+                                                    $isDisabled = !$knowledgeBase->isActive();
+                                                    $checkboxId = 'telegram_kb_' . $knowledgeBase->getId();
+                                                    ?>
+                                                    <label class="kb-checkbox telegram-kb-checkbox<?= $isDisabled ? ' is-disabled' : '' ?>" for="<?= Html::encode($checkboxId) ?>">
+                                                        <input
+                                                            id="<?= Html::encode($checkboxId) ?>"
+                                                            type="checkbox"
+                                                            name="knowledge_base_ids[]"
+                                                            value="<?= Html::encode($knowledgeBase->getId()) ?>"
+                                                            data-assign-kb-checkbox
+                                                            <?= $isAssigned ? ' checked' : '' ?>
+                                                            <?= $isDisabled ? ' disabled' : '' ?>
+                                                        >
+                                                        <span><?= Html::encode($knowledgeBase->getTitle()) ?></span>
+                                                        <?php if ($isDisabled): ?>
+                                                            <span class="telegram-kb-checkbox__meta">(неактивна)</span>
+                                                        <?php endif; ?>
+                                                    </label>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <div class="form-error" data-assign-kb-error hidden></div>
+                                        </fieldset>
+                                        <button type="submit" class="btn btn-primary">Сохранить базы</button>
+                                        <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/form-preloader', [
+                                            'text' => 'Сохраняем…',
+                                        ]) ?>
+                                    </form>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="instruction-step">
+                        <div class="instruction-step__num" aria-hidden="true">7</div>
                         <div class="instruction-step__body">
                             <h2>Проверьте работу</h2>
                             <p>

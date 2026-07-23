@@ -153,6 +153,25 @@ class ConnectTelegramForm {
                 element.textContent = displayName;
             }
         });
+
+        this.#enableKnowledgeAssignSection();
+    }
+
+    #enableKnowledgeAssignSection() {
+        const needBotElement = document.querySelector('[data-assign-kb-need-bot]');
+        if (needBotElement instanceof HTMLElement) {
+            needBotElement.hidden = true;
+        }
+
+        const emptyElement = document.querySelector('[data-assign-kb-empty]');
+        if (emptyElement instanceof HTMLElement) {
+            emptyElement.hidden = false;
+        }
+
+        const formElement = document.querySelector('[data-assign-kb-form]');
+        if (formElement instanceof HTMLElement) {
+            formElement.hidden = false;
+        }
     }
 
     /**
@@ -193,3 +212,189 @@ class ConnectTelegramForm {
 }
 
 ConnectTelegramForm.initAll();
+
+class AssignTelegramKnowledgeForm {
+    /** @type {HTMLFormElement} */
+    #formElement;
+
+    /** @type {HTMLElement|null} */
+    #errorElement;
+
+    /** @type {HTMLElement|null} */
+    #successElement;
+
+    /** @type {HTMLElement|null} */
+    #counterElement;
+
+    /** @type {FormPreloader|null} */
+    #formPreloader;
+
+    /** @type {number} */
+    #maxKnowledgeBases;
+
+    /**
+     * @param {HTMLFormElement} formElement
+     */
+    constructor(formElement) {
+        this.#formElement = formElement;
+        this.#errorElement = formElement.querySelector('[data-assign-kb-error]');
+        this.#successElement = document.querySelector('[data-telegram-success]');
+        this.#counterElement = formElement.querySelector('[data-assign-kb-counter]');
+        this.#formPreloader = typeof FormPreloader !== 'undefined'
+            ? FormPreloader.create(formElement)
+            : null;
+        this.#maxKnowledgeBases = Math.max(0, Number.parseInt(formElement.getAttribute('data-assign-kb-max') ?? '0', 10) || 0);
+
+        formElement.querySelectorAll('[data-assign-kb-checkbox]').forEach((checkboxElement) => {
+            if (checkboxElement instanceof HTMLInputElement) {
+                checkboxElement.addEventListener('change', () => {
+                    this.#enforceSelectionLimit(checkboxElement);
+                    this.#updateCounter();
+                });
+            }
+        });
+
+        formElement.addEventListener('submit', (event) => {
+            this.#handleSubmit(event);
+        });
+
+        this.#updateCounter();
+    }
+
+    static initAll() {
+        document.querySelectorAll('[data-assign-kb-form]').forEach((formElement) => {
+            if (formElement instanceof HTMLFormElement) {
+                new AssignTelegramKnowledgeForm(formElement);
+            }
+        });
+    }
+
+    /**
+     * @param {Event} event
+     */
+    async #handleSubmit(event) {
+        event.preventDefault();
+        this.#clearMessages();
+
+        const payload = this.#formToPayload();
+        const selectedCount = payload.knowledge_base_ids.length;
+
+        if (this.#maxKnowledgeBases > 0 && selectedCount > this.#maxKnowledgeBases) {
+            this.#showMessage(
+                this.#errorElement,
+                `По тарифу можно выбрать не больше ${this.#maxKnowledgeBases} баз знаний.`,
+            );
+            return;
+        }
+
+        this.#formPreloader?.setLoading(true);
+
+        try {
+            const data = await this.#postJson(this.#formElement.action, payload);
+            this.#showMessage(this.#successElement, data.message || 'Базы знаний сохранены.');
+            this.#successElement?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Не удалось сохранить базы знаний.';
+            this.#showMessage(this.#errorElement, message);
+        } finally {
+            this.#formPreloader?.setLoading(false);
+        }
+    }
+
+    /**
+     * @returns {{form_action: string, knowledge_base_ids: string[]}}
+     */
+    #formToPayload() {
+        /** @type {string[]} */
+        const knowledgeBaseIds = [];
+
+        this.#formElement.querySelectorAll('[data-assign-kb-checkbox]').forEach((checkboxElement) => {
+            if (checkboxElement instanceof HTMLInputElement && checkboxElement.checked && !checkboxElement.disabled) {
+                knowledgeBaseIds.push(checkboxElement.value);
+            }
+        });
+
+        return {
+            form_action: 'assign_telegram',
+            knowledge_base_ids: knowledgeBaseIds,
+        };
+    }
+
+    /**
+     * @param {HTMLInputElement} changedCheckbox
+     */
+    #enforceSelectionLimit(changedCheckbox) {
+        if (this.#maxKnowledgeBases <= 0 || !changedCheckbox.checked) {
+            return;
+        }
+
+        const checkedCount = this.#formElement.querySelectorAll('[data-assign-kb-checkbox]:checked').length;
+        if (checkedCount <= this.#maxKnowledgeBases) {
+            return;
+        }
+
+        changedCheckbox.checked = false;
+        this.#showMessage(
+            this.#errorElement,
+            `По тарифу можно выбрать не больше ${this.#maxKnowledgeBases} баз знаний.`,
+        );
+    }
+
+    #updateCounter() {
+        if (this.#counterElement === null) {
+            return;
+        }
+
+        const checkedCount = this.#formElement.querySelectorAll('[data-assign-kb-checkbox]:checked').length;
+        this.#counterElement.textContent = `Выбрано: ${checkedCount} из ${this.#maxKnowledgeBases}`;
+    }
+
+    /**
+     * @param {string} url
+     * @param {Record<string, unknown>} payload
+     */
+    async #postJson(url, payload) {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+        if (!response.ok || data.success !== true) {
+            throw new Error(data.message || 'Произошла ошибка. Попробуйте ещё раз.');
+        }
+
+        return data;
+    }
+
+    /**
+     * @param {HTMLElement|null} element
+     * @param {string} message
+     */
+    #showMessage(element, message) {
+        if (element === null) {
+            return;
+        }
+
+        element.textContent = message;
+        element.hidden = false;
+    }
+
+    #clearMessages() {
+        if (this.#successElement !== null) {
+            this.#successElement.hidden = true;
+            this.#successElement.textContent = '';
+        }
+
+        if (this.#errorElement !== null) {
+            this.#errorElement.hidden = true;
+            this.#errorElement.textContent = '';
+        }
+    }
+}
+
+AssignTelegramKnowledgeForm.initAll();

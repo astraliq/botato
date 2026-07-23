@@ -11,8 +11,11 @@ use DateTimeImmutable;
 
 final class ChannelFactory
 {
-    /** @param array<string, mixed> $row */
-    public static function fromRow(array $row): Channel
+    /**
+     * @param array<string, mixed> $row
+     * @param list<string> $knowledgeBaseIds
+     */
+    public static function fromRow(array $row, array $knowledgeBaseIds = []): Channel
     {
         $provider = ChannelProvider::from((string) $row['provider']);
         $status = ChannelStatus::from((string) $row['status']);
@@ -35,9 +38,7 @@ final class ChannelFactory
                 : null,
             createdAt: new DateTimeImmutable((string) $row['created_at']),
             updatedAt: new DateTimeImmutable((string) $row['updated_at']),
-            knowledgeBaseId: isset($row['knowledge_base_id']) && $row['knowledge_base_id'] !== null && $row['knowledge_base_id'] !== ''
-                ? (string) $row['knowledge_base_id']
-                : null,
+            knowledgeBaseIds: $knowledgeBaseIds,
         );
     }
 

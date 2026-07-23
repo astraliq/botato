@@ -18,5 +18,11 @@ interface KnowledgeArticleRepositoryInterface
      */
     public function listActiveForPrompt(string $knowledgeBaseId): array;
 
+    /**
+     * @param list<string> $knowledgeBaseIds
+     * @return list<KnowledgeArticle>
+     */
+    public function listActiveForPromptByKnowledgeBaseIds(array $knowledgeBaseIds): array;
+
     public function save(KnowledgeArticle $article): void;
 }

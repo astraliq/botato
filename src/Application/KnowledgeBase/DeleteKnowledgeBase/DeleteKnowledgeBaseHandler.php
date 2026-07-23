@@ -29,10 +29,16 @@ final class DeleteKnowledgeBaseHandler
         $this->knowledgeBaseRepository->save($knowledgeBase);
 
         foreach ($this->channelRepository->listByUserId($userId) as $channel) {
-            if ($channel->getKnowledgeBaseId() === $knowledgeBaseId) {
-                $channel->assignKnowledgeBase(null, $now);
-                $this->channelRepository->save($channel);
+            if (!$channel->hasKnowledgeBase($knowledgeBaseId)) {
+                continue;
             }
+
+            $remainingIds = array_values(array_filter(
+                $channel->getKnowledgeBaseIds(),
+                static fn (string $id): bool => $id !== $knowledgeBaseId,
+            ));
+            $channel->assignKnowledgeBases($remainingIds, $now);
+            $this->channelRepository->save($channel);
         }
     }
 }

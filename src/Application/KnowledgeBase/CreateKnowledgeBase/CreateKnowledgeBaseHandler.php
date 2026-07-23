@@ -68,8 +68,8 @@ final class CreateKnowledgeBaseHandler
             ChannelProvider::Telegram,
         );
 
-        if ($telegramChannel !== null && $telegramChannel->getKnowledgeBaseId() === null) {
-            $telegramChannel->assignKnowledgeBase($knowledgeBase->getId(), $now);
+        if ($telegramChannel !== null && $telegramChannel->getKnowledgeBaseIds() === []) {
+            $telegramChannel->assignKnowledgeBases([$knowledgeBase->getId()], $now);
             $this->channelRepository->save($telegramChannel);
         }
 

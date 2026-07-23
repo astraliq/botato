@@ -15,7 +15,7 @@ use Yiisoft\View\WebView;
  * @var KnowledgeBase|null $selectedKnowledgeBase
  * @var list<KnowledgeArticle> $articles
  * @var bool $isTelegramConnected
- * @var string|null $telegramKnowledgeBaseId
+ * @var list<string> $telegramKnowledgeBaseIds
  * @var int $maxKnowledgeBases
  * @var string|null $csrf
  */
@@ -55,7 +55,7 @@ $canCreateMore = count($knowledgeBases) < $maxKnowledgeBases;
                         <?php
                         $isSelected = $selectedKnowledgeBase !== null
                             && $selectedKnowledgeBase->getId() === $knowledgeBase->getId();
-                        $isAssignedToTelegram = $telegramKnowledgeBaseId === $knowledgeBase->getId();
+                        $isAssignedToTelegram = in_array($knowledgeBase->getId(), $telegramKnowledgeBaseIds, true);
                         $pillUrl = $urlGenerator->generate('cabinet/settings/knowledge', [
                             'kb' => $knowledgeBase->getId(),
                         ]);
@@ -115,23 +115,43 @@ $canCreateMore = count($knowledgeBases) < $maxKnowledgeBases;
                         <div class="kb-panel__head">
                             <h2 data-kb-panel-title><?= Html::encode($selectedKnowledgeBase->getTitle()) ?></h2>
                             <div data-kb-telegram-actions>
-                                <?php if ($isTelegramConnected && $telegramKnowledgeBaseId !== $selectedKnowledgeBase->getId()): ?>
+                                <?php if ($isTelegramConnected && !$selectedKnowledgeBase->isActive()): ?>
+                                    <span class="kb-panel__status">Неактивна — нельзя привязать к Telegram</span>
+                                <?php elseif ($isTelegramConnected && in_array($selectedKnowledgeBase->getId(), $telegramKnowledgeBaseIds, true)): ?>
                                     <form
                                         method="post"
                                         action="<?= Html::encode($manageUrl) ?>"
                                         class="has-form-preloader"
                                         data-kb-form
                                     >
-                                        <input type="hidden" name="form_action" value="assign_telegram">
+                                        <input type="hidden" name="form_action" value="remove_telegram_kb">
                                         <input type="hidden" name="knowledge_base_id" value="<?= Html::encode($selectedKnowledgeBase->getId()) ?>">
-                                        <button type="submit" class="btn btn-secondary">Использовать в Telegram</button>
+                                        <span class="kb-panel__status">Используется в Telegram</span>
+                                        <button type="submit" class="btn btn-secondary">Убрать из Telegram</button>
                                         <div class="form-error" data-kb-form-error hidden></div>
                                         <?= $this->render(dirname(__DIR__, 3) . '/Shared/Partial/form-preloader', [
-                                            'text' => 'Привязываем…',
+                                            'text' => 'Сохраняем…',
                                         ]) ?>
                                     </form>
-                                <?php elseif ($isTelegramConnected && $telegramKnowledgeBaseId === $selectedKnowledgeBase->getId()): ?>
-                                    <span class="kb-panel__status">Используется в Telegram</span>
+                                <?php elseif ($isTelegramConnected): ?>
+                                    <?php if (count($telegramKnowledgeBaseIds) >= $maxKnowledgeBases): ?>
+                                        <span class="kb-panel__status">Лимит тарифа исчерпан (<?= Html::encode((string) $maxKnowledgeBases) ?>)</span>
+                                    <?php else: ?>
+                                        <form
+                                            method="post"
+                                            action="<?= Html::encode($manageUrl) ?>"
+                                            class="has-form-preloader"
+                                            data-kb-form
+                                        >
+                                            <input type="hidden" name="form_action" value="add_telegram_kb">
+                                            <input type="hidden" name="knowledge_base_id" value="<?= Html::encode($selectedKnowledgeBase->getId()) ?>">
+                                            <button type="submit" class="btn btn-secondary">Добавить к Telegram</button>
+                                            <div class="form-error" data-kb-form-error hidden></div>
+                                            <?= $this->render(dirname(__DIR__, 3) . '/Shared/Partial/form-preloader', [
+                                                'text' => 'Привязываем…',
+                                            ]) ?>
+                                        </form>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </div>

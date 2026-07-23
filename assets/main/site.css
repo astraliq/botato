@@ -1267,6 +1267,54 @@ a {
     margin-bottom: 14px;
 }
 
+.telegram-kb-form {
+    margin: 16px 0;
+    padding: 16px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid var(--color-border);
+    max-width: 480px;
+}
+
+.telegram-kb-form .form-field {
+    margin-bottom: 14px;
+}
+
+.telegram-kb-form select {
+    width: 100%;
+}
+
+.telegram-kb-form__fieldset {
+    margin: 0 0 16px;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.telegram-kb-form__fieldset legend {
+    padding: 0;
+    margin: 0 0 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.telegram-kb-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.telegram-kb-checkbox.is-disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.telegram-kb-checkbox__meta {
+    color: #64748b;
+    font-size: 13px;
+}
+
 .has-form-preloader {
     position: relative;
 }

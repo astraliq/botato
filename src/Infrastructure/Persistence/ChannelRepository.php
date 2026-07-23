@@ -26,7 +26,7 @@ final class ChannelRepository implements ChannelRepositoryInterface
             ->bindValue(':id', $id)
             ->queryOne();
 
-        return is_array($row) ? ChannelFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? $this->mapRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function findConnectedByUserAndProvider(string $userId, ChannelProvider $provider): ?Channel
@@ -46,7 +46,7 @@ final class ChannelRepository implements ChannelRepositoryInterface
             ])
             ->queryOne();
 
-        return is_array($row) ? ChannelFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+        return is_array($row) ? $this->mapRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     public function listByUserId(string $userId): array
@@ -61,7 +61,7 @@ final class ChannelRepository implements ChannelRepositoryInterface
         $channels = [];
 
         foreach ($rows as $row) {
-            $channels[] = ChannelFactory::fromRow(ArrayHelper::toStringKeyArray($row));
+            $channels[] = $this->mapRow(ArrayHelper::toStringKeyArray($row));
         }
 
         return $channels;
@@ -69,18 +69,21 @@ final class ChannelRepository implements ChannelRepositoryInterface
 
     public function save(Channel $channel, ?string $secretPayloadJson = null): void
     {
-        $existing = $this->findById($channel->getId());
+        $existing = $this->connection
+            ->createCommand('SELECT 1 FROM channels WHERE id = :id')
+            ->bindValue(':id', $channel->getId())
+            ->queryScalar();
         $settingsJson = json_encode($channel->getSettings(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
-        if ($existing === null) {
+        if ($existing === false || $existing === null) {
             $this->connection
                 ->createCommand(
                     'INSERT INTO channels (
                         id, user_id, provider, status, external_id, display_name, settings,
-                        knowledge_base_id, connected_at, created_at, updated_at
+                        connected_at, created_at, updated_at
                      ) VALUES (
                         :id, :user_id, :provider, :status, :external_id, :display_name, CAST(:settings AS JSONB),
-                        :knowledge_base_id, :connected_at, :created_at, :updated_at
+                        :connected_at, :created_at, :updated_at
                      )',
                 )
                 ->bindValues([
@@ -91,7 +94,6 @@ final class ChannelRepository implements ChannelRepositoryInterface
                     ':external_id' => $channel->getExternalId(),
                     ':display_name' => $channel->getDisplayName(),
                     ':settings' => $settingsJson,
-                    ':knowledge_base_id' => $channel->getKnowledgeBaseId(),
                     ':connected_at' => $channel->getConnectedAt()?->format('Y-m-d H:i:sP'),
                     ':created_at' => $channel->getCreatedAt()->format('Y-m-d H:i:sP'),
                     ':updated_at' => $channel->getUpdatedAt()->format('Y-m-d H:i:sP'),
@@ -105,7 +107,6 @@ final class ChannelRepository implements ChannelRepositoryInterface
                         external_id = :external_id,
                         display_name = :display_name,
                         settings = CAST(:settings AS JSONB),
-                        knowledge_base_id = :knowledge_base_id,
                         connected_at = :connected_at,
                         updated_at = :updated_at
                      WHERE id = :id',
@@ -116,12 +117,13 @@ final class ChannelRepository implements ChannelRepositoryInterface
                     ':external_id' => $channel->getExternalId(),
                     ':display_name' => $channel->getDisplayName(),
                     ':settings' => $settingsJson,
-                    ':knowledge_base_id' => $channel->getKnowledgeBaseId(),
                     ':connected_at' => $channel->getConnectedAt()?->format('Y-m-d H:i:sP'),
                     ':updated_at' => $channel->getUpdatedAt()->format('Y-m-d H:i:sP'),
                 ])
                 ->execute();
         }
+
+        $this->syncKnowledgeBases($channel);
 
         if ($secretPayloadJson !== null) {
             $this->upsertSecret($channel->getId(), $secretPayloadJson);
@@ -158,6 +160,64 @@ final class ChannelRepository implements ChannelRepositoryInterface
         }
 
         return (string) $row['secret_hint'];
+    }
+
+    /** @param array<string, mixed> $row */
+    private function mapRow(array $row): Channel
+    {
+        return ChannelFactory::fromRow($row, $this->fetchKnowledgeBaseIds((string) $row['id']));
+    }
+
+    /** @return list<string> */
+    private function fetchKnowledgeBaseIds(string $channelId): array
+    {
+        $rows = $this->connection
+            ->createCommand(
+                'SELECT knowledge_base_id
+                 FROM channel_knowledge_bases
+                 WHERE channel_id = :channel_id
+                 ORDER BY sort_order ASC, knowledge_base_id ASC',
+            )
+            ->bindValue(':channel_id', $channelId)
+            ->queryAll();
+
+        $ids = [];
+
+        foreach ($rows as $row) {
+            if (is_array($row) && isset($row['knowledge_base_id'])) {
+                $ids[] = (string) $row['knowledge_base_id'];
+            }
+        }
+
+        return $ids;
+    }
+
+    private function syncKnowledgeBases(Channel $channel): void
+    {
+        $this->connection
+            ->createCommand('DELETE FROM channel_knowledge_bases WHERE channel_id = :channel_id')
+            ->bindValue(':channel_id', $channel->getId())
+            ->execute();
+
+        $sortOrder = 0;
+        $createdAt = $channel->getUpdatedAt()->format('Y-m-d H:i:sP');
+
+        foreach ($channel->getKnowledgeBaseIds() as $knowledgeBaseId) {
+            $this->connection
+                ->createCommand(
+                    'INSERT INTO channel_knowledge_bases (channel_id, knowledge_base_id, sort_order, created_at)
+                     VALUES (:channel_id, :knowledge_base_id, :sort_order, :created_at)',
+                )
+                ->bindValues([
+                    ':channel_id' => $channel->getId(),
+                    ':knowledge_base_id' => $knowledgeBaseId,
+                    ':sort_order' => $sortOrder,
+                    ':created_at' => $createdAt,
+                ])
+                ->execute();
+
+            ++$sortOrder;
+        }
     }
 
     private function upsertSecret(string $channelId, string $secretPayloadJson): void

@@ -105,7 +105,7 @@ final class ProcessTelegramMessageJobHandler
         $systemPrompt = $this->buildSystemPrompt(
             companyName: $user->getCompanyName(),
             description: $user->getDescription(),
-            knowledgeBaseId: $channel->getKnowledgeBaseId(),
+            knowledgeBaseIds: $channel->getKnowledgeBaseIds(),
         );
 
         try {
@@ -131,7 +131,10 @@ final class ProcessTelegramMessageJobHandler
         );
     }
 
-    private function buildSystemPrompt(string $companyName, string $description, ?string $knowledgeBaseId): string
+    /**
+     * @param list<string> $knowledgeBaseIds
+     */
+    private function buildSystemPrompt(string $companyName, string $description, array $knowledgeBaseIds): string
     {
         $parts = [
             'Ты ИИ-ассистент бизнеса в мессенджере. Отвечай кратко, вежливо и по делу на русском языке.',
@@ -146,8 +149,8 @@ final class ProcessTelegramMessageJobHandler
             $parts[] = "Описание бизнеса:\n" . $description;
         }
 
-        if ($knowledgeBaseId !== null && $knowledgeBaseId !== '') {
-            $articles = $this->knowledgeArticleRepository->listActiveForPrompt($knowledgeBaseId);
+        if ($knowledgeBaseIds !== []) {
+            $articles = $this->knowledgeArticleRepository->listActiveForPromptByKnowledgeBaseIds($knowledgeBaseIds);
             $knowledgeChunks = [];
 
             foreach ($articles as $article) {

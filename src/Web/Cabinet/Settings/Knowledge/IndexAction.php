@@ -52,7 +52,7 @@ final class IndexAction
             'selectedKnowledgeBase' => $selectedKnowledgeBase,
             'articles' => $articles,
             'isTelegramConnected' => $telegramChannel !== null,
-            'telegramKnowledgeBaseId' => $telegramChannel?->getKnowledgeBaseId(),
+            'telegramKnowledgeBaseIds' => $telegramChannel?->getKnowledgeBaseIds() ?? [],
             'maxKnowledgeBases' => $subscription?->getMaxKnowledgeBases() ?? 0,
         ]);
     }

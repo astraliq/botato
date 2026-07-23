@@ -12,6 +12,8 @@ use App\Application\KnowledgeBase\DeleteKnowledgeArticle\DeleteKnowledgeArticleH
 use App\Application\KnowledgeBase\DeleteKnowledgeBase\DeleteKnowledgeBaseHandler;
 use App\Application\KnowledgeBase\UpdateKnowledgeArticle\UpdateKnowledgeArticleHandler;
 use App\Application\KnowledgeBase\UpdateKnowledgeBase\UpdateKnowledgeBaseHandler;
+use App\Domain\Channel\ChannelProvider;
+use App\Domain\Channel\ChannelRepositoryInterface;
 use App\Web\Shared\JsonBodyParser;
 use App\Web\Shared\JsonResponseFactory;
 use InvalidArgumentException;
@@ -31,6 +33,7 @@ final class ManageAction
         private readonly CreateKnowledgeArticleHandler $createKnowledgeArticleHandler,
         private readonly UpdateKnowledgeArticleHandler $updateKnowledgeArticleHandler,
         private readonly DeleteKnowledgeArticleHandler $deleteKnowledgeArticleHandler,
+        private readonly ChannelRepositoryInterface $channelRepository,
         private readonly JsonResponseFactory $jsonResponseFactory,
         private readonly LoggerInterface $logger,
     ) {}
@@ -44,12 +47,13 @@ final class ManageAction
                 ? $formData['form_action']
                 : '';
 
-            $knowledgeBaseId = $this->dispatch($user->getId(), $formAction, $formData);
+            $result = $this->dispatch($user->getId(), $formAction, $formData);
 
             return $this->jsonResponseFactory->success([
-                'message' => $this->successMessageFor($formAction),
+                'message' => $result['message'],
                 'formAction' => $formAction,
-                'knowledgeBaseId' => $knowledgeBaseId,
+                'knowledgeBaseId' => $result['knowledgeBaseId'],
+                'knowledgeBaseIds' => $result['knowledgeBaseIds'],
             ]);
         } catch (InvalidArgumentException $exception) {
             return $this->jsonResponseFactory->error($exception->getMessage());
@@ -65,50 +69,148 @@ final class ManageAction
 
     /**
      * @param array<string, mixed> $formData
+     * @return array{message: string, knowledgeBaseId: string|null, knowledgeBaseIds: list<string>|null}
      */
-    private function dispatch(
-        string $userId,
-        string $formAction,
-        array $formData,
-    ): ?string {
+    private function dispatch(string $userId, string $formAction, array $formData): array
+    {
         return match ($formAction) {
-            'create_base' => $this->createKnowledgeBaseHandler->handle(
-                userId: $userId,
-                title: $this->stringValue($formData, 'title'),
-                summary: $this->stringValue($formData, 'summary'),
-            )->getId(),
-            'update_base' => $this->updateKnowledgeBaseHandler->handle(
-                userId: $userId,
-                knowledgeBaseId: $this->requiredString($formData, 'knowledge_base_id'),
-                title: $this->stringValue($formData, 'title'),
-                summary: $this->stringValue($formData, 'summary'),
-                isActive: $this->booleanValue($formData, 'is_active'),
-            )->getId(),
+            'create_base' => [
+                'message' => 'База знаний создана.',
+                'knowledgeBaseId' => $this->createKnowledgeBaseHandler->handle(
+                    userId: $userId,
+                    title: $this->stringValue($formData, 'title'),
+                    summary: $this->stringValue($formData, 'summary'),
+                )->getId(),
+                'knowledgeBaseIds' => null,
+            ],
+            'update_base' => [
+                'message' => 'База знаний сохранена.',
+                'knowledgeBaseId' => $this->updateKnowledgeBaseHandler->handle(
+                    userId: $userId,
+                    knowledgeBaseId: $this->requiredString($formData, 'knowledge_base_id'),
+                    title: $this->stringValue($formData, 'title'),
+                    summary: $this->stringValue($formData, 'summary'),
+                    isActive: $this->booleanValue($formData, 'is_active'),
+                )->getId(),
+                'knowledgeBaseIds' => null,
+            ],
             'delete_base' => $this->deleteBase($userId, $formData),
             'assign_telegram' => $this->assignTelegram($userId, $formData),
-            'create_article' => $this->createArticle($userId, $formData),
-            'update_article' => $this->updateArticle($userId, $formData),
-            'delete_article' => $this->deleteArticle($userId, $formData),
+            'add_telegram_kb' => $this->addTelegramKnowledgeBase($userId, $formData),
+            'remove_telegram_kb' => $this->removeTelegramKnowledgeBase($userId, $formData),
+            'create_article' => [
+                'message' => 'Статья добавлена.',
+                'knowledgeBaseId' => $this->createArticle($userId, $formData),
+                'knowledgeBaseIds' => null,
+            ],
+            'update_article' => [
+                'message' => 'Статья сохранена.',
+                'knowledgeBaseId' => $this->updateArticle($userId, $formData),
+                'knowledgeBaseIds' => null,
+            ],
+            'delete_article' => [
+                'message' => 'Статья удалена.',
+                'knowledgeBaseId' => $this->deleteArticle($userId, $formData),
+                'knowledgeBaseIds' => null,
+            ],
             default => throw new InvalidArgumentException('Неизвестное действие.'),
         };
     }
 
-    /** @param array<string, mixed> $formData */
-    private function deleteBase(string $userId, array $formData): ?string
+    /**
+     * @param array<string, mixed> $formData
+     * @return array{message: string, knowledgeBaseId: string|null, knowledgeBaseIds: list<string>|null}
+     */
+    private function deleteBase(string $userId, array $formData): array
     {
-        $knowledgeBaseId = $this->requiredString($formData, 'knowledge_base_id');
-        $this->deleteKnowledgeBaseHandler->handle($userId, $knowledgeBaseId);
+        $this->deleteKnowledgeBaseHandler->handle(
+            $userId,
+            $this->requiredString($formData, 'knowledge_base_id'),
+        );
 
-        return null;
+        return [
+            'message' => 'База знаний удалена.',
+            'knowledgeBaseId' => null,
+            'knowledgeBaseIds' => null,
+        ];
     }
 
-    /** @param array<string, mixed> $formData */
-    private function assignTelegram(string $userId, array $formData): string
+    /**
+     * @param array<string, mixed> $formData
+     * @return array{message: string, knowledgeBaseId: string|null, knowledgeBaseIds: list<string>}
+     */
+    private function assignTelegram(string $userId, array $formData): array
+    {
+        $assignedIds = $this->assignKnowledgeBaseToTelegramHandler->handle(
+            $userId,
+            $this->extractKnowledgeBaseIds($formData),
+        );
+
+        return [
+            'message' => $assignedIds === []
+                ? 'Базы знаний отвязаны от Telegram.'
+                : 'Базы знаний для Telegram сохранены.',
+            'knowledgeBaseId' => $assignedIds[0] ?? null,
+            'knowledgeBaseIds' => $assignedIds,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $formData
+     * @return array{message: string, knowledgeBaseId: string|null, knowledgeBaseIds: list<string>}
+     */
+    private function addTelegramKnowledgeBase(string $userId, array $formData): array
     {
         $knowledgeBaseId = $this->requiredString($formData, 'knowledge_base_id');
-        $this->assignKnowledgeBaseToTelegramHandler->handle($userId, $knowledgeBaseId);
+        $channel = $this->requireTelegramChannel($userId);
+        $ids = $channel->getKnowledgeBaseIds();
 
-        return $knowledgeBaseId;
+        if (!in_array($knowledgeBaseId, $ids, true)) {
+            $ids[] = $knowledgeBaseId;
+        }
+
+        $assignedIds = $this->assignKnowledgeBaseToTelegramHandler->handle($userId, $ids);
+
+        return [
+            'message' => 'База знаний добавлена к Telegram.',
+            'knowledgeBaseId' => $knowledgeBaseId,
+            'knowledgeBaseIds' => $assignedIds,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $formData
+     * @return array{message: string, knowledgeBaseId: string|null, knowledgeBaseIds: list<string>}
+     */
+    private function removeTelegramKnowledgeBase(string $userId, array $formData): array
+    {
+        $knowledgeBaseId = $this->requiredString($formData, 'knowledge_base_id');
+        $channel = $this->requireTelegramChannel($userId);
+        $ids = array_values(array_filter(
+            $channel->getKnowledgeBaseIds(),
+            static fn (string $id): bool => $id !== $knowledgeBaseId,
+        ));
+        $assignedIds = $this->assignKnowledgeBaseToTelegramHandler->handle($userId, $ids);
+
+        return [
+            'message' => 'База знаний убрана из Telegram.',
+            'knowledgeBaseId' => $knowledgeBaseId,
+            'knowledgeBaseIds' => $assignedIds,
+        ];
+    }
+
+    private function requireTelegramChannel(string $userId): \App\Domain\Channel\Channel
+    {
+        $channel = $this->channelRepository->findConnectedByUserAndProvider(
+            $userId,
+            ChannelProvider::Telegram,
+        );
+
+        if ($channel === null) {
+            throw new InvalidArgumentException('Сначала подключите Telegram-бота.');
+        }
+
+        return $channel;
     }
 
     /** @param array<string, mixed> $formData */
@@ -148,18 +250,30 @@ final class ManageAction
         );
     }
 
-    private function successMessageFor(string $formAction): string
+    /**
+     * @param array<string, mixed> $formData
+     * @return list<string>
+     */
+    private function extractKnowledgeBaseIds(array $formData): array
     {
-        return match ($formAction) {
-            'create_base' => 'База знаний создана.',
-            'update_base' => 'База знаний сохранена.',
-            'delete_base' => 'База знаний удалена.',
-            'assign_telegram' => 'База знаний привязана к Telegram.',
-            'create_article' => 'Статья добавлена.',
-            'update_article' => 'Статья сохранена.',
-            'delete_article' => 'Статья удалена.',
-            default => 'Сохранено.',
-        };
+        $rawIds = $formData['knowledge_base_ids'] ?? null;
+        $ids = [];
+
+        if (is_array($rawIds)) {
+            foreach ($rawIds as $rawId) {
+                if (is_string($rawId) && $rawId !== '') {
+                    $ids[] = $rawId;
+                }
+            }
+        }
+
+        $singleId = $this->stringValue($formData, 'knowledge_base_id');
+
+        if ($singleId !== '' && !in_array($singleId, $ids, true)) {
+            $ids[] = $singleId;
+        }
+
+        return array_values($ids);
     }
 
     /** @param array<string, mixed> $formData */
