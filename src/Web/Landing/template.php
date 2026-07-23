@@ -14,6 +14,10 @@ use Yiisoft\View\WebView;
  */
 
 $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Instagram');
+$this->registerMeta([
+    'name' => 'yandex-verification',
+    'content' => 'c991cdff6022ef83',
+]);
 ?>
 
 <section class="hero">
