@@ -13,29 +13,32 @@ use Yiisoft\View\WebView;
  * @var UrlGeneratorInterface $urlGenerator
  * @var Channel|null $telegramChannel
  * @var string|null $telegramSecretHint
- * @var string|null $successMessage
- * @var string|null $errorMessage
- * @var string|null $csrf
  */
 
 $this->setTitle('Настройки — Botato');
 
 $settingsUrl = $urlGenerator->generate('cabinet/settings');
-$connectTelegramUrl = $urlGenerator->generate('cabinet/settings/telegram');
+$connectTelegramUrl = $urlGenerator->generate('api/cabinet/settings/telegram');
 $botFatherUrl = 'https://t.me/BotFather';
 $tooltipId = 'botfather-tooltip';
 $isTelegramConnected = $telegramChannel !== null
     && $telegramChannel->getStatus() === ChannelStatus::Connected;
+$telegramDisplayName = $telegramChannel?->getDisplayName();
 ?>
 
 <section class="cabinet">
     <div class="container">
         <div class="cabinet__layout">
             <nav class="cabinet__tabs" aria-label="Разделы настроек">
-                <a href="<?= Html::encode($settingsUrl) ?>" class="cabinet__tab is-active" aria-current="page">
+                <a href="<?= Html::encode($settingsUrl) ?>" class="cabinet__tab is-active" aria-current="page" data-telegram-tab>
                     <span>Подключить Telegram</span>
                     <?php if ($isTelegramConnected): ?>
-                        <span class="cabinet__tab-check" title="Telegram подключён" aria-label="Telegram подключён">✓</span>
+                        <span
+                            class="cabinet__tab-check"
+                            title="Telegram подключён"
+                            aria-label="Telegram подключён"
+                            data-telegram-tab-check
+                        >✓</span>
                     <?php endif; ?>
                 </a>
             </nav>
@@ -45,25 +48,23 @@ $isTelegramConnected = $telegramChannel !== null
                     <h1>Подключить Telegram</h1>
                 </div>
 
-                <?php if ($successMessage !== null): ?>
-                    <div class="form-success"><?= Html::encode($successMessage) ?></div>
-                <?php endif; ?>
+                <div class="form-success" data-telegram-success hidden></div>
 
-                <?php if ($errorMessage !== null): ?>
-                    <div class="form-error"><?= Html::encode($errorMessage) ?></div>
-                <?php endif; ?>
-
-                <?php if ($telegramChannel !== null && $isTelegramConnected): ?>
-                    <div class="channel-status">
-                        <div class="channel-status__badge">Подключено</div>
-                        <div class="channel-status__meta">
-                            <strong><?= Html::encode((string) $telegramChannel->getDisplayName()) ?></strong>
-                            <?php if ($telegramSecretHint !== null): ?>
-                                <span class="channel-status__hint">токен ···<?= Html::encode($telegramSecretHint) ?></span>
-                            <?php endif; ?>
+                <div data-telegram-status-mount>
+                    <?php if ($isTelegramConnected): ?>
+                        <div class="channel-status" data-telegram-status>
+                            <div class="channel-status__badge">Подключено</div>
+                            <div class="channel-status__meta">
+                                <?php if ($telegramDisplayName !== null): ?>
+                                    <strong><?= Html::encode($telegramDisplayName) ?></strong>
+                                <?php endif; ?>
+                                <?php if ($telegramSecretHint !== null): ?>
+                                    <span class="channel-status__hint">токен ···<?= Html::encode($telegramSecretHint) ?></span>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
 
                 <p class="cabinet__lead">
                     Ассистент будет отвечать клиентам в вашей личной переписке Telegram от вашего имени.
@@ -132,10 +133,12 @@ $isTelegramConnected = $telegramChannel !== null
                                 Никому не передавайте токен: по нему можно управлять вашим ботом.
                             </p>
 
-                            <form method="post" action="<?= Html::encode($connectTelegramUrl) ?>" class="telegram-token-form">
-                                <?php if ($csrf !== null): ?>
-                                    <input type="hidden" name="_csrf" value="<?= Html::encode($csrf) ?>">
-                                <?php endif; ?>
+                            <form
+                                method="post"
+                                action="<?= Html::encode($connectTelegramUrl) ?>"
+                                class="telegram-token-form has-form-preloader"
+                                data-connect-telegram-form
+                            >
                                 <div class="form-field">
                                     <label for="bot_token">Токен бота</label>
                                     <input
@@ -146,10 +149,14 @@ $isTelegramConnected = $telegramChannel !== null
                                         autocomplete="off"
                                         placeholder="123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw"
                                     >
+                                    <div class="form-error" data-telegram-error hidden></div>
                                 </div>
                                 <button type="submit" class="btn btn-primary">
                                     <?= $isTelegramConnected ? 'Обновить токен' : 'Подключить бота' ?>
                                 </button>
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/form-preloader', [
+                                    'text' => 'Проверяем токен…',
+                                ]) ?>
                             </form>
 
                             <p class="instruction-step__note">
@@ -169,12 +176,7 @@ $isTelegramConnected = $telegramChannel !== null
                                 <li>Перейдите в <strong>Мой аккаунт</strong> → <strong>Автоматизация чатов</strong>.</li>
                                 <li>
                                     В поле «Ссылка или @имя бота» укажите username вашего бота
-                                    <?php if ($telegramChannel !== null && $telegramChannel->getDisplayName() !== null): ?>
-                                        (<code><?= Html::encode($telegramChannel->getDisplayName()) ?></code>)
-                                    <?php else: ?>
-                                        (например, <code>@my_salon_bot</code>)
-                                    <?php endif; ?>
-                                    .
+                                    (<code data-telegram-bot-username><?= Html::encode($telegramDisplayName ?? '@my_salon_bot') ?></code>).
                                 </li>
                                 <li>
                                     Выберите, какие чаты доступны боту:

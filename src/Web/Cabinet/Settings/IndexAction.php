@@ -31,8 +31,6 @@ final class IndexAction
             'telegramSecretHint' => $telegramChannel !== null
                 ? $this->channelRepository->findSecretHint($telegramChannel->getId())
                 : null,
-            'successMessage' => null,
-            'errorMessage' => null,
         ]);
     }
 }

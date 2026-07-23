@@ -747,6 +747,11 @@ a {
     margin-bottom: 12px;
 }
 
+.form-field .form-error {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
 .form-success {
     color: #16a34a;
     font-size: 14px;
@@ -828,6 +833,10 @@ a {
     font-size: 12px;
     font-weight: 700;
     line-height: 1;
+}
+
+.cabinet__tab-check[hidden] {
+    display: none;
 }
 
 .cabinet__tab:hover {
@@ -950,6 +959,10 @@ a {
     border: 1px solid #a7f3d0;
 }
 
+.channel-status[hidden] {
+    display: none;
+}
+
 .channel-status__badge {
     display: inline-flex;
     align-items: center;
@@ -986,6 +999,53 @@ a {
 
 .telegram-token-form .form-field {
     margin-bottom: 14px;
+}
+
+.has-form-preloader {
+    position: relative;
+}
+
+.has-form-preloader.is-loading {
+    pointer-events: none;
+}
+
+.form-preloader {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    border-radius: inherit;
+    background: rgba(248, 250, 252, 0.88);
+    backdrop-filter: blur(2px);
+}
+
+.form-preloader[hidden] {
+    display: none;
+}
+
+.form-preloader__spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e0e7ff;
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: form-preloader-spin 0.7s linear infinite;
+}
+
+.form-preloader__text {
+    color: var(--color-muted);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+@keyframes form-preloader-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .info-tooltip {
