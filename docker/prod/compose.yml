@@ -65,13 +65,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - internal
-    # Только localhost: доступ с ПК через SSH-туннель (DBeaver → 127.0.0.1:5432).
+    # На ноде с задачей: порт 5432 в режиме host (доступ с ПК через SSH-туннель).
+    # host_ip в stack deploy не поддерживается — ограничьте доступ файрволом при необходимости.
     ports:
       - target: 5432
         published: 5432
         protocol: tcp
         mode: host
-        host_ip: 127.0.0.1
     deploy:
       replicas: 1
       placement:
