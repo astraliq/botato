@@ -68,7 +68,8 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
 
                 <p class="cabinet__lead">
                     Ассистент будет отвечать клиентам в вашей личной переписке Telegram от вашего имени.
-                    Для этого создайте бота и подключите его в разделе «Автоматизация чатов».
+                    Для этого создайте бота, включите у него режим секретаря и подключите его в разделе
+                    «Автоматизация чатов».
                 </p>
 
                 <ol class="instruction-steps">
@@ -123,6 +124,28 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
                     <li class="instruction-step">
                         <div class="instruction-step__num" aria-hidden="true">3</div>
                         <div class="instruction-step__body">
+                            <h2>Включите режим секретаря у бота</h2>
+                            <p>
+                                Без режима секретаря бот не сможет работать в личной переписке через
+                                «Автоматизация чатов».
+                            </p>
+                            <ol class="instruction-substeps">
+                                <li>
+                                    Откройте в Telegram чат со своим ботом
+                                    (<code data-telegram-bot-username><?= Html::encode($telegramDisplayName ?? '@my_salon_bot') ?></code>).
+                                </li>
+                                <li>Перейдите в настройки бота (меню или кнопка настроек в чате с ботом).</li>
+                                <li>
+                                    Включите <strong>режим секретаря</strong> (Secretary mode).
+                                    В чате должно появиться подтверждение, что режим включён.
+                                </li>
+                            </ol>
+                        </div>
+                    </li>
+
+                    <li class="instruction-step">
+                        <div class="instruction-step__num" aria-hidden="true">4</div>
+                        <div class="instruction-step__body">
                             <h2>Сохраните токен бота в Botato</h2>
                             <p>
                                 После создания BotFather пришлёт сообщение с <strong>HTTP API token</strong> —
@@ -167,7 +190,7 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
                     </li>
 
                     <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">4</div>
+                        <div class="instruction-step__num" aria-hidden="true">5</div>
                         <div class="instruction-step__body">
                             <h2>Подключите бота в «Автоматизация чатов»</h2>
                             <p>Чтобы ассистент отвечал в вашей личке (а не только в отдельном чате с ботом):</p>
@@ -189,13 +212,23 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
                                     В <strong>Исключения</strong> добавьте личные чаты (семья, друзья, коллеги),
                                     куда бот не должен заходить.
                                 </li>
+                                <li>
+                                    Откройте <strong>Разрешения для бота</strong> и в блоке
+                                    <strong>Управление сообщениями</strong> включите:
+                                    <ul>
+                                        <li><strong>Чтение сообщений</strong> — обязательно;</li>
+                                        <li><strong>Ответы на сообщения</strong> — обязательно;</li>
+                                        <li><strong>Отметки о прочтении</strong> — по желанию.</li>
+                                    </ul>
+                                    Остальные разрешения (удаление сообщений, профиль, подарки, истории) для Botato не нужны.
+                                </li>
                                 <li>Сохраните настройки.</li>
                             </ol>
                         </div>
                     </li>
 
                     <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">5</div>
+                        <div class="instruction-step__num" aria-hidden="true">6</div>
                         <div class="instruction-step__body">
                             <h2>Проверьте работу</h2>
                             <p>
@@ -204,8 +237,9 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
                             </p>
                             <p>
                                 Убедитесь, что ответ приходит от вашего имени и опирается на данные профиля
-                                и базы знаний в Botato. Если ответа нет — проверьте, что бот указан в
-                                «Автоматизация чатов» и чат не в исключениях.
+                                и базы знаний в Botato. Если ответа нет — проверьте, что у бота включён
+                                режим секретаря, бот указан в «Автоматизация чатов», выданы разрешения
+                                на чтение и ответы, и чат не в исключениях.
                             </p>
                         </div>
                     </li>
