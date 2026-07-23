@@ -52,7 +52,17 @@ final class QueueConsumeCommand extends Command
         $output->writeln(sprintf('Consuming queue "%s" (sleep=%d)', $queue, $sleepSeconds));
 
         while (!$this->shouldStop) {
-            $job = $this->queueJobRepository->claimNext($queue);
+            try {
+                $job = $this->queueJobRepository->claimNext($queue);
+            } catch (\Throwable $exception) {
+                $output->writeln(sprintf(
+                    '[%s] claim failed: %s',
+                    (new \DateTimeImmutable())->format('H:i:s'),
+                    $exception->getMessage(),
+                ));
+                sleep($sleepSeconds);
+                continue;
+            }
 
             if ($job === null) {
                 sleep($sleepSeconds);

@@ -33,10 +33,9 @@ services:
   worker:
     image: ${IMAGE}:${IMAGE_TAG}
     working_dir: /app
-    # Без docker-entrypoint (frankenphp): иначе Swarm считает task упавшим при ошибке RR.
-    entrypoint: ["/usr/local/bin/rr"]
-    command: ["serve", "-c", "/app/.rr.yaml"]
-    user: "www-data"
+    # Без RR: в Swarm entrypoint rr + user www-data давал early termination.
+    # Тот же entrypoint, что у php (chown runtime → runuser www-data).
+    command: ["php", "./yii", "queue/consume", "--sleep=1"]
     networks:
       - internal
     volumes:
@@ -45,13 +44,13 @@ services:
       - ./prod/.env
       - ./prod/override.env
     deploy:
-      replicas: 1
+      replicas: 2
       update_config:
         delay: 10s
         parallelism: 1
         order: start-first
         failure_action: pause
-        monitor: 20s
+        monitor: 30s
       restart_policy:
         condition: on-failure
         delay: 5s

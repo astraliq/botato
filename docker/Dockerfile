@@ -82,14 +82,3 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 USER root
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
-
-#
-# Queue worker (RoadRunner supervisor)
-#
-
-FROM prod AS worker
-ENV APP_ENV=prod
-WORKDIR /app
-USER www-data
-ENTRYPOINT ["/usr/local/bin/rr"]
-CMD ["serve", "-c", "/app/.rr.yaml"]

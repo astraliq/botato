@@ -378,16 +378,36 @@ jobs:
         run: |
           set -euo pipefail
           export IMAGE="${{ env.IMAGE }}"
+          export IMAGE_TAG="${IMAGE_TAG}"
           export STACK_NAME="${{ env.STACK_NAME }}"
           export PROD_HOST="${PROD_HOST}"
+          export POSTGRES_PASSWORD="${POSTGRES_PASSWORD}"
           docker context create prod --docker "host=ssh://${VPS_USER}@${VPS_HOST}"
-          docker --context prod stack deploy \
+
+          # Предыдущий failed update мог оставить worker в paused — иначе новый deploy тоже падает.
+          worker_service="${STACK_NAME}_worker"
+          if docker --context prod service inspect "${worker_service}" >/dev/null 2>&1; then
+            update_state="$(docker --context prod service inspect "${worker_service}" \
+              --format '{{if .UpdateStatus}}{{.UpdateStatus.State}}{{end}}' 2>/dev/null || true)"
+            if [ "${update_state}" = "paused" ] || [ "${update_state}" = "rollback_paused" ]; then
+              echo "Clearing paused update on ${worker_service} (state=${update_state})"
+              docker --context prod service update --force --detach=true "${worker_service}" || true
+              sleep 5
+            fi
+          fi
+
+          if ! docker --context prod stack deploy \
             --prune \
             --detach=false \
             --with-registry-auth \
             -c docker/compose.yml \
             -c docker/prod/compose.yml \
-            "${STACK_NAME}"
+            "${STACK_NAME}"; then
+            echo '--- stack deploy failed; worker diagnostics ---'
+            docker --context prod service ps "${worker_service}" --no-trunc || true
+            docker --context prod service logs "${worker_service}" --tail 200 || true
+            exit 1
+          fi
 
       - name: Run database migrations.
         env:
