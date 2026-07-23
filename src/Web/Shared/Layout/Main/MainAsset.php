@@ -18,6 +18,7 @@ final class MainAsset extends AssetBundle
 
     public array $js = [
         'js/form-preloader.js',
+        'js/character-counter.js',
         'js/auth-modal.js',
         'js/pricing-toggle.js',
         'js/phone-mask.js',

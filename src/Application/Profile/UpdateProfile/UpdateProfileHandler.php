@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Profile\UpdateProfile;
 
 use App\Domain\User\User;
+use App\Domain\User\UserConstraints;
 use App\Domain\User\UserGender;
 use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
@@ -64,8 +65,10 @@ final class UpdateProfileHandler
             throw new InvalidArgumentException('Название компании не должно превышать 255 символов.');
         }
 
-        if (mb_strlen($description) > 2000) {
-            throw new InvalidArgumentException('Описание не должно превышать 2000 символов.');
+        if (mb_strlen($description) > UserConstraints::DESCRIPTION_MAX_LENGTH) {
+            throw new InvalidArgumentException(
+                'Описание не должно превышать ' . UserConstraints::DESCRIPTION_MAX_LENGTH . ' символов.',
+            );
         }
 
         if ($phone !== '' && !preg_match('/^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$/', $phone)) {

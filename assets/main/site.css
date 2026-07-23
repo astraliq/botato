@@ -720,6 +720,17 @@ a {
     color: var(--color-muted);
 }
 
+.form-field__counter {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--color-muted);
+    text-align: right;
+}
+
+.form-field__counter.is-limit-reached {
+    color: #dc2626;
+}
+
 .form-field textarea {
     min-height: 120px;
     resize: vertical;

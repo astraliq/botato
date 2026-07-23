@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Domain\User\User;
+use App\Domain\User\UserConstraints;
 use App\Domain\User\UserGender;
 use Yiisoft\Html\Html;
 use Yiisoft\View\WebView;
@@ -17,6 +18,8 @@ use Yiisoft\View\WebView;
  */
 
 $this->setTitle('Личный кабинет — Botato');
+
+$descriptionMaxLength = UserConstraints::DESCRIPTION_MAX_LENGTH;
 ?>
 
 <section class="cabinet">
@@ -79,9 +82,16 @@ $this->setTitle('Личный кабинет — Botato');
                     <input id="company_name" type="text" name="company_name" required maxlength="255" value="<?= Html::encode($formValues['company_name']) ?>">
                 </div>
 
-                <div class="form-field">
+                <div class="form-field" data-character-counter>
                     <label for="description">Описание бизнеса для контекста ИИ</label>
-                    <textarea id="description" name="description" maxlength="2000" placeholder="Опишите услуги, аудиторию, tone of voice и особенности вашего бизнеса."><?= Html::encode($formValues['description']) ?></textarea>
+                    <textarea
+                        id="description"
+                        name="description"
+                        maxlength="<?= $descriptionMaxLength ?>"
+                        data-character-counter-input
+                        placeholder="Опишите услуги, аудиторию, tone of voice и особенности вашего бизнеса."
+                    ><?= Html::encode($formValues['description']) ?></textarea>
+                    <p class="form-field__counter" data-character-counter-output aria-live="polite"></p>
                 </div>
 
                 <div class="form-field">
