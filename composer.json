@@ -37,6 +37,7 @@
         "ext-curl": "*",
         "ext-filter": "*",
         "ext-mbstring": "*",
+        "ext-pcntl": "*",
         "ext-redis": "*",
         "ext-session": "*",
         "ext-sodium": "*",
