@@ -11,6 +11,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use Yiisoft\Router\HydratorAttribute\RouteArgument;
 
 final class TelegramWebhookAction
 {
@@ -19,8 +20,11 @@ final class TelegramWebhookAction
         private readonly ResponseFactoryInterface $responseFactory,
     ) {}
 
-    public function __invoke(ServerRequestInterface $request, string $channelId): ResponseInterface
-    {
+    public function __invoke(
+        ServerRequestInterface $request,
+        #[RouteArgument('channelId')]
+        string $channelId,
+    ): ResponseInterface {
         $secretTokenHeader = $request->getHeaderLine('X-Telegram-Bot-Api-Secret-Token');
 
         try {
