@@ -122,7 +122,7 @@ final class Channel
         $normalized = [];
 
         foreach ($knowledgeBaseIds as $knowledgeBaseId) {
-            if (!is_string($knowledgeBaseId) || $knowledgeBaseId === '') {
+            if ($knowledgeBaseId === '') {
                 continue;
             }
 

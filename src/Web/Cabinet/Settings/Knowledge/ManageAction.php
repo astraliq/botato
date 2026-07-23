@@ -186,10 +186,14 @@ final class ManageAction
     {
         $knowledgeBaseId = $this->requiredString($formData, 'knowledge_base_id');
         $channel = $this->requireTelegramChannel($userId);
-        $ids = array_values(array_filter(
-            $channel->getKnowledgeBaseIds(),
-            static fn (string $id): bool => $id !== $knowledgeBaseId,
-        ));
+        $ids = [];
+
+        foreach ($channel->getKnowledgeBaseIds() as $assignedKnowledgeBaseId) {
+            if ($assignedKnowledgeBaseId !== $knowledgeBaseId) {
+                $ids[] = $assignedKnowledgeBaseId;
+            }
+        }
+
         $assignedIds = $this->assignKnowledgeBaseToTelegramHandler->handle($userId, $ids);
 
         return [
@@ -273,7 +277,7 @@ final class ManageAction
             $ids[] = $singleId;
         }
 
-        return array_values($ids);
+        return $ids;
     }
 
     /** @param array<string, mixed> $formData */

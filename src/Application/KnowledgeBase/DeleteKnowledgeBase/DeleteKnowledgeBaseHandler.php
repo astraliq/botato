@@ -33,10 +33,14 @@ final class DeleteKnowledgeBaseHandler
                 continue;
             }
 
-            $remainingIds = array_values(array_filter(
-                $channel->getKnowledgeBaseIds(),
-                static fn (string $id): bool => $id !== $knowledgeBaseId,
-            ));
+            $remainingIds = [];
+
+            foreach ($channel->getKnowledgeBaseIds() as $assignedKnowledgeBaseId) {
+                if ($assignedKnowledgeBaseId !== $knowledgeBaseId) {
+                    $remainingIds[] = $assignedKnowledgeBaseId;
+                }
+            }
+
             $channel->assignKnowledgeBases($remainingIds, $now);
             $this->channelRepository->save($channel);
         }

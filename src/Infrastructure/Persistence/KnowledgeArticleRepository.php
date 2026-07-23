@@ -51,7 +51,7 @@ final class KnowledgeArticleRepository implements KnowledgeArticleRepositoryInte
         $normalizedIds = [];
 
         foreach ($knowledgeBaseIds as $knowledgeBaseId) {
-            if (is_string($knowledgeBaseId) && $knowledgeBaseId !== '' && !in_array($knowledgeBaseId, $normalizedIds, true)) {
+            if ($knowledgeBaseId !== '' && !in_array($knowledgeBaseId, $normalizedIds, true)) {
                 $normalizedIds[] = $knowledgeBaseId;
             }
         }

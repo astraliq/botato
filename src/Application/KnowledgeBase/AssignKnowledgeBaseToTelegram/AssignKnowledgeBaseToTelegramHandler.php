@@ -43,7 +43,7 @@ final class AssignKnowledgeBaseToTelegramHandler
         $normalizedIds = [];
 
         foreach ($knowledgeBaseIds as $knowledgeBaseId) {
-            if (!is_string($knowledgeBaseId) || $knowledgeBaseId === '') {
+            if ($knowledgeBaseId === '') {
                 continue;
             }
 

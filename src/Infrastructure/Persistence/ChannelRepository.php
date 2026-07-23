@@ -184,7 +184,7 @@ final class ChannelRepository implements ChannelRepositoryInterface
         $ids = [];
 
         foreach ($rows as $row) {
-            if (is_array($row) && isset($row['knowledge_base_id'])) {
+            if (isset($row['knowledge_base_id'])) {
                 $ids[] = (string) $row['knowledge_base_id'];
             }
         }
