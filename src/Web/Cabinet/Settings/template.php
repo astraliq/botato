@@ -17,7 +17,6 @@ use Yiisoft\View\WebView;
 
 $this->setTitle('Настройки — Botato');
 
-$settingsUrl = $urlGenerator->generate('cabinet/settings');
 $connectTelegramUrl = $urlGenerator->generate('api/cabinet/settings/telegram');
 $botFatherUrl = 'https://t.me/BotFather';
 $tooltipId = 'botfather-tooltip';
@@ -29,19 +28,11 @@ $telegramDisplayName = $telegramChannel?->getDisplayName();
 <section class="cabinet">
     <div class="container">
         <div class="cabinet__layout">
-            <nav class="cabinet__tabs" aria-label="Разделы настроек">
-                <a href="<?= Html::encode($settingsUrl) ?>" class="cabinet__tab is-active" aria-current="page" data-telegram-tab>
-                    <span>Подключить Telegram</span>
-                    <?php if ($isTelegramConnected): ?>
-                        <span
-                            class="cabinet__tab-check"
-                            title="Telegram подключён"
-                            aria-label="Telegram подключён"
-                            data-telegram-tab-check
-                        >✓</span>
-                    <?php endif; ?>
-                </a>
-            </nav>
+            <?= $this->render(__DIR__ . '/Partial/settings-tabs', [
+                'urlGenerator' => $urlGenerator,
+                'activeTab' => 'telegram',
+                'isTelegramConnected' => $isTelegramConnected,
+            ]) ?>
 
             <div class="cabinet__card">
                 <div class="cabinet__head">

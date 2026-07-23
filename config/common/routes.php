@@ -31,6 +31,11 @@ return [
                 ->action(Web\Cabinet\Settings\ConnectTelegramAction::class)
                 ->name('api/cabinet/settings/telegram'),
 
+            Route::post('/api/cabinet/settings/knowledge')
+                ->middleware(AuthMiddleware::class)
+                ->action(Web\Cabinet\Settings\Knowledge\ManageAction::class)
+                ->name('api/cabinet/settings/knowledge'),
+
             Route::post('/webhooks/telegram/{channelId}')
                 ->action(Web\Webhook\TelegramWebhookAction::class)
                 ->name('webhooks/telegram'),
@@ -47,6 +52,9 @@ return [
                     Route::get('/settings')
                         ->action(Web\Cabinet\Settings\IndexAction::class)
                         ->name('cabinet/settings'),
+                    Route::get('/settings/knowledge')
+                        ->action(Web\Cabinet\Settings\Knowledge\IndexAction::class)
+                        ->name('cabinet/settings/knowledge'),
                     Route::get('/support')
                         ->action(Web\Cabinet\Support\IndexAction::class)
                         ->name('cabinet/support'),

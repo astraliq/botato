@@ -24,5 +24,6 @@ final class MainAsset extends AssetBundle
         'js/phone-mask.js',
         'js/user-menu.js',
         'js/connect-telegram.js',
+        'js/knowledge-base.js',
     ];
 }

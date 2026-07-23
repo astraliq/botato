@@ -13,6 +13,13 @@ use App\Application\Channel\ConnectTelegram\ConnectTelegramChannelHandler;
 use App\Application\Channel\Telegram\HandleUpdate\HandleTelegramUpdateHandler;
 use App\Application\Channel\Telegram\ProcessMessage\ProcessTelegramMessageJobHandler;
 use App\Application\Channel\Telegram\TelegramBotApiInterface;
+use App\Application\KnowledgeBase\AssignKnowledgeBaseToTelegram\AssignKnowledgeBaseToTelegramHandler;
+use App\Application\KnowledgeBase\CreateKnowledgeArticle\CreateKnowledgeArticleHandler;
+use App\Application\KnowledgeBase\CreateKnowledgeBase\CreateKnowledgeBaseHandler;
+use App\Application\KnowledgeBase\DeleteKnowledgeArticle\DeleteKnowledgeArticleHandler;
+use App\Application\KnowledgeBase\DeleteKnowledgeBase\DeleteKnowledgeBaseHandler;
+use App\Application\KnowledgeBase\UpdateKnowledgeArticle\UpdateKnowledgeArticleHandler;
+use App\Application\KnowledgeBase\UpdateKnowledgeBase\UpdateKnowledgeBaseHandler;
 use App\Application\Profile\UpdateProfile\UpdateProfileHandler;
 use App\Application\Queue\ProcessQueueJobHandler;
 use App\Console\QueueConsumeCommand;
@@ -97,6 +104,13 @@ return [
     HandleTelegramUpdateHandler::class => HandleTelegramUpdateHandler::class,
     ProcessTelegramMessageJobHandler::class => ProcessTelegramMessageJobHandler::class,
     ProcessQueueJobHandler::class => ProcessQueueJobHandler::class,
+    CreateKnowledgeBaseHandler::class => CreateKnowledgeBaseHandler::class,
+    UpdateKnowledgeBaseHandler::class => UpdateKnowledgeBaseHandler::class,
+    DeleteKnowledgeBaseHandler::class => DeleteKnowledgeBaseHandler::class,
+    AssignKnowledgeBaseToTelegramHandler::class => AssignKnowledgeBaseToTelegramHandler::class,
+    CreateKnowledgeArticleHandler::class => CreateKnowledgeArticleHandler::class,
+    UpdateKnowledgeArticleHandler::class => UpdateKnowledgeArticleHandler::class,
+    DeleteKnowledgeArticleHandler::class => DeleteKnowledgeArticleHandler::class,
     QueueConsumeCommand::class => [
         '__construct()' => [
             'defaultSleepSeconds' => (int) ($params['queue']['default_sleep'] ?? 1),
