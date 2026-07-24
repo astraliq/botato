@@ -36,6 +36,9 @@ services:
     # Без RR: в Swarm entrypoint rr + user www-data давал early termination.
     # Тот же entrypoint, что у php (chown runtime → runuser www-data).
     command: ["php", "./yii", "queue/consume", "--sleep=1"]
+    # Образ FrankenPHP несёт HEALTHCHECK на :2019/metrics — у CLI-воркера его нет → unhealthy → exit 143.
+    healthcheck:
+      test: ["NONE"]
     networks:
       - internal
     volumes:

@@ -396,33 +396,59 @@ jobs:
             fi
           fi
 
-          if ! docker --context prod stack deploy \
+          # detach=true: не ждать worker до миграций (иначе нет queue_jobs → шум в логах / гонка).
+          docker --context prod stack deploy \
             --prune \
-            --detach=false \
+            --detach=true \
             --with-registry-auth \
             -c docker/compose.yml \
             -c docker/prod/compose.yml \
-            "${STACK_NAME}"; then
-            echo '--- stack deploy failed; worker diagnostics ---'
-            docker --context prod service ps "${worker_service}" --no-trunc || true
-            docker --context prod service logs "${worker_service}" --tail 200 || true
-            exit 1
-          fi
+            "${STACK_NAME}"
 
       - name: Run database migrations.
         env:
           STACK_NAME: ${{ env.STACK_NAME }}
         run: |
           set -euo pipefail
+          php_service="${STACK_NAME}_php"
+          container_id=""
+          for _ in $(seq 1 60); do
+            container_id="$(ssh -i ~/.ssh/deploy_key \
+              -o IdentitiesOnly=yes \
+              -o PreferredAuthentications=publickey \
+              -o StrictHostKeyChecking=yes \
+              -o BatchMode=yes \
+              "${VPS_USER}@${VPS_HOST}" \
+              "docker ps -q --filter \"label=com.docker.swarm.service.name=${php_service}\" | head -n 1" || true)"
+            if [ -n "${container_id}" ]; then
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "${container_id}" ]; then
+            echo "No running ${php_service} container found."
+            exit 1
+          fi
           ssh -i ~/.ssh/deploy_key \
             -o IdentitiesOnly=yes \
             -o PreferredAuthentications=publickey \
             -o StrictHostKeyChecking=yes \
             -o BatchMode=yes \
             "${VPS_USER}@${VPS_HOST}" \
-            "container_id=\$(docker ps -q --filter \"label=com.docker.swarm.service.name=${STACK_NAME}_php\" | head -n 1) && \
-            if [ -z \"\${container_id}\" ]; then \
-              echo 'No running ${STACK_NAME}_php container found.'; \
-              exit 1; \
-            fi && \
-            docker exec \"\${container_id}\" php ./yii migrate/up"
+            "docker exec \"${container_id}\" php ./yii migrate/up"
+
+      - name: Wait for stack services to converge.
+        env:
+          STACK_NAME: ${{ env.STACK_NAME }}
+        run: |
+          set -euo pipefail
+          worker_service="${STACK_NAME}_worker"
+          # После миграций форсим worker, чтобы снять paused и подхватить схему.
+          if docker --context prod service inspect "${worker_service}" >/dev/null 2>&1; then
+            docker --context prod service update --force --detach=false "${worker_service}" || {
+              echo '--- worker failed to converge; diagnostics ---'
+              docker --context prod service ps "${worker_service}" --no-trunc || true
+              docker --context prod service logs "${worker_service}" --tail 200 || true
+              exit 1
+            }
+          fi
