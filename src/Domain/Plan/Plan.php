@@ -15,6 +15,7 @@ final class Plan
         private readonly bool $isPopular,
         private readonly int $priceMonthlyMinor,
         private readonly int $maxDialogsPerMonth,
+        private readonly int $messagesPerDialog,
         private readonly ?int $maxChannels,
         private readonly int $maxKnowledgeBases,
         private readonly string $buttonLabel,
@@ -68,6 +69,11 @@ final class Plan
         return $this->maxDialogsPerMonth;
     }
 
+    public function getMessagesPerDialog(): int
+    {
+        return $this->messagesPerDialog;
+    }
+
     public function getMaxChannels(): ?int
     {
         return $this->maxChannels;
@@ -107,6 +113,13 @@ final class Plan
         $count = number_format($this->maxDialogsPerMonth, 0, '', ' ');
 
         return $count . ' диалогов в месяц';
+    }
+
+    public function getMessagesPerDialogFeatureLabel(): string
+    {
+        return 'До ' . $this->messagesPerDialog . ' '
+            . self::pluralRu($this->messagesPerDialog, 'сообщение', 'сообщения', 'сообщений')
+            . ' в диалоге';
     }
 
     public function getChannelsFeatureLabel(): string

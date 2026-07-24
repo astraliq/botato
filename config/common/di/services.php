@@ -26,6 +26,7 @@ use App\Console\QueueConsumeCommand;
 use App\Domain\Ai\AiProviderRepositoryInterface;
 use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
 use App\Domain\Channel\ChannelRepositoryInterface;
+use App\Domain\Conversation\ConversationMessageRepositoryInterface;
 use App\Domain\KnowledgeBase\KnowledgeArticleRepositoryInterface;
 use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use App\Domain\Plan\PlanRepositoryInterface;
@@ -40,6 +41,7 @@ use App\Infrastructure\Auth\SessionAuthSession;
 use App\Infrastructure\Mail\VerificationCodeMailer;
 use App\Infrastructure\Persistence\AiProviderRepository;
 use App\Infrastructure\Persistence\ChannelRepository;
+use App\Infrastructure\Persistence\ConversationMessageRepository;
 use App\Infrastructure\Persistence\EmailVerificationCodeRepository;
 use App\Infrastructure\Persistence\KnowledgeArticleRepository;
 use App\Infrastructure\Persistence\KnowledgeBaseRepository;
@@ -60,6 +62,7 @@ return [
     UserRepositoryInterface::class => UserRepository::class,
     EmailVerificationCodeRepositoryInterface::class => EmailVerificationCodeRepository::class,
     ChannelRepositoryInterface::class => ChannelRepository::class,
+    ConversationMessageRepositoryInterface::class => ConversationMessageRepository::class,
     SubscriptionRepositoryInterface::class => SubscriptionRepository::class,
     UsageRepositoryInterface::class => UsageRepository::class,
     PlanRepositoryInterface::class => PlanRepository::class,

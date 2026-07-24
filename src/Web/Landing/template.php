@@ -195,6 +195,7 @@ $this->registerMeta([
                     <p style="color:#64748b;margin:0;"><?= Html::encode($plan->getDescription()) ?></p>
                     <ul>
                         <li><?= Html::encode($plan->getDialogsFeatureLabel()) ?></li>
+                        <li><?= Html::encode($plan->getMessagesPerDialogFeatureLabel()) ?></li>
                         <li><?= Html::encode($plan->getChannelsFeatureLabel()) ?></li>
                         <li><?= Html::encode($plan->getKnowledgeBasesFeatureLabel()) ?></li>
                     </ul>

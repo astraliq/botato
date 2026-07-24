@@ -22,6 +22,7 @@ final class UsageRepository implements UsageRepositoryInterface
         string $userId,
         string $peerKey,
         int $maxDialogsPerMonth,
+        int $messagesPerDialog,
         DateTimeImmutable $now,
     ): PeerMessageQuotaResult {
         $transaction = $this->connection->beginTransaction();
@@ -29,6 +30,7 @@ final class UsageRepository implements UsageRepositoryInterface
         try {
             $periodMonthDate = $now->modify('first day of this month')->setTime(0, 0)->format('Y-m-d');
             $nowFormatted = $now->format('Y-m-d H:i:sP');
+            $messagesPerDialog = max(1, $messagesPerDialog);
 
             $dialogsUsed = $this->ensureUsageMonthLocked($userId, $periodMonthDate, $nowFormatted);
             $window = $this->ensurePeerWindowLocked($userId, $peerKey, $nowFormatted);
@@ -42,7 +44,7 @@ final class UsageRepository implements UsageRepositoryInterface
             }
 
             $nextMessagesCount = $messagesCount + 1;
-            $startsNewDialog = DialogBillingRules::startsNewDialog($nextMessagesCount);
+            $startsNewDialog = DialogBillingRules::startsNewDialog($nextMessagesCount, $messagesPerDialog);
 
             if ($startsNewDialog) {
                 $updatedRows = $this->connection

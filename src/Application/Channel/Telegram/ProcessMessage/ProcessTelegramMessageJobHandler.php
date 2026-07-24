@@ -9,6 +9,8 @@ use App\Application\Ai\AiChatMessage;
 use App\Application\Channel\Telegram\TelegramBotApiInterface;
 use App\Domain\Channel\ChannelRepositoryInterface;
 use App\Domain\Channel\ChannelStatus;
+use App\Domain\Conversation\ConversationMessageRepositoryInterface;
+use App\Domain\Conversation\ConversationMessageRole;
 use App\Domain\KnowledgeBase\KnowledgeArticleRepositoryInterface;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\Usage\UsageRepositoryInterface;
@@ -30,6 +32,7 @@ final class ProcessTelegramMessageJobHandler
         private readonly UsageRepositoryInterface $usageRepository,
         private readonly UserRepositoryInterface $userRepository,
         private readonly KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
+        private readonly ConversationMessageRepositoryInterface $conversationMessageRepository,
         private readonly AiChatClientInterface $aiChatClient,
         private readonly TelegramBotApiInterface $telegramBotApi,
         private readonly LoggerInterface $logger,
@@ -77,10 +80,14 @@ final class ProcessTelegramMessageJobHandler
             throw new RuntimeException('У пользователя нет активной подписки.');
         }
 
+        $peerKey = (string) $chatId;
+        $messagesPerDialog = max(1, $subscription->getMessagesPerDialog());
+
         $quotaResult = $this->usageRepository->registerPeerMessage(
             userId: $channel->getUserId(),
-            peerKey: (string) $chatId,
+            peerKey: $peerKey,
             maxDialogsPerMonth: $subscription->getMaxDialogsPerMonth(),
+            messagesPerDialog: $messagesPerDialog,
             now: new DateTimeImmutable(),
         );
 
@@ -102,17 +109,41 @@ final class ProcessTelegramMessageJobHandler
             throw new RuntimeException('Пользователь канала не найден.');
         }
 
+        $trimmedText = trim($text);
+
+        $this->conversationMessageRepository->append(
+            channelId: $channelId,
+            peerKey: $peerKey,
+            role: ConversationMessageRole::User,
+            content: $trimmedText,
+            externalId: (string) $messageId,
+        );
+
+        $history = $this->conversationMessageRepository->listRecent(
+            channelId: $channelId,
+            peerKey: $peerKey,
+            limit: $messagesPerDialog,
+        );
+
         $systemPrompt = $this->buildSystemPrompt(
             companyName: $user->getCompanyName(),
             description: $user->getDescription(),
             knowledgeBaseIds: $channel->getKnowledgeBaseIds(),
         );
 
+        $chatMessages = [
+            new AiChatMessage(role: 'system', content: $systemPrompt),
+        ];
+
+        foreach ($history as $historyMessage) {
+            $chatMessages[] = new AiChatMessage(
+                role: $historyMessage->getRole()->value,
+                content: $historyMessage->getContent(),
+            );
+        }
+
         try {
-            $aiResult = $this->aiChatClient->chat([
-                new AiChatMessage(role: 'system', content: $systemPrompt),
-                new AiChatMessage(role: 'user', content: trim($text)),
-            ]);
+            $aiResult = $this->aiChatClient->chat($chatMessages);
         } catch (Throwable $exception) {
             $this->logger->error('AI chat failed for Telegram message.', [
                 'channel_id' => $channelId,
@@ -121,6 +152,13 @@ final class ProcessTelegramMessageJobHandler
 
             throw $exception;
         }
+
+        $this->conversationMessageRepository->append(
+            channelId: $channelId,
+            peerKey: $peerKey,
+            role: ConversationMessageRole::Assistant,
+            content: $aiResult->content,
+        );
 
         $this->telegramBotApi->sendMessage(
             botToken: $botToken,

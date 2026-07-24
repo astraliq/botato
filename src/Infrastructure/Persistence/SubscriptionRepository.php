@@ -73,12 +73,12 @@ final class SubscriptionRepository implements SubscriptionRepositoryInterface
                 'INSERT INTO subscriptions (
                     id, user_id, plan_id, billing_period_id, status,
                     price_monthly_minor, amount_charged_minor, currency,
-                    max_dialogs_per_month, max_channels, max_knowledge_bases,
+                    max_dialogs_per_month, messages_per_dialog, max_channels, max_knowledge_bases,
                     starts_at, ends_at, created_at, updated_at
                  ) VALUES (
                     :id, :user_id, :plan_id, :billing_period_id, :status,
                     :price_monthly_minor, :amount_charged_minor, :currency,
-                    :max_dialogs_per_month, :max_channels, :max_knowledge_bases,
+                    :max_dialogs_per_month, :messages_per_dialog, :max_channels, :max_knowledge_bases,
                     :starts_at, :ends_at, :created_at, :updated_at
                  )',
             )
@@ -92,6 +92,7 @@ final class SubscriptionRepository implements SubscriptionRepositoryInterface
                 ':amount_charged_minor' => 0,
                 ':currency' => 'RUB',
                 ':max_dialogs_per_month' => (int) $plan['max_dialogs_per_month'],
+                ':messages_per_dialog' => (int) ($plan['messages_per_dialog'] ?? 10),
                 ':max_channels' => $plan['max_channels'] !== null ? (int) $plan['max_channels'] : null,
                 ':max_knowledge_bases' => (int) $plan['max_knowledge_bases'],
                 ':starts_at' => $nowFormatted,
