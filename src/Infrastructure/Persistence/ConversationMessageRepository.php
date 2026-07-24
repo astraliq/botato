@@ -126,10 +126,6 @@ final class ConversationMessageRepository implements ConversationMessageReposito
         $messages = [];
 
         foreach ($rows as $row) {
-            if (!is_array($row)) {
-                continue;
-            }
-
             $messages[] = ConversationMessageFactory::fromRow(ArrayHelper::toStringKeyArray($row));
         }
 
