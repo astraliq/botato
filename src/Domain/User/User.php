@@ -22,6 +22,7 @@ final class User
         private readonly DateTimeImmutable $createdAt,
         private DateTimeImmutable $updatedAt,
         private bool $deleted = false,
+        private bool $isAdmin = false,
     ) {}
 
     public function getId(): string
@@ -87,6 +88,11 @@ final class User
     public function isDeleted(): bool
     {
         return $this->deleted;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
     }
 
     public function updateProfile(

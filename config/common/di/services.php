@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Application\Admin\Ai\DeleteModel\DeleteAiModelHandler;
+use App\Application\Admin\Ai\DeleteProvider\DeleteAiProviderHandler;
+use App\Application\Admin\Ai\SaveModel\SaveAiModelHandler;
+use App\Application\Admin\Ai\SaveProvider\SaveAiProviderHandler;
 use App\Application\Ai\AiChatClientInterface;
 use App\Application\Auth\AuthSessionInterface;
 use App\Application\Auth\GetCurrentUser\GetCurrentUserHandler;
@@ -114,6 +118,10 @@ return [
     CreateKnowledgeArticleHandler::class => CreateKnowledgeArticleHandler::class,
     UpdateKnowledgeArticleHandler::class => UpdateKnowledgeArticleHandler::class,
     DeleteKnowledgeArticleHandler::class => DeleteKnowledgeArticleHandler::class,
+    SaveAiProviderHandler::class => SaveAiProviderHandler::class,
+    DeleteAiProviderHandler::class => DeleteAiProviderHandler::class,
+    SaveAiModelHandler::class => SaveAiModelHandler::class,
+    DeleteAiModelHandler::class => DeleteAiModelHandler::class,
     QueueConsumeCommand::class => [
         '__construct()' => [
             'defaultSleepSeconds' => (int) ($params['queue']['default_sleep'] ?? 1),

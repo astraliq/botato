@@ -59,6 +59,11 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
 
     public function listVisible(): array
     {
+        return $this->listAll();
+    }
+
+    public function listAll(): array
+    {
         $rows = $this->connection
             ->createCommand(
                 'SELECT * FROM ai_providers
@@ -96,6 +101,21 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
         return $this->mapModelRows($rows);
     }
 
+    public function listModelsByProvider(string $providerId): array
+    {
+        $rows = $this->connection
+            ->createCommand(
+                'SELECT * FROM ai_models
+                 WHERE provider_id = :provider_id
+                   AND deleted = FALSE
+                 ORDER BY purpose ASC, sort_order ASC, name ASC',
+            )
+            ->bindValue(':provider_id', $providerId)
+            ->queryAll();
+
+        return $this->mapModelRows($rows);
+    }
+
     public function findDefaultModelByProviderAndPurpose(string $providerId, AiModelPurpose $purpose): ?AiModel
     {
         $row = $this->connection
@@ -112,6 +132,20 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
                 ':provider_id' => $providerId,
                 ':purpose' => $purpose->value,
             ])
+            ->queryOne();
+
+        return is_array($row) ? AiModelFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
+    }
+
+    public function findModelById(string $id): ?AiModel
+    {
+        $row = $this->connection
+            ->createCommand(
+                'SELECT * FROM ai_models
+                 WHERE id = :id AND deleted = FALSE
+                 LIMIT 1',
+            )
+            ->bindValue(':id', $id)
             ->queryOne();
 
         return is_array($row) ? AiModelFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
@@ -188,6 +222,108 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
         }
     }
 
+    public function saveModel(AiModel $model): void
+    {
+        $existing = $this->findModelByIdIncludingDeleted($model->getId());
+        $settingsJson = json_encode($model->getSettings(), JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+
+        if ($existing === null) {
+            $this->connection
+                ->createCommand(
+                    'INSERT INTO ai_models (
+                        id, provider_id, code, name, purpose,
+                        is_active, is_default, sort_order, settings,
+                        deleted, created_at, updated_at
+                     ) VALUES (
+                        :id, :provider_id, :code, :name, :purpose,
+                        :is_active, :is_default, :sort_order, CAST(:settings AS JSONB),
+                        :deleted, :created_at, :updated_at
+                     )',
+                )
+                ->bindValues([
+                    ':id' => $model->getId(),
+                    ':provider_id' => $model->getProviderId(),
+                    ':code' => $model->getCode(),
+                    ':name' => $model->getName(),
+                    ':purpose' => $model->getPurpose()->value,
+                    ':is_active' => $model->isActive(),
+                    ':is_default' => $model->isDefault(),
+                    ':sort_order' => $model->getSortOrder(),
+                    ':settings' => $settingsJson,
+                    ':deleted' => $model->isDeleted(),
+                    ':created_at' => $model->getCreatedAt()->format('Y-m-d H:i:sP'),
+                    ':updated_at' => $model->getUpdatedAt()->format('Y-m-d H:i:sP'),
+                ])
+                ->execute();
+
+            return;
+        }
+
+        $this->connection
+            ->createCommand(
+                'UPDATE ai_models SET
+                    name = :name,
+                    purpose = :purpose,
+                    is_active = :is_active,
+                    is_default = :is_default,
+                    sort_order = :sort_order,
+                    settings = CAST(:settings AS JSONB),
+                    deleted = :deleted,
+                    updated_at = :updated_at
+                 WHERE id = :id',
+            )
+            ->bindValues([
+                ':id' => $model->getId(),
+                ':name' => $model->getName(),
+                ':purpose' => $model->getPurpose()->value,
+                ':is_active' => $model->isActive(),
+                ':is_default' => $model->isDefault(),
+                ':sort_order' => $model->getSortOrder(),
+                ':settings' => $settingsJson,
+                ':deleted' => $model->isDeleted(),
+                ':updated_at' => $model->getUpdatedAt()->format('Y-m-d H:i:sP'),
+            ])
+            ->execute();
+    }
+
+    public function clearDefaultProvidersExcept(string $providerId): void
+    {
+        $this->connection
+            ->createCommand(
+                'UPDATE ai_providers
+                 SET is_default = FALSE, updated_at = :updated_at
+                 WHERE deleted = FALSE
+                   AND is_default = TRUE
+                   AND id <> :provider_id',
+            )
+            ->bindValues([
+                ':updated_at' => (new DateTimeImmutable())->format('Y-m-d H:i:sP'),
+                ':provider_id' => $providerId,
+            ])
+            ->execute();
+    }
+
+    public function clearDefaultModelsExcept(string $providerId, AiModelPurpose $purpose, string $modelId): void
+    {
+        $this->connection
+            ->createCommand(
+                'UPDATE ai_models
+                 SET is_default = FALSE, updated_at = :updated_at
+                 WHERE deleted = FALSE
+                   AND is_default = TRUE
+                   AND provider_id = :provider_id
+                   AND purpose = :purpose
+                   AND id <> :model_id',
+            )
+            ->bindValues([
+                ':updated_at' => (new DateTimeImmutable())->format('Y-m-d H:i:sP'),
+                ':provider_id' => $providerId,
+                ':purpose' => $purpose->value,
+                ':model_id' => $modelId,
+            ])
+            ->execute();
+    }
+
     public function getSecretPayload(string $providerId): ?string
     {
         $row = $this->connection
@@ -233,6 +369,16 @@ final class AiProviderRepository implements AiProviderRepositoryInterface
         }
 
         return $models;
+    }
+
+    private function findModelByIdIncludingDeleted(string $id): ?AiModel
+    {
+        $row = $this->connection
+            ->createCommand('SELECT * FROM ai_models WHERE id = :id LIMIT 1')
+            ->bindValue(':id', $id)
+            ->queryOne();
+
+        return is_array($row) ? AiModelFactory::fromRow(ArrayHelper::toStringKeyArray($row)) : null;
     }
 
     private function upsertSecret(string $providerId, string $secretPayloadJson): void

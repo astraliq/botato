@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Web;
+use App\Web\Middleware\AdminMiddleware;
 use App\Web\Middleware\AuthMiddleware;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
@@ -61,6 +62,35 @@ return [
                     Route::post('/support')
                         ->action(Web\Cabinet\Support\CreateAction::class)
                         ->name('cabinet/support/create'),
+
+                    Group::create('/admin')
+                        ->middleware(AdminMiddleware::class)
+                        ->routes(
+                            Route::get('/ai')
+                                ->action(Web\Cabinet\Admin\Ai\IndexAction::class)
+                                ->name('cabinet/admin/ai'),
+                            Route::methods(['GET', 'POST'], '/ai/providers/create')
+                                ->action(Web\Cabinet\Admin\Ai\ProviderFormAction::class)
+                                ->name('cabinet/admin/ai/providers/create'),
+                            Route::methods(['GET', 'POST'], '/ai/providers/{id}')
+                                ->action(Web\Cabinet\Admin\Ai\ProviderFormAction::class)
+                                ->name('cabinet/admin/ai/providers/edit'),
+                            Route::post('/ai/providers/{id}/delete')
+                                ->action(Web\Cabinet\Admin\Ai\DeleteProviderAction::class)
+                                ->name('cabinet/admin/ai/providers/delete'),
+                            Route::get('/ai/providers/{id}/models')
+                                ->action(Web\Cabinet\Admin\Ai\ModelsIndexAction::class)
+                                ->name('cabinet/admin/ai/models'),
+                            Route::methods(['GET', 'POST'], '/ai/providers/{id}/models/create')
+                                ->action(Web\Cabinet\Admin\Ai\ModelFormAction::class)
+                                ->name('cabinet/admin/ai/models/create'),
+                            Route::methods(['GET', 'POST'], '/ai/providers/{id}/models/{modelId}')
+                                ->action(Web\Cabinet\Admin\Ai\ModelFormAction::class)
+                                ->name('cabinet/admin/ai/models/edit'),
+                            Route::post('/ai/providers/{id}/models/{modelId}/delete')
+                                ->action(Web\Cabinet\Admin\Ai\DeleteModelAction::class)
+                                ->name('cabinet/admin/ai/models/delete'),
+                        ),
                 ),
         ),
 ];

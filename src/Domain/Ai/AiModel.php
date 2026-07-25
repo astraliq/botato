@@ -15,16 +15,82 @@ final class AiModel
         private readonly string $id,
         private readonly string $providerId,
         private readonly string $code,
-        private readonly string $name,
-        private readonly AiModelPurpose $purpose,
-        private readonly bool $isActive,
-        private readonly bool $isDefault,
-        private readonly int $sortOrder,
-        private readonly array $settings,
-        private readonly bool $deleted,
+        private string $name,
+        private AiModelPurpose $purpose,
+        private bool $isActive,
+        private bool $isDefault,
+        private int $sortOrder,
+        private array $settings,
+        private bool $deleted,
         private readonly DateTimeImmutable $createdAt,
-        private readonly DateTimeImmutable $updatedAt,
+        private DateTimeImmutable $updatedAt,
     ) {}
+
+    /**
+     * @param array<string, mixed> $settings
+     */
+    public static function create(
+        string $id,
+        string $providerId,
+        string $code,
+        string $name,
+        AiModelPurpose $purpose,
+        bool $isActive,
+        bool $isDefault,
+        int $sortOrder,
+        array $settings,
+        DateTimeImmutable $createdAt,
+    ): self {
+        return new self(
+            id: $id,
+            providerId: $providerId,
+            code: $code,
+            name: $name,
+            purpose: $purpose,
+            isActive: $isActive,
+            isDefault: $isDefault,
+            sortOrder: $sortOrder,
+            settings: $settings,
+            deleted: false,
+            createdAt: $createdAt,
+            updatedAt: $createdAt,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     */
+    public function update(
+        string $name,
+        AiModelPurpose $purpose,
+        bool $isActive,
+        bool $isDefault,
+        int $sortOrder,
+        array $settings,
+        DateTimeImmutable $updatedAt,
+    ): void {
+        $this->name = $name;
+        $this->purpose = $purpose;
+        $this->isActive = $isActive;
+        $this->isDefault = $isDefault;
+        $this->sortOrder = $sortOrder;
+        $this->settings = $settings;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function markDeleted(DateTimeImmutable $updatedAt): void
+    {
+        $this->deleted = true;
+        $this->isDefault = false;
+        $this->isActive = false;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function clearDefault(DateTimeImmutable $updatedAt): void
+    {
+        $this->isDefault = false;
+        $this->updatedAt = $updatedAt;
+    }
 
     public function getId(): string
     {

@@ -106,7 +106,12 @@ final class QueueConsumeCommand extends Command
             $this->shouldStop = true;
         };
 
-        pcntl_signal(SIGTERM, $stop);
-        pcntl_signal(SIGINT, $stop);
+        /** @var int $sigterm */
+        $sigterm = constant('SIGTERM');
+        /** @var int $sigint */
+        $sigint = constant('SIGINT');
+
+        pcntl_signal($sigterm, $stop);
+        pcntl_signal($sigint, $stop);
     }
 }

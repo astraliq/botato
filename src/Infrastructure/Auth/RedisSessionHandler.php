@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Infrastructure\Auth;
 
 use Redis;
-use RedisException;
 use RuntimeException;
 use SessionHandlerInterface;
+use Throwable;
 
 /**
  * Shared session storage for multi-replica deployments.
@@ -42,7 +42,7 @@ final class RedisSessionHandler implements SessionHandlerInterface
     {
         try {
             $data = $this->connection()->get($this->key($id));
-        } catch (RedisException) {
+        } catch (Throwable) {
             return '';
         }
 
@@ -53,7 +53,7 @@ final class RedisSessionHandler implements SessionHandlerInterface
     {
         try {
             return (bool) $this->connection()->setex($this->key($id), $this->lifetime, $data);
-        } catch (RedisException) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -62,7 +62,7 @@ final class RedisSessionHandler implements SessionHandlerInterface
     {
         try {
             $this->connection()->del($this->key($id));
-        } catch (RedisException) {
+        } catch (Throwable) {
             return false;
         }
 
@@ -84,7 +84,7 @@ final class RedisSessionHandler implements SessionHandlerInterface
 
         try {
             $redis->connect($this->redisHost, $this->redisPort);
-        } catch (RedisException $exception) {
+        } catch (Throwable $exception) {
             throw new RuntimeException(
                 'Не удалось подключиться к Redis для сессий.',
                 previous: $exception,

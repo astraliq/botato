@@ -21,6 +21,7 @@ final class AuthViewInjection implements CommonParametersInjectionInterface
         return [
             'isAuthenticated' => $isAuthenticated,
             'userEmail' => $user?->getEmail(),
+            'isAdmin' => $user?->isAdmin() ?? false,
             'includeAuthModal' => !$isAuthenticated,
         ];
     }

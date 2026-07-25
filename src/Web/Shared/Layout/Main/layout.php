@@ -76,6 +76,9 @@ $this->beginPage();
                             <a href="<?= $urlGenerator->generate('cabinet') ?>" class="user-menu__item">Профиль</a>
                             <a href="<?= $urlGenerator->generate('cabinet/settings') ?>" class="user-menu__item">Настройки</a>
                             <a href="<?= $urlGenerator->generate('cabinet/support') ?>" class="user-menu__item">Поддержка</a>
+                            <?php if (($isAdmin ?? false) === true): ?>
+                                <a href="<?= $urlGenerator->generate('cabinet/admin/ai') ?>" class="user-menu__item">AI-провайдеры</a>
+                            <?php endif; ?>
                             <button type="button" class="user-menu__item user-menu__item--button" id="logout-button">Выйти</button>
                         </div>
                     </div>

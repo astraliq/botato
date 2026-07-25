@@ -31,6 +31,7 @@ final class UserFactory
             createdAt: new DateTimeImmutable((string) $row['created_at']),
             updatedAt: new DateTimeImmutable((string) $row['updated_at']),
             deleted: self::toBool($row['deleted'] ?? false),
+            isAdmin: self::toBool($row['is_admin'] ?? false),
         );
     }
 

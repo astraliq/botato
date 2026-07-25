@@ -14,18 +14,90 @@ final class AiProvider
     public function __construct(
         private readonly string $id,
         private readonly string $code,
-        private readonly string $name,
-        private readonly string $baseUrl,
-        private readonly string $apiHost,
-        private readonly AiApiStyle $apiStyle,
-        private readonly bool $isActive,
-        private readonly bool $isDefault,
-        private readonly int $sortOrder,
-        private readonly array $settings,
-        private readonly bool $deleted,
+        private string $name,
+        private string $baseUrl,
+        private string $apiHost,
+        private AiApiStyle $apiStyle,
+        private bool $isActive,
+        private bool $isDefault,
+        private int $sortOrder,
+        private array $settings,
+        private bool $deleted,
         private readonly DateTimeImmutable $createdAt,
-        private readonly DateTimeImmutable $updatedAt,
+        private DateTimeImmutable $updatedAt,
     ) {}
+
+    /**
+     * @param array<string, mixed> $settings
+     */
+    public static function create(
+        string $id,
+        string $code,
+        string $name,
+        string $baseUrl,
+        string $apiHost,
+        AiApiStyle $apiStyle,
+        bool $isActive,
+        bool $isDefault,
+        int $sortOrder,
+        array $settings,
+        DateTimeImmutable $createdAt,
+    ): self {
+        return new self(
+            id: $id,
+            code: $code,
+            name: $name,
+            baseUrl: $baseUrl,
+            apiHost: $apiHost,
+            apiStyle: $apiStyle,
+            isActive: $isActive,
+            isDefault: $isDefault,
+            sortOrder: $sortOrder,
+            settings: $settings,
+            deleted: false,
+            createdAt: $createdAt,
+            updatedAt: $createdAt,
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $settings
+     */
+    public function update(
+        string $name,
+        string $baseUrl,
+        string $apiHost,
+        AiApiStyle $apiStyle,
+        bool $isActive,
+        bool $isDefault,
+        int $sortOrder,
+        array $settings,
+        DateTimeImmutable $updatedAt,
+    ): void {
+        $this->name = $name;
+        $this->baseUrl = $baseUrl;
+        $this->apiHost = $apiHost;
+        $this->apiStyle = $apiStyle;
+        $this->isActive = $isActive;
+        $this->isDefault = $isDefault;
+        $this->sortOrder = $sortOrder;
+        $this->settings = $settings;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function markDeleted(DateTimeImmutable $updatedAt): void
+    {
+        $this->deleted = true;
+        $this->isDefault = false;
+        $this->isActive = false;
+        $this->updatedAt = $updatedAt;
+    }
+
+    public function clearDefault(DateTimeImmutable $updatedAt): void
+    {
+        $this->isDefault = false;
+        $this->updatedAt = $updatedAt;
+    }
 
     public function getId(): string
     {
