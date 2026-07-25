@@ -408,34 +408,44 @@ jobs:
       - name: Run database migrations.
         env:
           STACK_NAME: ${{ env.STACK_NAME }}
+          IMAGE: ${{ env.IMAGE }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           set -euo pipefail
           php_service="${STACK_NAME}_php"
+          expected_image="${IMAGE}:${IMAGE_TAG}"
+          # Не брать старый php при start-first: migrate только в контейнере с образом текущего SHA.
           container_id=""
-          for _ in $(seq 1 60); do
-            container_id="$(ssh -i ~/.ssh/deploy_key \
-              -o IdentitiesOnly=yes \
-              -o PreferredAuthentications=publickey \
-              -o StrictHostKeyChecking=yes \
-              -o BatchMode=yes \
-              "${VPS_USER}@${VPS_HOST}" \
-              "docker ps -q --filter \"label=com.docker.swarm.service.name=${php_service}\" | head -n 1" || true)"
+          for _ in $(seq 1 90); do
+            while read -r id image; do
+              [ -n "${id}" ] || continue
+              case "${image}" in
+                *"${IMAGE_TAG}"*)
+                  container_id="${id}"
+                  break
+                  ;;
+              esac
+            done < <(docker --context prod ps \
+              --filter "label=com.docker.swarm.service.name=${php_service}" \
+              --filter "status=running" \
+              --format '{{.ID}} {{.Image}}')
+
             if [ -n "${container_id}" ]; then
               break
             fi
             sleep 2
           done
+
           if [ -z "${container_id}" ]; then
-            echo "No running ${php_service} container found."
+            echo "No running ${php_service} container with image ${expected_image} (tag ${IMAGE_TAG})."
+            docker --context prod ps \
+              --filter "label=com.docker.swarm.service.name=${php_service}" \
+              --format 'table {{.ID}}\t{{.Image}}\t{{.Status}}' || true
             exit 1
           fi
-          ssh -i ~/.ssh/deploy_key \
-            -o IdentitiesOnly=yes \
-            -o PreferredAuthentications=publickey \
-            -o StrictHostKeyChecking=yes \
-            -o BatchMode=yes \
-            "${VPS_USER}@${VPS_HOST}" \
-            "docker exec \"${container_id}\" php ./yii migrate/up"
+
+          echo "Migrating via ${container_id} ($(docker --context prod inspect -f '{{.Config.Image}}' "${container_id}"))"
+          docker --context prod exec "${container_id}" php ./yii migrate/up
 
       - name: Wait for stack services to converge.
         env:
