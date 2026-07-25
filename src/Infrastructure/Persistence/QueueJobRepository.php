@@ -47,7 +47,7 @@ final class QueueJobRepository implements QueueJobRepositoryInterface
                     :id, :queue, :job_type, CAST(:payload AS JSONB), :dedupe_key, :status,
                     0, :max_attempts, :available_at, :created_at
                  )
-                 ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL DO NOTHING',
+                 ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL AND status = \'pending\' DO NOTHING',
             )
             ->bindValues([
                 ':id' => $id,
@@ -76,6 +76,73 @@ final class QueueJobRepository implements QueueJobRepositoryInterface
         }
 
         return QueueJobFactory::fromRow(ArrayHelper::toStringKeyArray($row));
+    }
+
+    public function scheduleOrPostpone(
+        string $queue,
+        string $jobType,
+        array $payload,
+        string $dedupeKey,
+        DateTimeImmutable $availableAt,
+        int $maxAttempts = 5,
+    ): void {
+        try {
+            $payloadJson = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        } catch (JsonException $exception) {
+            throw new RuntimeException('Не удалось сериализовать payload очереди.', previous: $exception);
+        }
+
+        $updated = $this->connection
+            ->createCommand(
+                'UPDATE queue_jobs SET
+                    available_at = :available_at,
+                    payload = CAST(:payload AS JSONB),
+                    last_error = NULL
+                 WHERE dedupe_key = :dedupe_key
+                   AND status = :pending',
+            )
+            ->bindValues([
+                ':available_at' => $availableAt->format('Y-m-d H:i:sP'),
+                ':payload' => $payloadJson,
+                ':dedupe_key' => $dedupeKey,
+                ':pending' => QueueJobStatus::Pending->value,
+            ])
+            ->execute();
+
+        if ($updated > 0) {
+            return;
+        }
+
+        $job = $this->enqueue(
+            queue: $queue,
+            jobType: $jobType,
+            payload: $payload,
+            dedupeKey: $dedupeKey,
+            maxAttempts: $maxAttempts,
+            availableAt: $availableAt,
+        );
+
+        if ($job !== null) {
+            return;
+        }
+
+        // Гонка: pending уже появился — ещё раз сдвигаем.
+        $this->connection
+            ->createCommand(
+                'UPDATE queue_jobs SET
+                    available_at = :available_at,
+                    payload = CAST(:payload AS JSONB),
+                    last_error = NULL
+                 WHERE dedupe_key = :dedupe_key
+                   AND status = :pending',
+            )
+            ->bindValues([
+                ':available_at' => $availableAt->format('Y-m-d H:i:sP'),
+                ':payload' => $payloadJson,
+                ':dedupe_key' => $dedupeKey,
+                ':pending' => QueueJobStatus::Pending->value,
+            ])
+            ->execute();
     }
 
     public function claimNext(string $queue = 'default'): ?QueueJob

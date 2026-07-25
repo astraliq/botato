@@ -133,6 +133,28 @@ final class UsageRepository implements UsageRepositoryInterface
         }
     }
 
+    public function findPeerWindowStartedAt(string $userId, string $peerKey): ?DateTimeImmutable
+    {
+        $row = $this->connection
+            ->createCommand(
+                'SELECT window_started_at
+                 FROM usage_peer_windows
+                 WHERE user_id = :user_id AND peer_key = :peer_key
+                 LIMIT 1',
+            )
+            ->bindValues([
+                ':user_id' => $userId,
+                ':peer_key' => $peerKey,
+            ])
+            ->queryOne();
+
+        if (!is_array($row) || !isset($row['window_started_at'])) {
+            return null;
+        }
+
+        return new DateTimeImmutable((string) $row['window_started_at']);
+    }
+
     /**
      * @return array{window_started_at: mixed, messages_count: mixed}
      */

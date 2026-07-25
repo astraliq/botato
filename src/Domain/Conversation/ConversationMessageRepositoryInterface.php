@@ -19,6 +19,12 @@ interface ConversationMessageRepositoryInterface
         ?string $externalId = null,
     ): ConversationMessage;
 
+    public function findByExternalId(
+        string $channelId,
+        string $peerKey,
+        string $externalId,
+    ): ?ConversationMessage;
+
     /**
      * Сообщения диалога с указанного момента в хронологическом порядке (от старых к новым).
      *
@@ -28,6 +34,7 @@ interface ConversationMessageRepositoryInterface
         string $channelId,
         string $peerKey,
         DateTimeImmutable $since,
+        ?DateTimeImmutable $until = null,
         ?int $limit = null,
     ): array;
 }

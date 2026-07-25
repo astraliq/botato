@@ -20,4 +20,6 @@ interface UsageRepositoryInterface
         int $maxMessagesPerDialog,
         DateTimeImmutable $now,
     ): PeerMessageQuotaResult;
+
+    public function findPeerWindowStartedAt(string $userId, string $peerKey): ?DateTimeImmutable;
 }

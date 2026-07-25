@@ -15,6 +15,7 @@ use App\Application\Auth\VerificationCodeMailerInterface;
 use App\Application\Auth\VerifyEmailCode\VerifyEmailCodeHandler;
 use App\Application\Channel\ConnectTelegram\ConnectTelegramChannelHandler;
 use App\Application\Channel\Telegram\HandleUpdate\HandleTelegramUpdateHandler;
+use App\Application\Channel\Telegram\IngestMessage\IngestTelegramMessageHandler;
 use App\Application\Channel\Telegram\ProcessMessage\ProcessTelegramMessageJobHandler;
 use App\Application\Channel\Telegram\TelegramBotApiInterface;
 use App\Application\KnowledgeBase\AssignKnowledgeBaseToTelegram\AssignKnowledgeBaseToTelegramHandler;
@@ -109,6 +110,7 @@ return [
         ],
     ],
     HandleTelegramUpdateHandler::class => HandleTelegramUpdateHandler::class,
+    IngestTelegramMessageHandler::class => IngestTelegramMessageHandler::class,
     ProcessTelegramMessageJobHandler::class => ProcessTelegramMessageJobHandler::class,
     ProcessQueueJobHandler::class => ProcessQueueJobHandler::class,
     CreateKnowledgeBaseHandler::class => CreateKnowledgeBaseHandler::class,

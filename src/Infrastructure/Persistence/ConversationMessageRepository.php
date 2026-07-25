@@ -103,17 +103,55 @@ final class ConversationMessageRepository implements ConversationMessageReposito
         );
     }
 
+    public function findByExternalId(
+        string $channelId,
+        string $peerKey,
+        string $externalId,
+    ): ?ConversationMessage {
+        $row = $this->connection
+            ->createCommand(
+                'SELECT * FROM conversation_messages
+                 WHERE channel_id = :channel_id
+                   AND peer_key = :peer_key
+                   AND external_id = :external_id
+                 LIMIT 1',
+            )
+            ->bindValues([
+                ':channel_id' => $channelId,
+                ':peer_key' => $peerKey,
+                ':external_id' => $externalId,
+            ])
+            ->queryOne();
+
+        return is_array($row)
+            ? ConversationMessageFactory::fromRow(ArrayHelper::toStringKeyArray($row))
+            : null;
+    }
+
     public function listSince(
         string $channelId,
         string $peerKey,
         DateTimeImmutable $since,
+        ?DateTimeImmutable $until = null,
         ?int $limit = null,
     ): array {
         $sql = 'SELECT * FROM conversation_messages
                 WHERE channel_id = :channel_id
                   AND peer_key = :peer_key
-                  AND created_at >= :since
-                ORDER BY created_at ASC, id ASC';
+                  AND created_at >= :since';
+
+        $bindValues = [
+            ':channel_id' => $channelId,
+            ':peer_key' => $peerKey,
+            ':since' => $since->format('Y-m-d H:i:sP'),
+        ];
+
+        if ($until !== null) {
+            $sql .= ' AND created_at <= :until';
+            $bindValues[':until'] = $until->format('Y-m-d H:i:sP');
+        }
+
+        $sql .= ' ORDER BY created_at ASC, id ASC';
 
         if ($limit !== null) {
             $limit = max(1, $limit);
@@ -122,11 +160,7 @@ final class ConversationMessageRepository implements ConversationMessageReposito
 
         $rows = $this->connection
             ->createCommand($sql)
-            ->bindValues([
-                ':channel_id' => $channelId,
-                ':peer_key' => $peerKey,
-                ':since' => $since->format('Y-m-d H:i:sP'),
-            ])
+            ->bindValues($bindValues)
             ->queryAll();
 
         $messages = [];

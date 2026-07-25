@@ -13,6 +13,7 @@ use App\Domain\Conversation\ConversationMessageRepositoryInterface;
 use App\Domain\Conversation\ConversationMessageRole;
 use App\Domain\KnowledgeBase\KnowledgeArticleRepositoryInterface;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
+use App\Domain\Usage\DialogBillingRules;
 use App\Domain\Usage\UsageRepositoryInterface;
 use App\Domain\User\UserGender;
 use App\Domain\User\UserRepositoryInterface;
@@ -22,14 +23,11 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
 
+/**
+ * Flush после debounce: собирает сообщения диалога до include_until и отвечает одним запросом к AI.
+ */
 final class ProcessTelegramMessageJobHandler
 {
-    private const LIMIT_REACHED_REPLY =
-        'Лимит диалогов на этот месяц исчерпан. Попробуйте позже или обновите тариф в Botato.';
-
-    private const MESSAGES_LIMIT_REACHED_REPLY =
-        'Лимит сообщений в этом диалоге исчерпан. Новый диалог с этим клиентом начнётся через 24 часа.';
-
     public function __construct(
         private readonly ChannelRepositoryInterface $channelRepository,
         private readonly SubscriptionRepositoryInterface $subscriptionRepository,
@@ -47,8 +45,8 @@ final class ProcessTelegramMessageJobHandler
     {
         $channelId = $payload['channel_id'] ?? null;
         $chatId = $payload['chat_id'] ?? null;
-        $messageId = $payload['message_id'] ?? null;
-        $text = $payload['text'] ?? null;
+        $includeUntilRaw = $payload['include_until'] ?? null;
+        $replyToMessageId = $payload['reply_to_message_id'] ?? null;
         $businessConnectionId = $payload['business_connection_id'] ?? null;
 
         if (!is_string($channelId) || $channelId === '') {
@@ -59,56 +57,29 @@ final class ProcessTelegramMessageJobHandler
             throw new RuntimeException('В payload отсутствует chat_id.');
         }
 
-        if (!is_int($messageId) && !is_string($messageId)) {
-            throw new RuntimeException('В payload отсутствует message_id.');
+        if (!is_string($includeUntilRaw) || $includeUntilRaw === '') {
+            throw new RuntimeException('В payload отсутствует include_until.');
         }
 
-        if (!is_string($text) || trim($text) === '') {
-            throw new RuntimeException('В payload отсутствует text.');
+        if (!is_int($replyToMessageId) && !is_string($replyToMessageId)) {
+            throw new RuntimeException('В payload отсутствует reply_to_message_id.');
         }
 
         if ($businessConnectionId !== null && !is_string($businessConnectionId)) {
             $businessConnectionId = null;
         }
 
+        $includeUntil = new DateTimeImmutable($includeUntilRaw);
         $channel = $this->channelRepository->findById($channelId);
 
         if ($channel === null || $channel->getStatus() !== ChannelStatus::Connected) {
             throw new RuntimeException('Канал не найден или не подключён.');
         }
 
-        $botToken = $this->resolveBotToken($channelId);
         $subscription = $this->subscriptionRepository->findActiveByUserId($channel->getUserId());
 
         if ($subscription === null) {
             throw new RuntimeException('У пользователя нет активной подписки.');
-        }
-
-        $peerKey = (string) $chatId;
-        $maxMessagesPerDialog = max(1, $subscription->getMaxMessagesPerDialog());
-
-        $quotaResult = $this->usageRepository->registerPeerMessage(
-            userId: $channel->getUserId(),
-            peerKey: $peerKey,
-            maxDialogsPerMonth: $subscription->getMaxDialogsPerMonth(),
-            maxMessagesPerDialog: $maxMessagesPerDialog,
-            now: new DateTimeImmutable(),
-        );
-
-        if ($quotaResult->isLimitReached()) {
-            $replyText = $quotaResult->isMessagesLimitReached()
-                ? self::MESSAGES_LIMIT_REACHED_REPLY
-                : self::LIMIT_REACHED_REPLY;
-
-            $this->telegramBotApi->sendMessage(
-                botToken: $botToken,
-                chatId: $chatId,
-                text: $replyText,
-                businessConnectionId: $businessConnectionId,
-                replyToMessageId: (int) $messageId,
-            );
-
-            return;
         }
 
         $user = $this->userRepository->findById($channel->getUserId());
@@ -117,23 +88,41 @@ final class ProcessTelegramMessageJobHandler
             throw new RuntimeException('Пользователь канала не найден.');
         }
 
-        $trimmedText = trim($text);
+        $peerKey = (string) $chatId;
+        $maxMessagesPerDialog = max(1, $subscription->getMaxMessagesPerDialog());
+        $now = new DateTimeImmutable();
 
-        $this->conversationMessageRepository->append(
-            channelId: $channelId,
-            peerKey: $peerKey,
-            role: ConversationMessageRole::User,
-            content: $trimmedText,
-            externalId: (string) $messageId,
-        );
+        $windowStartedAt = $this->usageRepository->findPeerWindowStartedAt($channel->getUserId(), $peerKey);
 
-        // Контекст = вся переписка текущего диалога (окно 24 часа), с запасом на пары user/assistant.
+        if ($windowStartedAt === null || !DialogBillingRules::isWithinDialogWindow($windowStartedAt, $now)) {
+            $windowStartedAt = $now->modify('-' . DialogBillingRules::DIALOG_TTL_SECONDS . ' seconds');
+
+            if ($windowStartedAt === false) {
+                $windowStartedAt = new DateTimeImmutable('-24 hours');
+            }
+        }
+
         $history = $this->conversationMessageRepository->listSince(
             channelId: $channelId,
             peerKey: $peerKey,
-            since: $quotaResult->windowStartedAt,
+            since: $windowStartedAt,
+            until: $includeUntil,
             limit: $maxMessagesPerDialog * 2,
         );
+
+        $hasUnansweredUserMessage = false;
+
+        foreach ($history as $historyMessage) {
+            if ($historyMessage->getRole() === ConversationMessageRole::User) {
+                $hasUnansweredUserMessage = true;
+            } elseif ($historyMessage->getRole() === ConversationMessageRole::Assistant) {
+                $hasUnansweredUserMessage = false;
+            }
+        }
+
+        if (!$hasUnansweredUserMessage) {
+            return;
+        }
 
         $systemPrompt = $this->buildSystemPrompt(
             companyName: $user->getCompanyName(),
@@ -172,11 +161,11 @@ final class ProcessTelegramMessageJobHandler
         );
 
         $this->telegramBotApi->sendMessage(
-            botToken: $botToken,
+            botToken: $this->resolveBotToken($channelId),
             chatId: $chatId,
             text: $aiResult->content,
             businessConnectionId: $businessConnectionId,
-            replyToMessageId: (int) $messageId,
+            replyToMessageId: (int) $replyToMessageId,
         );
     }
 

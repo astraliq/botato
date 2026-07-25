@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Application\Channel\Telegram\HandleUpdate;
 
+use App\Application\Channel\Telegram\IngestMessage\IngestTelegramMessageHandler;
 use App\Domain\Channel\Channel;
 use App\Domain\Channel\ChannelRepositoryInterface;
 use App\Domain\Channel\ChannelStatus;
-use App\Domain\Queue\QueueJobRepositoryInterface;
-use App\Domain\Queue\QueueJobType;
 use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use InvalidArgumentException;
@@ -17,7 +16,7 @@ final class HandleTelegramUpdateHandler
 {
     public function __construct(
         private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly QueueJobRepositoryInterface $queueJobRepository,
+        private readonly IngestTelegramMessageHandler $ingestTelegramMessageHandler,
     ) {}
 
     /**
@@ -61,20 +60,7 @@ final class HandleTelegramUpdateHandler
             }
         }
 
-        $this->queueJobRepository->enqueue(
-            queue: 'default',
-            jobType: QueueJobType::TELEGRAM_PROCESS_MESSAGE,
-            payload: [
-                'channel_id' => $channelId,
-                'update_id' => $incomingMessage->updateId,
-                'chat_id' => $incomingMessage->chatId,
-                'message_id' => $incomingMessage->messageId,
-                'text' => $incomingMessage->text,
-                'business_connection_id' => $incomingMessage->businessConnectionId,
-                'from_user_id' => $incomingMessage->fromUserId,
-            ],
-            dedupeKey: $channelId . ':' . $incomingMessage->updateId,
-        );
+        $this->ingestTelegramMessageHandler->handle($channel, $incomingMessage);
     }
 
     /** @param array<string, mixed> $businessConnection */
