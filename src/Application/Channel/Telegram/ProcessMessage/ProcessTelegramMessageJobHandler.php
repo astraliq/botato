@@ -96,10 +96,6 @@ final class ProcessTelegramMessageJobHandler
 
         if ($windowStartedAt === null || !DialogBillingRules::isWithinDialogWindow($windowStartedAt, $now)) {
             $windowStartedAt = $now->modify('-' . DialogBillingRules::DIALOG_TTL_SECONDS . ' seconds');
-
-            if ($windowStartedAt === false) {
-                $windowStartedAt = new DateTimeImmutable('-24 hours');
-            }
         }
 
         $history = $this->conversationMessageRepository->listSince(

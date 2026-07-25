@@ -90,10 +90,6 @@ final class IngestTelegramMessageHandler
 
         $availableAt = $now->modify('+' . self::MESSAGE_DEBOUNCE_SECONDS . ' seconds');
 
-        if ($availableAt === false) {
-            $availableAt = new DateTimeImmutable('+' . self::MESSAGE_DEBOUNCE_SECONDS . ' seconds');
-        }
-
         $this->queueJobRepository->scheduleOrPostpone(
             queue: 'default',
             jobType: QueueJobType::TELEGRAM_PROCESS_MESSAGE,

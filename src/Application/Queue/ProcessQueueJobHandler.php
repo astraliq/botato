@@ -44,10 +44,6 @@ final class ProcessQueueJobHandler
             $delaySeconds = min(300, 2 ** max(0, $job->getAttempts() - 1));
             $availableAt = (new DateTimeImmutable())->modify('+' . $delaySeconds . ' seconds');
 
-            if ($availableAt === false) {
-                $availableAt = new DateTimeImmutable('+60 seconds');
-            }
-
             $this->queueJobRepository->markFailed(
                 jobId: $job->getId(),
                 error: $exception->getMessage(),
