@@ -131,7 +131,7 @@ $botFatherUrl = 'https://t.me/BotFather';
                         <textarea
                             id="onboarding_description"
                             name="description"
-                            maxlength="<?= (int) $descriptionMaxLength ?>"
+                            maxlength="<?= $descriptionMaxLength ?>"
                             data-character-counter-input
                             placeholder="Опишите кратко особенности вашего бизнеса, аудиторию, подробнее можно будет расписать в базах знаний."
                         ><?= Html::encode($formValues['description']) ?></textarea>
