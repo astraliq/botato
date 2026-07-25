@@ -50,6 +50,7 @@ final class UserRepository implements UserRepositoryInterface
                     phone = :phone,
                     gender = :gender,
                     email_verified_at = :email_verified_at,
+                    onboarding_completed_at = :onboarding_completed_at,
                     deleted = :deleted,
                     updated_at = :updated_at
                  WHERE id = :id',
@@ -64,6 +65,7 @@ final class UserRepository implements UserRepositoryInterface
                 ':phone' => $user->getPhone(),
                 ':gender' => $user->getGender()?->value,
                 ':email_verified_at' => $user->getEmailVerifiedAt()?->format('Y-m-d H:i:sP'),
+                ':onboarding_completed_at' => $user->getOnboardingCompletedAt()?->format('Y-m-d H:i:sP'),
                 ':deleted' => $user->isDeleted(),
                 ':updated_at' => $user->getUpdatedAt()->format('Y-m-d H:i:sP'),
             ])

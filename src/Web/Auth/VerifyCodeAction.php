@@ -30,11 +30,12 @@ final class VerifyCodeAction
             $payload = JsonBodyParser::parse($request);
             $email = ArrayHelper::toString($payload['email'] ?? null);
             $code = ArrayHelper::toString($payload['code'] ?? null);
-            $this->handler->handle($email, $code);
+            $user = $this->handler->handle($email, $code);
+            $redirectRoute = $user->isOnboardingCompleted() ? 'cabinet' : 'cabinet/onboarding';
 
             return $this->jsonResponseFactory->success([
                 'message' => 'Вход выполнен.',
-                'redirect' => $this->urlGenerator->generate('cabinet'),
+                'redirect' => $this->urlGenerator->generate($redirectRoute),
             ]);
         } catch (InvalidArgumentException $exception) {
             return $this->jsonResponseFactory->error($exception->getMessage());

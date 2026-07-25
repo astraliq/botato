@@ -25,6 +25,7 @@ use App\Application\KnowledgeBase\DeleteKnowledgeArticle\DeleteKnowledgeArticleH
 use App\Application\KnowledgeBase\DeleteKnowledgeBase\DeleteKnowledgeBaseHandler;
 use App\Application\KnowledgeBase\UpdateKnowledgeArticle\UpdateKnowledgeArticleHandler;
 use App\Application\KnowledgeBase\UpdateKnowledgeBase\UpdateKnowledgeBaseHandler;
+use App\Application\Onboarding\CompleteOnboarding\CompleteOnboardingHandler;
 use App\Application\Profile\UpdateProfile\UpdateProfileHandler;
 use App\Application\Queue\ProcessQueueJobHandler;
 use App\Console\QueueConsumeCommand;
@@ -124,6 +125,7 @@ return [
     DeleteAiProviderHandler::class => DeleteAiProviderHandler::class,
     SaveAiModelHandler::class => SaveAiModelHandler::class,
     DeleteAiModelHandler::class => DeleteAiModelHandler::class,
+    CompleteOnboardingHandler::class => CompleteOnboardingHandler::class,
     QueueConsumeCommand::class => [
         '__construct()' => [
             'defaultSleepSeconds' => (int) ($params['queue']['default_sleep'] ?? 1),

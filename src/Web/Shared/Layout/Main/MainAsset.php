@@ -25,5 +25,6 @@ final class MainAsset extends AssetBundle
         'js/user-menu.js',
         'js/connect-telegram.js',
         'js/knowledge-base.js',
+        'js/onboarding.js',
     ];
 }

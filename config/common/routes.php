@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Web;
 use App\Web\Middleware\AdminMiddleware;
 use App\Web\Middleware\AuthMiddleware;
+use App\Web\Middleware\OnboardingMiddleware;
 use Yiisoft\Router\Group;
 use Yiisoft\Router\Route;
 
@@ -37,12 +38,23 @@ return [
                 ->action(Web\Cabinet\Settings\Knowledge\ManageAction::class)
                 ->name('api/cabinet/settings/knowledge'),
 
+            Route::post('/api/cabinet/onboarding/profile')
+                ->middleware(AuthMiddleware::class)
+                ->action(Web\Cabinet\Onboarding\SaveProfileAction::class)
+                ->name('api/cabinet/onboarding/profile'),
+
+            Route::post('/api/cabinet/onboarding/complete')
+                ->middleware(AuthMiddleware::class)
+                ->action(Web\Cabinet\Onboarding\CompleteAction::class)
+                ->name('api/cabinet/onboarding/complete'),
+
             Route::post('/webhooks/telegram/{channelId}')
                 ->action(Web\Webhook\TelegramWebhookAction::class)
                 ->name('webhooks/telegram'),
 
             Group::create('/cabinet')
                 ->middleware(AuthMiddleware::class)
+                ->middleware(OnboardingMiddleware::class)
                 ->routes(
                     Route::get('')
                         ->action(Web\Cabinet\IndexAction::class)
@@ -50,6 +62,9 @@ return [
                     Route::post('')
                         ->action(Web\Cabinet\UpdateAction::class)
                         ->name('cabinet/update'),
+                    Route::get('/onboarding')
+                        ->action(Web\Cabinet\Onboarding\IndexAction::class)
+                        ->name('cabinet/onboarding'),
                     Route::get('/settings')
                         ->action(Web\Cabinet\Settings\IndexAction::class)
                         ->name('cabinet/settings'),

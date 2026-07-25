@@ -89,7 +89,7 @@ $descriptionMaxLength = UserConstraints::DESCRIPTION_MAX_LENGTH;
                         name="description"
                         maxlength="<?= $descriptionMaxLength ?>"
                         data-character-counter-input
-                        placeholder="Опишите услуги, аудиторию, tone of voice и особенности вашего бизнеса."
+                        placeholder="Опишите кратко особенности вашего бизнеса, аудиторию, подробнее можно будет расписать в базах знаний."
                     ><?= Html::encode($formValues['description']) ?></textarea>
                     <p class="form-field__counter" data-character-counter-output aria-live="polite"></p>
                 </div>

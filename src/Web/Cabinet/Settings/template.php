@@ -241,7 +241,7 @@ $assignedCount = count($assignedKnowledgeBaseIds);
                             <div data-assign-kb-section>
                                 <?php if (!$isTelegramConnected): ?>
                                     <p class="instruction-step__note" data-assign-kb-need-bot>
-                                        Сначала подключите бота на шаге 4 — после этого здесь появится выбор баз.
+                                        Сначала подключите бота в пункте 4 — после этого здесь появится выбор баз.
                                     </p>
                                 <?php endif; ?>
 

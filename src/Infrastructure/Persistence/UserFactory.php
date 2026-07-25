@@ -32,6 +32,9 @@ final class UserFactory
             updatedAt: new DateTimeImmutable((string) $row['updated_at']),
             deleted: self::toBool($row['deleted'] ?? false),
             isAdmin: self::toBool($row['is_admin'] ?? false),
+            onboardingCompletedAt: isset($row['onboarding_completed_at']) && $row['onboarding_completed_at'] !== null
+                ? new DateTimeImmutable((string) $row['onboarding_completed_at'])
+                : null,
         );
     }
 

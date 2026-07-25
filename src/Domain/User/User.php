@@ -23,6 +23,7 @@ final class User
         private DateTimeImmutable $updatedAt,
         private bool $deleted = false,
         private bool $isAdmin = false,
+        private ?DateTimeImmutable $onboardingCompletedAt = null,
     ) {}
 
     public function getId(): string
@@ -93,6 +94,22 @@ final class User
     public function isAdmin(): bool
     {
         return $this->isAdmin;
+    }
+
+    public function getOnboardingCompletedAt(): ?DateTimeImmutable
+    {
+        return $this->onboardingCompletedAt;
+    }
+
+    public function isOnboardingCompleted(): bool
+    {
+        return $this->onboardingCompletedAt !== null;
+    }
+
+    public function markOnboardingCompleted(DateTimeImmutable $completedAt, DateTimeImmutable $updatedAt): void
+    {
+        $this->onboardingCompletedAt = $completedAt;
+        $this->updatedAt = $updatedAt;
     }
 
     public function updateProfile(
