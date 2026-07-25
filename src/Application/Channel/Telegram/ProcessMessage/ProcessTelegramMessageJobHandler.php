@@ -14,6 +14,7 @@ use App\Domain\Conversation\ConversationMessageRole;
 use App\Domain\KnowledgeBase\KnowledgeArticleRepositoryInterface;
 use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use App\Domain\Usage\UsageRepositoryInterface;
+use App\Domain\User\UserGender;
 use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
 use JsonException;
@@ -128,6 +129,7 @@ final class ProcessTelegramMessageJobHandler
         $systemPrompt = $this->buildSystemPrompt(
             companyName: $user->getCompanyName(),
             description: $user->getDescription(),
+            gender: $user->getGender(),
             knowledgeBaseIds: $channel->getKnowledgeBaseIds(),
         );
 
@@ -172,12 +174,20 @@ final class ProcessTelegramMessageJobHandler
     /**
      * @param list<string> $knowledgeBaseIds
      */
-    private function buildSystemPrompt(string $companyName, string $description, array $knowledgeBaseIds): string
-    {
+    private function buildSystemPrompt(
+        string $companyName,
+        string $description,
+        ?UserGender $gender,
+        array $knowledgeBaseIds,
+    ): string {
         $parts = [
             'Ты ИИ-ассистент бизнеса в мессенджере. Отвечай кратко, вежливо и по делу на русском языке.',
             'Не выдумывай факты, которых нет в описании бизнеса и базе знаний.',
         ];
+
+        if ($gender !== null) {
+            $parts[] = 'Отвечай от имени пользователя с учетом рода: ' . $gender->label();
+        }
 
         if ($companyName !== '') {
             $parts[] = 'Название бизнеса: ' . $companyName;
