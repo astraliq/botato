@@ -195,7 +195,7 @@ $this->registerMeta([
                     <p style="color:#64748b;margin:0;"><?= Html::encode($plan->getDescription()) ?></p>
                     <ul>
                         <li><?= Html::encode($plan->getDialogsFeatureLabel()) ?></li>
-                        <li><?= Html::encode($plan->getMessagesPerDialogFeatureLabel()) ?></li>
+                        <li><?= Html::encode($plan->getMaxMessagesPerDialogFeatureLabel()) ?></li>
                         <li><?= Html::encode($plan->getChannelsFeatureLabel()) ?></li>
                         <li><?= Html::encode($plan->getKnowledgeBasesFeatureLabel()) ?></li>
                     </ul>
@@ -227,9 +227,10 @@ $this->registerMeta([
             <details>
                 <summary>Как считается диалог?</summary>
                 <p>
-                    Диалог — переписка с одним клиентом в течение календарного месяца.
-                    В один диалог входит до 10 сообщений; каждое следующее сообщение после 10-го
-                    (11-е, 21-е и т.д.) начинает новый диалог и списывается из лимита тарифа.
+                    Диалог — вся переписка с одним клиентом в течение 24 часов.
+                    Первое сообщение в этом окне списывает 1 диалог из лимита тарифа.
+                    В одном диалоге — до лимита сообщений тарифа; после истечения 24 часов
+                    переписка с тем же клиентом считается новым диалогом.
                 </p>
             </details>
             <details>

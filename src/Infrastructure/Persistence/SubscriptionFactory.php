@@ -23,7 +23,7 @@ final class SubscriptionFactory
             amountChargedMinor: (int) $row['amount_charged_minor'],
             currency: (string) $row['currency'],
             maxDialogsPerMonth: (int) $row['max_dialogs_per_month'],
-            messagesPerDialog: (int) ($row['messages_per_dialog'] ?? 10),
+            maxMessagesPerDialog: (int) ($row['max_messages_per_dialog'] ?? 10),
             maxChannels: isset($row['max_channels']) && $row['max_channels'] !== null
                 ? (int) $row['max_channels']
                 : null,

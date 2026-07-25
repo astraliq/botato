@@ -22,7 +22,7 @@ final class UsageRepository implements UsageRepositoryInterface
         string $userId,
         string $peerKey,
         int $maxDialogsPerMonth,
-        int $messagesPerDialog,
+        int $maxMessagesPerDialog,
         DateTimeImmutable $now,
     ): PeerMessageQuotaResult {
         $transaction = $this->connection->beginTransaction();
@@ -30,7 +30,7 @@ final class UsageRepository implements UsageRepositoryInterface
         try {
             $periodMonthDate = $now->modify('first day of this month')->setTime(0, 0)->format('Y-m-d');
             $nowFormatted = $now->format('Y-m-d H:i:sP');
-            $messagesPerDialog = max(1, $messagesPerDialog);
+            $maxMessagesPerDialog = max(1, $maxMessagesPerDialog);
 
             $dialogsUsed = $this->ensureUsageMonthLocked($userId, $periodMonthDate, $nowFormatted);
             $window = $this->ensurePeerWindowLocked($userId, $peerKey, $nowFormatted);
@@ -38,13 +38,29 @@ final class UsageRepository implements UsageRepositoryInterface
             $windowStartedAt = new DateTimeImmutable((string) $window['window_started_at']);
             $messagesCount = (int) $window['messages_count'];
 
-            if (!DialogBillingRules::isSameBillingMonth($windowStartedAt, $now)) {
+            $startsNewDialog = $messagesCount === 0
+                || !DialogBillingRules::isWithinDialogWindow($windowStartedAt, $now);
+
+            if ($startsNewDialog) {
                 $messagesCount = 0;
                 $windowStartedAt = $now;
             }
 
             $nextMessagesCount = $messagesCount + 1;
-            $startsNewDialog = DialogBillingRules::startsNewDialog($nextMessagesCount, $messagesPerDialog);
+
+            if ($nextMessagesCount > $maxMessagesPerDialog) {
+                $transaction->rollBack();
+
+                return new PeerMessageQuotaResult(
+                    allowed: false,
+                    startedNewDialog: false,
+                    messagesInWindow: $messagesCount,
+                    dialogsUsedThisMonth: $dialogsUsed,
+                    dialogsLimit: $maxDialogsPerMonth,
+                    windowStartedAt: $windowStartedAt,
+                    denyReason: PeerMessageQuotaResult::DENY_MESSAGES_LIMIT,
+                );
+            }
 
             if ($startsNewDialog) {
                 $updatedRows = $this->connection
@@ -73,6 +89,8 @@ final class UsageRepository implements UsageRepositoryInterface
                         messagesInWindow: $messagesCount,
                         dialogsUsedThisMonth: $dialogsUsed,
                         dialogsLimit: $maxDialogsPerMonth,
+                        windowStartedAt: $windowStartedAt,
+                        denyReason: PeerMessageQuotaResult::DENY_DIALOGS_LIMIT,
                     );
                 }
 
@@ -104,6 +122,7 @@ final class UsageRepository implements UsageRepositoryInterface
                 messagesInWindow: $nextMessagesCount,
                 dialogsUsedThisMonth: $dialogsUsed,
                 dialogsLimit: $maxDialogsPerMonth,
+                windowStartedAt: $windowStartedAt,
             );
         } catch (\Throwable $exception) {
             if ($transaction->isActive()) {

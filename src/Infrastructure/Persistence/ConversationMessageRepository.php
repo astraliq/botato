@@ -103,23 +103,29 @@ final class ConversationMessageRepository implements ConversationMessageReposito
         );
     }
 
-    public function listRecent(string $channelId, string $peerKey, int $limit): array
-    {
-        $limit = max(1, $limit);
+    public function listSince(
+        string $channelId,
+        string $peerKey,
+        DateTimeImmutable $since,
+        ?int $limit = null,
+    ): array {
+        $sql = 'SELECT * FROM conversation_messages
+                WHERE channel_id = :channel_id
+                  AND peer_key = :peer_key
+                  AND created_at >= :since
+                ORDER BY created_at ASC, id ASC';
+
+        if ($limit !== null) {
+            $limit = max(1, $limit);
+            $sql .= ' LIMIT ' . $limit;
+        }
 
         $rows = $this->connection
-            ->createCommand(
-                'SELECT * FROM (
-                    SELECT * FROM conversation_messages
-                    WHERE channel_id = :channel_id AND peer_key = :peer_key
-                    ORDER BY created_at DESC, id DESC
-                    LIMIT ' . $limit . '
-                 ) recent
-                 ORDER BY created_at ASC, id ASC',
-            )
+            ->createCommand($sql)
             ->bindValues([
                 ':channel_id' => $channelId,
                 ':peer_key' => $peerKey,
+                ':since' => $since->format('Y-m-d H:i:sP'),
             ])
             ->queryAll();
 

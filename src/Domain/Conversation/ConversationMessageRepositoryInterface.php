@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Conversation;
 
+use DateTimeImmutable;
+
 interface ConversationMessageRepositoryInterface
 {
     /**
@@ -18,9 +20,14 @@ interface ConversationMessageRepositoryInterface
     ): ConversationMessage;
 
     /**
-     * Последние сообщения диалога в хронологическом порядке (от старых к новым).
+     * Сообщения диалога с указанного момента в хронологическом порядке (от старых к новым).
      *
      * @return list<ConversationMessage>
      */
-    public function listRecent(string $channelId, string $peerKey, int $limit): array;
+    public function listSince(
+        string $channelId,
+        string $peerKey,
+        DateTimeImmutable $since,
+        ?int $limit = null,
+    ): array;
 }

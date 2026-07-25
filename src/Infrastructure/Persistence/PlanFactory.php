@@ -20,7 +20,7 @@ final class PlanFactory
             isPopular: self::toBool($row['is_popular'] ?? false),
             priceMonthlyMinor: (int) $row['price_monthly_minor'],
             maxDialogsPerMonth: (int) $row['max_dialogs_per_month'],
-            messagesPerDialog: (int) ($row['messages_per_dialog'] ?? 10),
+            maxMessagesPerDialog: (int) ($row['max_messages_per_dialog'] ?? 10),
             maxChannels: isset($row['max_channels']) && $row['max_channels'] !== null
                 ? (int) $row['max_channels']
                 : null,

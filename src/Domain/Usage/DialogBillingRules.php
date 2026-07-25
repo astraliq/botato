@@ -6,20 +6,15 @@ namespace App\Domain\Usage;
 
 use DateTimeImmutable;
 
-/** Правила биллинга диалогов: блок из N сообщений с клиентом в календарном месяце = 1 диалог. */
+/** Правила биллинга: диалог — вся переписка с одним клиентом в течение 24 часов. */
 final class DialogBillingRules
 {
-    public static function startsNewDialog(int $messageNumberInWindow, int $messagesPerDialog): bool
-    {
-        if ($messageNumberInWindow < 1 || $messagesPerDialog < 1) {
-            return false;
-        }
+    public const DIALOG_TTL_SECONDS = 86400;
 
-        return ($messageNumberInWindow - 1) % $messagesPerDialog === 0;
-    }
-
-    public static function isSameBillingMonth(DateTimeImmutable $left, DateTimeImmutable $right): bool
+    public static function isWithinDialogWindow(DateTimeImmutable $windowStartedAt, DateTimeImmutable $now): bool
     {
-        return $left->format('Y-m') === $right->format('Y-m');
+        $expiresAt = $windowStartedAt->modify('+' . self::DIALOG_TTL_SECONDS . ' seconds');
+
+        return $now < $expiresAt;
     }
 }

@@ -18,7 +18,7 @@ final class Subscription
         private readonly int $amountChargedMinor,
         private readonly string $currency,
         private readonly int $maxDialogsPerMonth,
-        private readonly int $messagesPerDialog,
+        private readonly int $maxMessagesPerDialog,
         private readonly ?int $maxChannels,
         private readonly int $maxKnowledgeBases,
         private readonly DateTimeImmutable $startsAt,
@@ -72,9 +72,9 @@ final class Subscription
         return $this->maxDialogsPerMonth;
     }
 
-    public function getMessagesPerDialog(): int
+    public function getMaxMessagesPerDialog(): int
     {
-        return $this->messagesPerDialog;
+        return $this->maxMessagesPerDialog;
     }
 
     public function getMaxChannels(): ?int

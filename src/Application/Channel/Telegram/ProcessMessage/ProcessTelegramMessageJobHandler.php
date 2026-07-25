@@ -27,6 +27,9 @@ final class ProcessTelegramMessageJobHandler
     private const LIMIT_REACHED_REPLY =
         'Лимит диалогов на этот месяц исчерпан. Попробуйте позже или обновите тариф в Botato.';
 
+    private const MESSAGES_LIMIT_REACHED_REPLY =
+        'Лимит сообщений в этом диалоге исчерпан. Новый диалог с этим клиентом начнётся через 24 часа.';
+
     public function __construct(
         private readonly ChannelRepositoryInterface $channelRepository,
         private readonly SubscriptionRepositoryInterface $subscriptionRepository,
@@ -82,21 +85,25 @@ final class ProcessTelegramMessageJobHandler
         }
 
         $peerKey = (string) $chatId;
-        $messagesPerDialog = max(1, $subscription->getMessagesPerDialog());
+        $maxMessagesPerDialog = max(1, $subscription->getMaxMessagesPerDialog());
 
         $quotaResult = $this->usageRepository->registerPeerMessage(
             userId: $channel->getUserId(),
             peerKey: $peerKey,
             maxDialogsPerMonth: $subscription->getMaxDialogsPerMonth(),
-            messagesPerDialog: $messagesPerDialog,
+            maxMessagesPerDialog: $maxMessagesPerDialog,
             now: new DateTimeImmutable(),
         );
 
         if ($quotaResult->isLimitReached()) {
+            $replyText = $quotaResult->isMessagesLimitReached()
+                ? self::MESSAGES_LIMIT_REACHED_REPLY
+                : self::LIMIT_REACHED_REPLY;
+
             $this->telegramBotApi->sendMessage(
                 botToken: $botToken,
                 chatId: $chatId,
-                text: self::LIMIT_REACHED_REPLY,
+                text: $replyText,
                 businessConnectionId: $businessConnectionId,
                 replyToMessageId: (int) $messageId,
             );
@@ -120,10 +127,12 @@ final class ProcessTelegramMessageJobHandler
             externalId: (string) $messageId,
         );
 
-        $history = $this->conversationMessageRepository->listRecent(
+        // Контекст = вся переписка текущего диалога (окно 24 часа), с запасом на пары user/assistant.
+        $history = $this->conversationMessageRepository->listSince(
             channelId: $channelId,
             peerKey: $peerKey,
-            limit: $messagesPerDialog,
+            since: $quotaResult->windowStartedAt,
+            limit: $maxMessagesPerDialog * 2,
         );
 
         $systemPrompt = $this->buildSystemPrompt(
