@@ -8,10 +8,10 @@ use App\Domain\Ai\AiProviderRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class DeleteAiProviderHandler
+final readonly class DeleteAiProviderHandler
 {
     public function __construct(
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
+        private AiProviderRepositoryInterface $aiProviderRepository,
     ) {}
 
     public function handle(string $providerId): void

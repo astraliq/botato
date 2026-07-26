@@ -7,10 +7,10 @@ namespace App\Web\Shared;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 
-final class JsonResponseFactory
+final readonly class JsonResponseFactory
 {
     public function __construct(
-        private readonly ResponseFactoryInterface $responseFactory,
+        private ResponseFactoryInterface $responseFactory,
     ) {}
 
     /** @param array<string, mixed> $data */

@@ -9,12 +9,12 @@ use App\Application\Support\ListTickets\ListSupportTicketsHandler;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class IndexAction
+final readonly class IndexAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly ListSupportTicketsHandler $listSupportTicketsHandler,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private ListSupportTicketsHandler $listSupportTicketsHandler,
     ) {}
 
     public function __invoke(): ResponseInterface

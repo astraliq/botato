@@ -8,11 +8,11 @@ use App\Domain\Ai\AiProviderRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class IndexAction
+final readonly class IndexAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
+        private WebViewRenderer $viewRenderer,
+        private AiProviderRepositoryInterface $aiProviderRepository,
     ) {}
 
     public function __invoke(): ResponseInterface

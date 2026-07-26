@@ -14,7 +14,7 @@ use JsonException;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
 
-final class ConnectTelegramChannelHandler
+final readonly class ConnectTelegramChannelHandler
 {
     private const ALLOWED_UPDATES = [
         'message',
@@ -25,9 +25,9 @@ final class ConnectTelegramChannelHandler
     ];
 
     public function __construct(
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly TelegramBotApiInterface $telegramBotApi,
-        private readonly string $webhookBaseUrl,
+        private ChannelRepositoryInterface $channelRepository,
+        private TelegramBotApiInterface $telegramBotApi,
+        private string $webhookBaseUrl,
     ) {}
 
     public function handle(string $userId, ConnectTelegramChannelCommand $command): Channel
@@ -101,7 +101,7 @@ final class ConnectTelegramChannelHandler
                 $webhookSecret,
                 self::ALLOWED_UPDATES,
             );
-        } catch (RuntimeException | InvalidArgumentException $exception) {
+        } catch (RuntimeException|InvalidArgumentException $exception) {
             throw new InvalidArgumentException(
                 'Бот сохранён, но webhook не установлен: ' . $exception->getMessage(),
                 previous: $exception,

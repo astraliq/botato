@@ -7,10 +7,10 @@ namespace App\Web\Shared\Layout;
 use App\Application\Auth\GetCurrentUser\GetCurrentUserHandler;
 use Yiisoft\Yii\View\Renderer\CommonParametersInjectionInterface;
 
-final class AuthViewInjection implements CommonParametersInjectionInterface
+final readonly class AuthViewInjection implements CommonParametersInjectionInterface
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
+        private GetCurrentUserHandler $getCurrentUserHandler,
     ) {}
 
     public function getCommonParameters(): array

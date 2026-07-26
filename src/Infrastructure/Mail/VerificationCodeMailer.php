@@ -10,13 +10,13 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mime\Email;
 
-final class VerificationCodeMailer implements VerificationCodeMailerInterface
+final readonly class VerificationCodeMailer implements VerificationCodeMailerInterface
 {
-    private readonly MailerInterface $mailer;
+    private MailerInterface $mailer;
 
     public function __construct(
         string $mailerDsn,
-        private readonly string $fromEmail,
+        private string $fromEmail,
     ) {
         $this->mailer = new Mailer(Transport::fromDsn($mailerDsn));
     }

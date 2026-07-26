@@ -191,8 +191,8 @@ $botFatherUrl = 'https://t.me/BotFather';
 
                 <?php
                 $tooltipId = 'onboarding-botfather-tooltip';
-                $botUsernamePlaceholder = $telegramDisplayName ?? '@my_salon_bot';
-                ?>
+$botUsernamePlaceholder = $telegramDisplayName ?? '@my_salon_bot';
+?>
 
                 <ol class="instruction-steps onboarding__instructions">
                     <li class="instruction-step">
@@ -311,8 +311,8 @@ $botFatherUrl = 'https://t.me/BotFather';
                                 </div>
 
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/form-preloader', [
-                                    'text' => 'Проверяем токен…',
-                                ]) ?>
+                    'text' => 'Проверяем токен…',
+                ]) ?>
                             </form>
 
                             <p class="instruction-step__note">
@@ -393,8 +393,8 @@ $botFatherUrl = 'https://t.me/BotFather';
                                         <div class="telegram-kb-checkboxes">
                                             <?php foreach ($knowledgeBases as $knowledgeBase): ?>
                                                 <?php
-                                                $isAssigned = in_array($knowledgeBase->getId(), $assignedKnowledgeBaseIds, true)
-                                                    || ($assignedKnowledgeBaseIds === [] && $knowledgeBase === $knowledgeBases[0]);
+                                $isAssigned = in_array($knowledgeBase->getId(), $assignedKnowledgeBaseIds, true)
+                                    || ($assignedKnowledgeBaseIds === [] && $knowledgeBase === $knowledgeBases[0]);
                                                 $isDisabled = !$knowledgeBase->isActive();
                                                 $checkboxId = 'onboarding_kb_' . $knowledgeBase->getId();
                                                 ?>
