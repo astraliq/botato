@@ -24,6 +24,7 @@ final class User
         private bool $deleted = false,
         private bool $isAdmin = false,
         private ?DateTimeImmutable $onboardingCompletedAt = null,
+        private bool $isConsentPersonalData = false,
     ) {}
 
     public function getId(): string
@@ -94,6 +95,17 @@ final class User
     public function isAdmin(): bool
     {
         return $this->isAdmin;
+    }
+
+    public function isConsentPersonalData(): bool
+    {
+        return $this->isConsentPersonalData;
+    }
+
+    public function givePersonalDataConsent(DateTimeImmutable $updatedAt): void
+    {
+        $this->isConsentPersonalData = true;
+        $this->updatedAt = $updatedAt;
     }
 
     public function getOnboardingCompletedAt(): ?DateTimeImmutable

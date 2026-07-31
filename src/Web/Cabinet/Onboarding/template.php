@@ -24,13 +24,20 @@ use Yiisoft\View\WebView;
  * @var string $assignKnowledgeUrl
  * @var string $completeUrl
  * @var string $settingsUrl
+ * @var string $personalDataUrl
  */
 
 $this->setTitle('Настройка Botato');
 
 $initialStep = 1;
 
-if ($formValues['name'] !== '' && $formValues['surname'] !== '' && $formValues['company_name'] !== '' && $formValues['gender'] !== '') {
+if (
+    $formValues['name'] !== ''
+    && $formValues['surname'] !== ''
+    && $formValues['company_name'] !== ''
+    && $formValues['gender'] !== ''
+    && $user->isConsentPersonalData()
+) {
     $initialStep = 2;
 }
 
@@ -141,6 +148,24 @@ $botFatherUrl = 'https://t.me/BotFather';
                     <div class="form-field">
                         <label for="onboarding_phone">Телефон</label>
                         <input id="onboarding_phone" type="tel" name="phone" data-phone-mask value="<?= Html::encode($formValues['phone']) ?>" placeholder="+7 (___) ___-__-__">
+                    </div>
+
+                    <div class="form-field form-field--consent">
+                        <label class="consent-check">
+                            <input
+                                type="checkbox"
+                                name="is_consent_personal_data"
+                                value="1"
+                                required
+                                <?= $user->isConsentPersonalData() ? 'checked' : '' ?>
+                            >
+                            <span>
+                                Я принимаю
+                                <a href="<?= Html::encode($personalDataUrl) ?>" target="_blank" rel="noopener noreferrer">оферту</a>
+                                и
+                                <a href="<?= Html::encode($personalDataUrl) ?>" target="_blank" rel="noopener noreferrer">условия использования и хранения персональных данных</a>
+                            </span>
+                        </label>
                     </div>
 
                     <div class="onboarding__actions">

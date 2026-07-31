@@ -11,6 +11,7 @@ use Yiisoft\View\WebView;
  * @var string $cabinetUrl
  * @var string $mailerFrom
  * @var list<\App\Domain\Plan\Plan> $plans
+ * @var string $personalDataUrl
  */
 
 $this->setTitle('Botato — ИИ-ассистент для Telegram, VK и Instagram');
@@ -260,6 +261,9 @@ $this->registerMeta([
 <footer class="site-footer">
     <div class="container site-footer__inner">
         <div>© <?= date('Y') ?> Botato</div>
-        <div><?= Html::encode($mailerFrom) ?></div>
+        <div class="site-footer__links">
+            <a href="<?= Html::encode($personalDataUrl) ?>">Оферта и персональные данные</a>
+            <span><?= Html::encode($mailerFrom) ?></span>
+        </div>
     </div>
 </footer>

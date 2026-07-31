@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Infrastructure\Mail\VerificationCodeMailer;
 use App\Web\Landing\Action as LandingAction;
+use App\Web\Legal\PersonalDataAction;
 
 /** @var array $params */
 
@@ -16,6 +17,12 @@ return [
     ],
 
     LandingAction::class => [
+        '__construct()' => [
+            'mailerFrom' => $params['mailer']['from'],
+        ],
+    ],
+
+    PersonalDataAction::class => [
         '__construct()' => [
             'mailerFrom' => $params['mailer']['from'],
         ],

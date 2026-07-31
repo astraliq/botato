@@ -16,6 +16,10 @@ return [
                 ->action(Web\Landing\Action::class)
                 ->name('home'),
 
+            Route::get('/legal/personal-data')
+                ->action(Web\Legal\PersonalDataAction::class)
+                ->name('legal/personal-data'),
+
             Route::post('/api/auth/request-code')
                 ->action(Web\Auth\RequestCodeAction::class)
                 ->name('auth/request-code'),

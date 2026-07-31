@@ -658,6 +658,109 @@ a {
     gap: 16px;
 }
 
+.site-footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+}
+
+.site-footer__links a {
+    color: var(--color-muted);
+    text-decoration: none;
+}
+
+.site-footer__links a:hover {
+    color: var(--color-text);
+}
+
+.legal {
+    padding: 48px 0 72px;
+}
+
+.legal__inner {
+    max-width: 760px;
+}
+
+.legal__document {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.legal__document h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    line-height: 1.25;
+}
+
+.legal__meta {
+    margin: 0 0 28px;
+    color: var(--color-muted);
+    font-size: 14px;
+}
+
+.legal__document h2 {
+    margin: 28px 0 12px;
+    font-size: 20px;
+}
+
+.legal__document h3 {
+    margin: 18px 0 8px;
+    font-size: 16px;
+}
+
+.legal__document p,
+.legal__document li {
+    color: var(--color-muted);
+    line-height: 1.55;
+    font-size: 15px;
+}
+
+.legal__document ul {
+    margin: 0 0 12px;
+    padding-left: 20px;
+}
+
+.consent-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.form-field--consent .consent-check input[type="checkbox"] {
+    box-sizing: border-box;
+    width: 16px;
+    min-width: 16px;
+    height: 16px;
+    margin: 3px 0 0;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    appearance: auto;
+    background: #fff;
+}
+
+.consent-check span {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.consent-check a {
+    color: var(--color-text);
+}
+
+.form-field--consent {
+    margin-top: 4px;
+}
+
 .modal {
     position: fixed;
     inset: 0;

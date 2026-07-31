@@ -35,6 +35,7 @@ final class UserFactory
             onboardingCompletedAt: isset($row['onboarding_completed_at']) && $row['onboarding_completed_at'] !== null
                 ? new DateTimeImmutable((string) $row['onboarding_completed_at'])
                 : null,
+            isConsentPersonalData: self::toBool($row['is_consent_personal_data'] ?? false),
         );
     }
 

@@ -64,6 +64,7 @@ final class IndexAction
             'assignKnowledgeUrl' => $this->urlGenerator->generate('api/cabinet/settings/knowledge'),
             'completeUrl' => $this->urlGenerator->generate('api/cabinet/onboarding/complete'),
             'settingsUrl' => $this->urlGenerator->generate('cabinet/settings'),
+            'personalDataUrl' => $this->urlGenerator->generate('legal/personal-data'),
         ]);
     }
 }

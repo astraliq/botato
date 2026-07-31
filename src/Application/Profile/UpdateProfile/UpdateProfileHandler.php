@@ -75,6 +75,14 @@ final class UpdateProfileHandler
             throw new InvalidArgumentException('Телефон должен быть в формате +7 (XXX) XXX-XX-XX.');
         }
 
+        if ($command->isConsentPersonalData === false) {
+            throw new InvalidArgumentException(
+                'Чтобы продолжить, примите оферту и согласие на обработку персональных данных.',
+            );
+        }
+
+        $updatedAt = new DateTimeImmutable();
+
         $user->updateProfile(
             $surname,
             $name,
@@ -83,8 +91,13 @@ final class UpdateProfileHandler
             $description,
             $phone,
             $gender,
-            new DateTimeImmutable(),
+            $updatedAt,
         );
+
+        if ($command->isConsentPersonalData === true) {
+            $user->givePersonalDataConsent($updatedAt);
+        }
+
         $this->userRepository->save($user);
 
         return $user;

@@ -17,6 +17,7 @@ final readonly class UpdateProfileCommand
         public string $description,
         public string $phone,
         public string $gender,
+        public ?bool $isConsentPersonalData = null,
     ) {}
 
     /** @param array<string, mixed> $data */
@@ -30,6 +31,9 @@ final readonly class UpdateProfileCommand
             description: ArrayHelper::toString($data['description'] ?? null),
             phone: ArrayHelper::toString($data['phone'] ?? null),
             gender: ArrayHelper::toString($data['gender'] ?? null),
+            isConsentPersonalData: array_key_exists('is_consent_personal_data', $data)
+                ? self::toBool($data['is_consent_personal_data'])
+                : null,
         );
     }
 
@@ -44,5 +48,22 @@ final readonly class UpdateProfileCommand
             phone: $this->phone,
             gender: $this->gender,
         );
+    }
+
+    private static function toBool(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        if (is_int($value)) {
+            return $value === 1;
+        }
+
+        if (is_string($value)) {
+            return in_array(strtolower($value), ['1', 'true', 'yes', 'on'], true);
+        }
+
+        return false;
     }
 }

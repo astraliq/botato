@@ -121,6 +121,8 @@ class OnboardingWizard {
         this.#clearMessages();
 
         const formData = new FormData(formElement);
+        const consentCheckbox = formElement.querySelector('[name="is_consent_personal_data"]');
+        const isConsentPersonalData = consentCheckbox instanceof HTMLInputElement && consentCheckbox.checked;
         const payload = {
             surname: String(formData.get('surname') ?? '').trim(),
             name: String(formData.get('name') ?? '').trim(),
@@ -129,10 +131,16 @@ class OnboardingWizard {
             description: String(formData.get('description') ?? '').trim(),
             phone: String(formData.get('phone') ?? '').trim(),
             gender: String(formData.get('gender') ?? '').trim(),
+            is_consent_personal_data: isConsentPersonalData,
         };
 
         if (payload.surname === '' || payload.name === '' || payload.company_name === '' || payload.gender === '') {
             this.#showError('Заполните обязательные поля профиля.');
+            return;
+        }
+
+        if (!payload.is_consent_personal_data) {
+            this.#showError('Чтобы продолжить, примите оферту и согласие на обработку персональных данных.');
             return;
         }
 

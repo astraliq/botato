@@ -24,6 +24,7 @@ final class Action
             'cabinetUrl' => $this->urlGenerator->generate('cabinet'),
             'mailerFrom' => $this->mailerFrom,
             'plans' => $this->planRepository->listVisible(),
+            'personalDataUrl' => $this->urlGenerator->generate('legal/personal-data'),
         ]);
     }
 }
