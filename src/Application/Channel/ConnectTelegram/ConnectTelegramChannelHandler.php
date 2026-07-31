@@ -32,7 +32,7 @@ final class ConnectTelegramChannelHandler
 
     public function handle(string $userId, ConnectTelegramChannelCommand $command): Channel
     {
-        $botToken = trim($command->botToken);
+        $botToken = self::extractBotToken($command->botToken);
 
         if ($botToken === '') {
             throw new InvalidArgumentException('Укажите токен бота.');
@@ -109,6 +109,20 @@ final class ConnectTelegramChannelHandler
         }
 
         return $channel;
+    }
+
+    private static function extractBotToken(string $rawValue): string
+    {
+        $trimmedValue = trim($rawValue);
+        if ($trimmedValue === '') {
+            return '';
+        }
+
+        if (preg_match('/\d+:[A-Za-z0-9_-]+/', $trimmedValue, $matches) === 1) {
+            return $matches[0];
+        }
+
+        return $trimmedValue;
     }
 
     private function generateWebhookSecret(): string

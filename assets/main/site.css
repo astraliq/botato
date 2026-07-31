@@ -1185,6 +1185,88 @@ a {
     color: var(--color-text);
 }
 
+.instruction-figure {
+    margin: 14px 0 4px;
+    max-width: 320px;
+}
+
+.instruction-figure__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    background: #0f172a;
+}
+
+.instruction-figure__caption {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--color-muted);
+}
+
+.instruction-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 14px 0 4px;
+}
+
+.instruction-figures .instruction-figure {
+    margin: 0;
+    flex: 1 1 220px;
+    max-width: 280px;
+}
+
+@media (max-width: 640px) {
+    .instruction-figure,
+    .instruction-figures .instruction-figure {
+        max-width: 260px;
+    }
+}
+
+.copy-code {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    vertical-align: middle;
+}
+
+.copy-code__button {
+    appearance: none;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #fff;
+    color: #334155;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.2;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.copy-code__button:hover,
+.copy-code__button:focus-visible {
+    border-color: rgba(37, 99, 235, 0.45);
+    color: #1d4ed8;
+    outline: none;
+}
+
+.copy-code__button.is-copied {
+    border-color: rgba(22, 163, 74, 0.45);
+    color: #15803d;
+}
+
+.copy-code__button.is-error {
+    border-color: rgba(185, 28, 28, 0.45);
+    color: #b91c1c;
+}
+
 .instruction-substeps {
     margin: 0 0 10px;
     padding-left: 20px;

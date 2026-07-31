@@ -23,6 +23,7 @@ final class MainAsset extends AssetBundle
         'js/pricing-toggle.js',
         'js/phone-mask.js',
         'js/user-menu.js',
+        'js/copy-button.js',
         'js/connect-telegram.js',
         'js/knowledge-base.js',
         'js/onboarding.js',

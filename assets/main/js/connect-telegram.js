@@ -1,3 +1,58 @@
+/**
+ * @param {unknown} error
+ * @returns {string}
+ */
+function resolveTelegramConnectErrorMessage(error) {
+    const fallbackMessage = 'Произошла ошибка, напишите нам в поддержку или попробуйте позже.';
+    if (!(error instanceof Error)) {
+        return fallbackMessage;
+    }
+
+    const message = error.message.trim();
+    if (
+        message === ''
+        || message === 'Failed to fetch'
+        || message === 'Load failed'
+        || message === 'NetworkError when attempting to fetch resource.'
+        || message === 'Network request failed'
+    ) {
+        return fallbackMessage;
+    }
+
+    return message;
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function extractTelegramBotToken(value) {
+    const match = String(value).match(/\d+:[A-Za-z0-9_-]+/);
+
+    return match !== null ? match[0] : String(value).trim();
+}
+
+/**
+ * @param {HTMLInputElement} tokenInputElement
+ */
+function bindTelegramBotTokenInput(tokenInputElement) {
+    tokenInputElement.addEventListener('paste', (event) => {
+        const clipboardData = event.clipboardData;
+        if (clipboardData === null) {
+            return;
+        }
+
+        const pastedText = clipboardData.getData('text');
+        const extractedToken = extractTelegramBotToken(pastedText);
+        if (extractedToken === pastedText.trim()) {
+            return;
+        }
+
+        event.preventDefault();
+        tokenInputElement.value = extractedToken;
+    });
+}
+
 class ConnectTelegramForm {
     /** @type {HTMLFormElement} */
     #formElement;
@@ -36,6 +91,10 @@ class ConnectTelegramForm {
         this.#tokenInputElement = formElement.querySelector('[name="bot_token"]');
         this.#formPreloader = FormPreloader.create(formElement);
 
+        if (this.#tokenInputElement instanceof HTMLInputElement) {
+            bindTelegramBotTokenInput(this.#tokenInputElement);
+        }
+
         this.#formElement.addEventListener('submit', (event) => {
             this.#handleSubmit(event);
         });
@@ -56,10 +115,14 @@ class ConnectTelegramForm {
         event.preventDefault();
         this.#clearMessages();
 
-        const botToken = this.#tokenInputElement?.value.trim() ?? '';
+        const botToken = extractTelegramBotToken(this.#tokenInputElement?.value ?? '');
         if (botToken === '') {
             this.#showMessage(this.#errorElement, 'Укажите токен бота.');
             return;
+        }
+
+        if (this.#tokenInputElement !== null) {
+            this.#tokenInputElement.value = botToken;
         }
 
         this.#formPreloader?.setLoading(true);
@@ -72,8 +135,7 @@ class ConnectTelegramForm {
                 this.#tokenInputElement.value = '';
             }
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Не удалось подключить бота.';
-            this.#showMessage(this.#errorElement, message);
+            this.#showMessage(this.#errorElement, resolveTelegramConnectErrorMessage(error));
         } finally {
             this.#formPreloader?.setLoading(false);
         }

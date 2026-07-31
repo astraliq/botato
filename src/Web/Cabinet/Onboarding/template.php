@@ -198,8 +198,9 @@ $botFatherUrl = 'https://t.me/BotFather';
                     <li class="instruction-step">
                         <div class="instruction-step__num" aria-hidden="true">1</div>
                         <div class="instruction-step__body">
-                            <h2>
-                                Откройте
+                            <h2>Создайте нового бота</h2>
+                            <p>
+                                В Telegram найдите
                                 <a href="<?= Html::encode($botFatherUrl) ?>" target="_blank" rel="noopener noreferrer">@BotFather</a>
                                 <span class="info-tooltip">
                                     <button
@@ -214,25 +215,19 @@ $botFatherUrl = 'https://t.me/BotFather';
                                         BotFather — официальный бот Telegram для создания и управления ботами
                                     </span>
                                 </span>
-                            </h2>
-                            <p>
-                                В Telegram найдите
-                                <a href="<?= Html::encode($botFatherUrl) ?>" target="_blank" rel="noopener noreferrer">@BotFather</a>
                                 или откройте ссылку. Это официальный аккаунт Telegram, не сторонний сервис.
                             </p>
-                        </div>
-                    </li>
-
-                    <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">2</div>
-                        <div class="instruction-step__body">
-                            <h2>Создайте нового бота</h2>
                             <p>В чате с BotFather выполните по порядку:</p>
                             <ol class="instruction-substeps">
-                                <li>Отправьте команду <code>/newbot</code>.</li>
-                                <li>Укажите <strong>отображаемое имя</strong> бота — например, название вашего бизнеса. Его будут видеть клиенты.</li>
                                 <li>
-                                    Укажите <strong>username</strong> бота. Он должен быть уникальным и
+                                    Отправьте команду
+                                    <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/copy-code', [
+                                        'text' => '/newbot',
+                                    ]) ?>.
+                                </li>
+                                <li>Отправьте в чат <strong>отображаемое имя</strong> бота — например, название вашего бизнеса. Его будут видеть клиенты.</li>
+                                <li>
+                                    Отправьте в чат <strong>username</strong> бота. Он должен быть уникальным и
                                     <strong>заканчиваться на <code>bot</code></strong>
                                     (например, <code>my_salon_bot</code> или <code>MySalonBot</code>).
                                 </li>
@@ -240,41 +235,27 @@ $botFatherUrl = 'https://t.me/BotFather';
                             <p>
                                 Если username занят, BotFather попросит выбрать другой — просто предложите новый вариант.
                             </p>
-                        </div>
-                    </li>
-
-                    <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">3</div>
-                        <div class="instruction-step__body">
-                            <h2>Включите режим секретаря у бота</h2>
                             <p>
-                                Без режима секретаря бот не сможет работать в личной переписке через
-                                «Автоматизация чатов».
+                                После создания BotFather пришлёт сообщение с токеном.
                             </p>
-                            <ol class="instruction-substeps">
-                                <li>
-                                    Откройте в Telegram чат со своим ботом
-                                    (<code data-telegram-bot-username><?= Html::encode($botUsernamePlaceholder) ?></code>).
-                                </li>
-                                <li>Перейдите в настройки бота (меню или кнопка настроек в чате с ботом).</li>
-                                <li>
-                                    Включите <strong>режим секретаря</strong> (Secretary mode).
-                                    В чате должно появиться подтверждение, что режим включён.
-                                </li>
-                            </ol>
+                            <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                'src' => 'telegram/token-message.png',
+                                'alt' => 'Сообщение BotFather с HTTP API token после создания бота',
+                                'caption' => 'Сообщение после создания бота',
+                            ]) ?>
+                            <p>
+                                Скопируйте token или целиком сообщение (лишнее мы обрежем при вставке).
+                            </p>
                         </div>
                     </li>
 
                     <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">4</div>
+                        <div class="instruction-step__num" aria-hidden="true">2</div>
                         <div class="instruction-step__body">
                             <h2>Сохраните токен бота в Botato</h2>
                             <p>
-                                После создания BotFather пришлёт сообщение с <strong>HTTP API token</strong> —
-                                длинной строкой вида <code>123456789:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw</code>.
-                            </p>
-                            <p>
-                                Вставьте токен ниже. Мы проверим его через Telegram и сохраним в зашифрованном виде.
+                                Вставьте токен или целиком сообщение ниже и нажмите «Подключить».
+                                Мы проверим его через Telegram и сохраним в зашифрованном виде.
                                 Никому не передавайте токен: по нему можно управлять вашим ботом.
                             </p>
 
@@ -316,14 +297,79 @@ $botFatherUrl = 'https://t.me/BotFather';
                             </form>
 
                             <p class="instruction-step__note">
-                                Если токен потеряли: откройте BotFather → <code>/mybots</code> → выберите бота →
+                                Если токен потеряли: откройте BotFather →
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/copy-code', [
+                                    'text' => '/mybots',
+                                ]) ?>
+                                → выберите бота →
                                 <strong>API Token</strong> → при необходимости перевыпустите токен.
                             </p>
+                            <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                'src' => 'telegram/botfather-bot-menu.png',
+                                'alt' => 'Меню бота в BotFather с кнопкой API Token',
+                                'caption' => 'Где найти токен снова: API Token',
+                            ]) ?>
                         </div>
                     </li>
 
                     <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">5</div>
+                        <div class="instruction-step__num" aria-hidden="true">3</div>
+                        <div class="instruction-step__body">
+                            <h2>Включите режим секретаря у бота</h2>
+                            <p>
+                                Без режима секретаря бот не сможет работать в личной переписке через
+                                «Автоматизация чатов».
+                            </p>
+                            <ol class="instruction-substeps">
+                                <li>
+                                    Откройте чат со своим ботом.
+                                    Кнопку <strong>Старт</strong> нажимать не нужно.
+                                    <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                        'src' => 'telegram/bot-link.png',
+                                        'alt' => 'Сообщение BotFather о создании бота со ссылкой на чат',
+                                        'caption' => 'Нажмите на ссылку чата с созданным ботом',
+                                    ]) ?>
+                                </li>
+                                <li>Справа сверху нажмите на иконку бота.</li>
+                                <li>Перейдите в <strong>Настройки бота</strong>.</li>
+                                <li>Нажмите <strong>Изменить настройки бота</strong>.</li>
+                                <li>
+                                    Откройте <strong>Secretary Mode</strong> и нажмите <strong>Turn on</strong>.
+                                    Должно появиться подтверждение, что режим включён.
+                                </li>
+                            </ol>
+                            <div class="instruction-figures">
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                    'src' => 'telegram/bot-start.png',
+                                    'alt' => 'Чат с ботом: иконка бота справа сверху',
+                                    'caption' => 'Справа сверху нажмите на иконку бота',
+                                ]) ?>
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                    'src' => 'telegram/bot-profile.png',
+                                    'alt' => 'Профиль бота с пунктом Настройки бота',
+                                    'caption' => 'Перейдите в «Настройки бота»',
+                                ]) ?>
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                    'src' => 'telegram/bot-edit.png',
+                                    'alt' => 'Экран редактирования бота с пунктом Изменить настройки бота',
+                                    'caption' => 'Нажмите «Изменить настройки бота»',
+                                ]) ?>
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                    'src' => 'telegram/botfather-settings.png',
+                                    'alt' => 'Настройки бота с пунктом Secretary Mode',
+                                    'caption' => 'Откройте Secretary Mode',
+                                ]) ?>
+                                <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
+                                    'src' => 'telegram/secretary-turn-on.png',
+                                    'alt' => 'Включение Secretary Mode кнопкой Turn on',
+                                    'caption' => 'Нажмите Turn on',
+                                ]) ?>
+                            </div>
+                        </div>
+                    </li>
+
+                    <li class="instruction-step">
+                        <div class="instruction-step__num" aria-hidden="true">4</div>
                         <div class="instruction-step__body">
                             <h2>Подключите бота в «Автоматизация чатов»</h2>
                             <p>Чтобы ассистент отвечал в вашей личке (а не только в отдельном чате с ботом):</p>
@@ -333,6 +379,7 @@ $botFatherUrl = 'https://t.me/BotFather';
                                 <li>
                                     В поле «Ссылка или @имя бота» укажите username вашего бота
                                     (<code data-telegram-bot-username><?= Html::encode($botUsernamePlaceholder) ?></code>).
+                                    Username можно посмотреть в профиле бота в Telegram.
                                 </li>
                                 <li>
                                     Выберите, какие чаты доступны боту:
@@ -361,7 +408,7 @@ $botFatherUrl = 'https://t.me/BotFather';
                     </li>
 
                     <li class="instruction-step">
-                        <div class="instruction-step__num" aria-hidden="true">6</div>
+                        <div class="instruction-step__num" aria-hidden="true">5</div>
                         <div class="instruction-step__body">
                             <h2>Проверьте работу</h2>
                             <p>
@@ -418,7 +465,7 @@ $botFatherUrl = 'https://t.me/BotFather';
                                     </fieldset>
                                     <?php if (!$isTelegramConnected) { ?>
                                         <p class="instruction-step__note" data-onboarding-kb-need-bot>
-                                            Сначала подключите бота в пункте 4 — после этого можно выбрать базы и завершить настройку.
+                                            Сначала подключите бота в пункте 2 — после этого можно выбрать базы и завершить настройку.
                                         </p>
                                     <?php } else { ?>
                                         <p class="instruction-step__note" data-onboarding-kb-need-bot>

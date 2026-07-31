@@ -47,6 +47,11 @@ class OnboardingWizard {
 
         const telegramForm = rootElement.querySelector('[data-onboarding-telegram-form]');
         if (telegramForm instanceof HTMLFormElement) {
+            const tokenInput = telegramForm.querySelector('[name="bot_token"]');
+            if (tokenInput instanceof HTMLInputElement && typeof bindTelegramBotTokenInput === 'function') {
+                bindTelegramBotTokenInput(tokenInput);
+            }
+
             telegramForm.addEventListener('submit', (event) => {
                 this.#handleTelegramConnect(event, telegramForm);
             });
@@ -195,11 +200,18 @@ class OnboardingWizard {
         this.#clearMessages();
 
         const tokenInput = formElement.querySelector('[name="bot_token"]');
-        const botToken = tokenInput instanceof HTMLInputElement ? tokenInput.value.trim() : '';
+        const rawTokenValue = tokenInput instanceof HTMLInputElement ? tokenInput.value : '';
+        const botToken = typeof extractTelegramBotToken === 'function'
+            ? extractTelegramBotToken(rawTokenValue)
+            : rawTokenValue.trim();
 
         if (botToken === '') {
             this.#showError('Укажите токен бота.');
             return;
+        }
+
+        if (tokenInput instanceof HTMLInputElement) {
+            tokenInput.value = botToken;
         }
 
         const formPreloader = typeof FormPreloader !== 'undefined' ? FormPreloader.create(formElement) : null;
@@ -214,13 +226,16 @@ class OnboardingWizard {
             this.#markTelegramConnected(connectData.displayName ?? null);
             this.#enableKnowledgeAssignment();
             this.#syncFinishAvailability();
-            this.#showSuccess(connectData.message || 'Telegram-бот подключён. Продолжите шаги 5–6 ниже.');
+            this.#showSuccess(connectData.message || 'Telegram-бот подключён. Продолжите шаги 4–5 ниже.');
 
             if (tokenInput instanceof HTMLInputElement) {
                 tokenInput.value = '';
             }
         } catch (error) {
-            this.#showError(error instanceof Error ? error.message : 'Не удалось подключить бота.');
+            const message = typeof resolveTelegramConnectErrorMessage === 'function'
+                ? resolveTelegramConnectErrorMessage(error)
+                : 'Произошла ошибка, напишите нам в поддержку или попробуйте позже.';
+            this.#showError(message);
         } finally {
             formPreloader?.setLoading(false);
         }
