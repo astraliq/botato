@@ -10,14 +10,14 @@ use App\Domain\Auth\EmailVerificationCodeRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class RequestVerificationCodeHandler
+final readonly class RequestVerificationCodeHandler
 {
     private const CODE_TTL_SECONDS = 600;
     private const RATE_LIMIT_SECONDS = 60;
 
     public function __construct(
-        private readonly EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
-        private readonly VerificationCodeMailerInterface $verificationCodeMailer,
+        private EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
+        private VerificationCodeMailerInterface $verificationCodeMailer,
     ) {}
 
     public function handle(string $email): void

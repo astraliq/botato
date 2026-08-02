@@ -12,11 +12,11 @@ use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class HandleTelegramUpdateHandler
+final readonly class HandleTelegramUpdateHandler
 {
     public function __construct(
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly IngestTelegramMessageHandler $ingestTelegramMessageHandler,
+        private ChannelRepositoryInterface $channelRepository,
+        private IngestTelegramMessageHandler $ingestTelegramMessageHandler,
     ) {}
 
     /**

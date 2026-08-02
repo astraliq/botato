@@ -13,12 +13,12 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
 
-final class ProcessQueueJobHandler
+final readonly class ProcessQueueJobHandler
 {
     public function __construct(
-        private readonly QueueJobRepositoryInterface $queueJobRepository,
-        private readonly ProcessTelegramMessageJobHandler $processTelegramMessageJobHandler,
-        private readonly LoggerInterface $logger,
+        private QueueJobRepositoryInterface $queueJobRepository,
+        private ProcessTelegramMessageJobHandler $processTelegramMessageJobHandler,
+        private LoggerInterface $logger,
     ) {}
 
     public function handle(QueueJob $job): void

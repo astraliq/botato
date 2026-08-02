@@ -10,10 +10,10 @@ use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class EmailVerificationCodeRepository implements EmailVerificationCodeRepositoryInterface
+final readonly class EmailVerificationCodeRepository implements EmailVerificationCodeRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function save(string $email, string $codeHash, DateTimeImmutable $expiresAt): void

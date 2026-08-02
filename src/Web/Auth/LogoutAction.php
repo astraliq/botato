@@ -9,12 +9,12 @@ use App\Web\Shared\JsonResponseFactory;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 
-final class LogoutAction
+final readonly class LogoutAction
 {
     public function __construct(
-        private readonly LogoutHandler $logoutHandler,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private LogoutHandler $logoutHandler,
+        private JsonResponseFactory $jsonResponseFactory,
+        private UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function __invoke(): ResponseInterface

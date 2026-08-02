@@ -15,13 +15,13 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final class SaveProfileAction
+final readonly class SaveProfileAction
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly UpdateProfileHandler $updateProfileHandler,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly LoggerInterface $logger,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private UpdateProfileHandler $updateProfileHandler,
+        private JsonResponseFactory $jsonResponseFactory,
+        private LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

@@ -13,11 +13,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 
-final class TelegramWebhookAction
+final readonly class TelegramWebhookAction
 {
     public function __construct(
-        private readonly HandleTelegramUpdateHandler $handleTelegramUpdateHandler,
-        private readonly ResponseFactoryInterface $responseFactory,
+        private HandleTelegramUpdateHandler $handleTelegramUpdateHandler,
+        private ResponseFactoryInterface $responseFactory,
     ) {}
 
     public function __invoke(

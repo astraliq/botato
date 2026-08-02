@@ -15,14 +15,14 @@ use Psr\Log\LoggerInterface;
 use Throwable;
 use Yiisoft\Router\UrlGeneratorInterface;
 
-final class CompleteAction
+final readonly class CompleteAction
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly CompleteOnboardingHandler $completeOnboardingHandler,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly LoggerInterface $logger,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private CompleteOnboardingHandler $completeOnboardingHandler,
+        private JsonResponseFactory $jsonResponseFactory,
+        private UrlGeneratorInterface $urlGenerator,
+        private LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

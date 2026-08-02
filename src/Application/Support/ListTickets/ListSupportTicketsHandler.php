@@ -7,10 +7,10 @@ namespace App\Application\Support\ListTickets;
 use App\Domain\Support\SupportTicket;
 use App\Domain\Support\SupportTicketRepositoryInterface;
 
-final class ListSupportTicketsHandler
+final readonly class ListSupportTicketsHandler
 {
     public function __construct(
-        private readonly SupportTicketRepositoryInterface $supportTicketRepository,
+        private SupportTicketRepositoryInterface $supportTicketRepository,
     ) {}
 
     /** @return list<SupportTicket> */

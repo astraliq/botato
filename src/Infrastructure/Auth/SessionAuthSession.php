@@ -7,12 +7,12 @@ namespace App\Infrastructure\Auth;
 use App\Application\Auth\AuthSessionInterface;
 use Yiisoft\Session\SessionInterface;
 
-final class SessionAuthSession implements AuthSessionInterface
+final readonly class SessionAuthSession implements AuthSessionInterface
 {
     private const SESSION_USER_ID_KEY = 'auth_user_id';
 
     public function __construct(
-        private readonly SessionInterface $session,
+        private SessionInterface $session,
     ) {}
 
     public function login(string $userId): void

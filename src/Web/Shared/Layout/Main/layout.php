@@ -28,8 +28,8 @@ $this->addJsFiles($assetManager->getJsFiles());
 $this->addJsStrings($assetManager->getJsStrings());
 $this->addJsVars($assetManager->getJsVars());
 
-$showLandingHeader = $showLandingHeader ?? true;
-$includeAuthModal = $includeAuthModal ?? true;
+$showLandingHeader ??= true;
+$includeAuthModal ??= true;
 $showLandingNav = ($currentRoute->getName() ?? null) === 'home';
 $csrfToken = $csrf ?? '';
 
