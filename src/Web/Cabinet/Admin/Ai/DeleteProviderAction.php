@@ -11,12 +11,12 @@ use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\UrlGeneratorInterface;
 
-final class DeleteProviderAction
+final readonly class DeleteProviderAction
 {
     public function __construct(
-        private readonly DeleteAiProviderHandler $deleteAiProviderHandler,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly ResponseFactoryInterface $responseFactory,
+        private DeleteAiProviderHandler $deleteAiProviderHandler,
+        private UrlGeneratorInterface $urlGenerator,
+        private ResponseFactoryInterface $responseFactory,
     ) {}
 
     public function __invoke(

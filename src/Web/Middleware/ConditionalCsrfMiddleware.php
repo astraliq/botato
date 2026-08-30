@@ -10,10 +10,10 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Csrf\CsrfTokenMiddleware;
 
-final class ConditionalCsrfMiddleware implements MiddlewareInterface
+final readonly class ConditionalCsrfMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly CsrfTokenMiddleware $csrfTokenMiddleware,
+        private CsrfTokenMiddleware $csrfTokenMiddleware,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

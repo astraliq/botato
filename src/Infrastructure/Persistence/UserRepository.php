@@ -11,10 +11,10 @@ use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class UserRepository implements UserRepositoryInterface
+final readonly class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function findById(string $id): ?User

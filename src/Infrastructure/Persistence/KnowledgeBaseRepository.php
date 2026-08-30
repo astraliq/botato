@@ -9,10 +9,10 @@ use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use App\Shared\ArrayHelper;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class KnowledgeBaseRepository implements KnowledgeBaseRepositoryInterface
+final readonly class KnowledgeBaseRepository implements KnowledgeBaseRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function findById(string $id): ?KnowledgeBase

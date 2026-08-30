@@ -15,10 +15,10 @@ use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class SubscriptionRepository implements SubscriptionRepositoryInterface
+final readonly class SubscriptionRepository implements SubscriptionRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function findActiveByUserId(string $userId): ?Subscription

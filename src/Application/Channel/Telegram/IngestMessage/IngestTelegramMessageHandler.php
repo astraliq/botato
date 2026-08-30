@@ -19,23 +19,23 @@ use JsonException;
 use RuntimeException;
 
 /** Принимает входящее сообщение: квота, сохранение, планирование debounce-ответа. */
-final class IngestTelegramMessageHandler
+final readonly class IngestTelegramMessageHandler
 {
     public const MESSAGE_DEBOUNCE_SECONDS = 10;
 
-    private const LIMIT_REACHED_REPLY =
-        'Лимит диалогов на этот месяц исчерпан. Попробуйте позже или обновите тариф в Botato.';
+    private const LIMIT_REACHED_REPLY
+        = 'Лимит диалогов на этот месяц исчерпан. Попробуйте позже или обновите тариф в Botato.';
 
-    private const MESSAGES_LIMIT_REACHED_REPLY =
-        'Лимит сообщений в этом диалоге исчерпан. Новый диалог с этим клиентом начнётся через 24 часа.';
+    private const MESSAGES_LIMIT_REACHED_REPLY
+        = 'Лимит сообщений в этом диалоге исчерпан. Новый диалог с этим клиентом начнётся через 24 часа.';
 
     public function __construct(
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly UsageRepositoryInterface $usageRepository,
-        private readonly ConversationMessageRepositoryInterface $conversationMessageRepository,
-        private readonly QueueJobRepositoryInterface $queueJobRepository,
-        private readonly TelegramBotApiInterface $telegramBotApi,
+        private ChannelRepositoryInterface $channelRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private UsageRepositoryInterface $usageRepository,
+        private ConversationMessageRepositoryInterface $conversationMessageRepository,
+        private QueueJobRepositoryInterface $queueJobRepository,
+        private TelegramBotApiInterface $telegramBotApi,
     ) {}
 
     public function handle(Channel $channel, IncomingTelegramMessage $incomingMessage): void

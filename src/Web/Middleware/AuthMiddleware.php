@@ -12,12 +12,12 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 
-final class AuthMiddleware implements MiddlewareInterface
+final readonly class AuthMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly AuthSessionInterface $authSession,
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private AuthSessionInterface $authSession,
+        private ResponseFactoryInterface $responseFactory,
+        private UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
