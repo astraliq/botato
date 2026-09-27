@@ -9,11 +9,11 @@ use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class DeleteKnowledgeArticleHandler
+final readonly class DeleteKnowledgeArticleHandler
 {
     public function __construct(
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
     ) {}
 
     public function handle(string $userId, string $articleId): string

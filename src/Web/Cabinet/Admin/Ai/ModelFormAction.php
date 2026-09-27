@@ -17,14 +17,14 @@ use Yiisoft\Router\HydratorAttribute\RouteArgument;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class ModelFormAction
+final readonly class ModelFormAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
-        private readonly SaveAiModelHandler $saveAiModelHandler,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly ResponseFactoryInterface $responseFactory,
+        private WebViewRenderer $viewRenderer,
+        private AiProviderRepositoryInterface $aiProviderRepository,
+        private SaveAiModelHandler $saveAiModelHandler,
+        private UrlGeneratorInterface $urlGenerator,
+        private ResponseFactoryInterface $responseFactory,
     ) {}
 
     public function __invoke(

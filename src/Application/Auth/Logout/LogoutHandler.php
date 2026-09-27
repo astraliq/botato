@@ -6,10 +6,10 @@ namespace App\Application\Auth\Logout;
 
 use App\Application\Auth\AuthSessionInterface;
 
-final class LogoutHandler
+final readonly class LogoutHandler
 {
     public function __construct(
-        private readonly AuthSessionInterface $authSession,
+        private AuthSessionInterface $authSession,
     ) {}
 
     public function handle(): void

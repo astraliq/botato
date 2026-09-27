@@ -17,16 +17,16 @@ use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class IndexAction
+final readonly class IndexAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly ResponseFactoryInterface $responseFactory,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private ChannelRepositoryInterface $channelRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private UrlGeneratorInterface $urlGenerator,
+        private ResponseFactoryInterface $responseFactory,
     ) {}
 
     public function __invoke(): ResponseInterface

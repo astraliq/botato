@@ -13,10 +13,10 @@ use JsonException;
 use Ramsey\Uuid\Uuid;
 use RuntimeException;
 
-final class SaveAiProviderHandler
+final readonly class SaveAiProviderHandler
 {
     public function __construct(
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
+        private AiProviderRepositoryInterface $aiProviderRepository,
     ) {}
 
     /**

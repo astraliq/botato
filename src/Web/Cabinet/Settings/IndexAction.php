@@ -12,14 +12,14 @@ use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class IndexAction
+final readonly class IndexAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private ChannelRepositoryInterface $channelRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
     ) {}
 
     public function __invoke(): ResponseInterface

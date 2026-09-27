@@ -216,8 +216,8 @@ $botFatherUrl = 'https://t.me/BotFather';
 
                 <?php
                 $tooltipId = 'onboarding-botfather-tooltip';
-                $botUsernamePlaceholder = $telegramDisplayName ?? '@my_salon_bot';
-                ?>
+$botUsernamePlaceholder = $telegramDisplayName ?? '@my_salon_bot';
+?>
 
                 <ol class="instruction-steps onboarding__instructions">
                     <li class="instruction-step">
@@ -247,8 +247,8 @@ $botFatherUrl = 'https://t.me/BotFather';
                                 <li>
                                     Отправьте команду
                                     <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/copy-code', [
-                                        'text' => '/newbot',
-                                    ]) ?>.
+                        'text' => '/newbot',
+                    ]) ?>.
                                 </li>
                                 <li>Отправьте в чат <strong>отображаемое имя</strong> бота — например, название вашего бизнеса. Его будут видеть клиенты.</li>
                                 <li>
@@ -264,10 +264,10 @@ $botFatherUrl = 'https://t.me/BotFather';
                                 После создания BotFather пришлёт сообщение с токеном.
                             </p>
                             <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                'src' => 'telegram/token-message.png',
-                                'alt' => 'Сообщение BotFather с HTTP API token после создания бота',
-                                'caption' => 'Сообщение после создания бота',
-                            ]) ?>
+                'src' => 'telegram/token-message.png',
+                'alt' => 'Сообщение BotFather с HTTP API token после создания бота',
+                'caption' => 'Сообщение после создания бота',
+            ]) ?>
                             <p>
                                 Скопируйте token или целиком сообщение (лишнее мы обрежем при вставке).
                             </p>
@@ -317,23 +317,23 @@ $botFatherUrl = 'https://t.me/BotFather';
                                 </div>
 
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/form-preloader', [
-                                    'text' => 'Проверяем токен…',
-                                ]) ?>
+                    'text' => 'Проверяем токен…',
+                ]) ?>
                             </form>
 
                             <p class="instruction-step__note">
                                 Если токен потеряли: откройте BotFather →
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/copy-code', [
-                                    'text' => '/mybots',
-                                ]) ?>
+                    'text' => '/mybots',
+                ]) ?>
                                 → выберите бота →
                                 <strong>API Token</strong> → при необходимости перевыпустите токен.
                             </p>
                             <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                'src' => 'telegram/botfather-bot-menu.png',
-                                'alt' => 'Меню бота в BotFather с кнопкой API Token',
-                                'caption' => 'Где найти токен снова: API Token',
-                            ]) ?>
+                'src' => 'telegram/botfather-bot-menu.png',
+                'alt' => 'Меню бота в BotFather с кнопкой API Token',
+                'caption' => 'Где найти токен снова: API Token',
+            ]) ?>
                         </div>
                     </li>
 
@@ -350,10 +350,10 @@ $botFatherUrl = 'https://t.me/BotFather';
                                     Откройте чат со своим ботом.
                                     Кнопку <strong>Старт</strong> нажимать не нужно.
                                     <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                        'src' => 'telegram/bot-link.png',
-                                        'alt' => 'Сообщение BotFather о создании бота со ссылкой на чат',
-                                        'caption' => 'Нажмите на ссылку чата с созданным ботом',
-                                    ]) ?>
+                        'src' => 'telegram/bot-link.png',
+                        'alt' => 'Сообщение BotFather о создании бота со ссылкой на чат',
+                        'caption' => 'Нажмите на ссылку чата с созданным ботом',
+                    ]) ?>
                                 </li>
                                 <li>Справа сверху нажмите на иконку бота.</li>
                                 <li>Перейдите в <strong>Настройки бота</strong>.</li>
@@ -365,30 +365,30 @@ $botFatherUrl = 'https://t.me/BotFather';
                             </ol>
                             <div class="instruction-figures">
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                    'src' => 'telegram/bot-start.png',
-                                    'alt' => 'Чат с ботом: иконка бота справа сверху',
-                                    'caption' => 'Справа сверху нажмите на иконку бота',
-                                ]) ?>
+                    'src' => 'telegram/bot-start.png',
+                    'alt' => 'Чат с ботом: иконка бота справа сверху',
+                    'caption' => 'Справа сверху нажмите на иконку бота',
+                ]) ?>
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                    'src' => 'telegram/bot-profile.png',
-                                    'alt' => 'Профиль бота с пунктом Настройки бота',
-                                    'caption' => 'Перейдите в «Настройки бота»',
-                                ]) ?>
+                    'src' => 'telegram/bot-profile.png',
+                    'alt' => 'Профиль бота с пунктом Настройки бота',
+                    'caption' => 'Перейдите в «Настройки бота»',
+                ]) ?>
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                    'src' => 'telegram/bot-edit.png',
-                                    'alt' => 'Экран редактирования бота с пунктом Изменить настройки бота',
-                                    'caption' => 'Нажмите «Изменить настройки бота»',
-                                ]) ?>
+                    'src' => 'telegram/bot-edit.png',
+                    'alt' => 'Экран редактирования бота с пунктом Изменить настройки бота',
+                    'caption' => 'Нажмите «Изменить настройки бота»',
+                ]) ?>
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                    'src' => 'telegram/botfather-settings.png',
-                                    'alt' => 'Настройки бота с пунктом Secretary Mode',
-                                    'caption' => 'Откройте Secretary Mode',
-                                ]) ?>
+                    'src' => 'telegram/botfather-settings.png',
+                    'alt' => 'Настройки бота с пунктом Secretary Mode',
+                    'caption' => 'Откройте Secretary Mode',
+                ]) ?>
                                 <?= $this->render(dirname(__DIR__, 2) . '/Shared/Partial/instruction-figure', [
-                                    'src' => 'telegram/secretary-turn-on.png',
-                                    'alt' => 'Включение Secretary Mode кнопкой Turn on',
-                                    'caption' => 'Нажмите Turn on',
-                                ]) ?>
+                    'src' => 'telegram/secretary-turn-on.png',
+                    'alt' => 'Включение Secretary Mode кнопкой Turn on',
+                    'caption' => 'Нажмите Turn on',
+                ]) ?>
                             </div>
                         </div>
                     </li>
@@ -465,8 +465,8 @@ $botFatherUrl = 'https://t.me/BotFather';
                                         <div class="telegram-kb-checkboxes">
                                             <?php foreach ($knowledgeBases as $knowledgeBase): ?>
                                                 <?php
-                                                $isAssigned = in_array($knowledgeBase->getId(), $assignedKnowledgeBaseIds, true)
-                                                    || ($assignedKnowledgeBaseIds === [] && $knowledgeBase === $knowledgeBases[0]);
+                                $isAssigned = in_array($knowledgeBase->getId(), $assignedKnowledgeBaseIds, true)
+                                    || ($assignedKnowledgeBaseIds === [] && $knowledgeBase === $knowledgeBases[0]);
                                                 $isDisabled = !$knowledgeBase->isActive();
                                                 $checkboxId = 'onboarding_kb_' . $knowledgeBase->getId();
                                                 ?>

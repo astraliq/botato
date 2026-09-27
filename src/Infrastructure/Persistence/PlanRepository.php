@@ -8,10 +8,10 @@ use App\Domain\Plan\PlanRepositoryInterface;
 use App\Shared\ArrayHelper;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class PlanRepository implements PlanRepositoryInterface
+final readonly class PlanRepository implements PlanRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function listVisible(): array

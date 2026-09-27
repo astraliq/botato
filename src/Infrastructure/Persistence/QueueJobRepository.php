@@ -14,10 +14,10 @@ use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class QueueJobRepository implements QueueJobRepositoryInterface
+final readonly class QueueJobRepository implements QueueJobRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function enqueue(

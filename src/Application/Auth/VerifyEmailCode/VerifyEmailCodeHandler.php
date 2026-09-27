@@ -13,13 +13,13 @@ use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class VerifyEmailCodeHandler
+final readonly class VerifyEmailCodeHandler
 {
     public function __construct(
-        private readonly EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly AuthSessionInterface $authSession,
+        private EmailVerificationCodeRepositoryInterface $verificationCodeRepository,
+        private UserRepositoryInterface $userRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private AuthSessionInterface $authSession,
     ) {}
 
     public function handle(string $email, string $code): User

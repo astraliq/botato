@@ -9,12 +9,11 @@ use App\Application\Channel\Telegram\TelegramBotInfo;
 use InvalidArgumentException;
 use RuntimeException;
 
-final class TelegramBotApiHttpClient implements TelegramBotApiInterface
+final readonly class TelegramBotApiHttpClient implements TelegramBotApiInterface
 {
     public function __construct(
-        private readonly ?string $proxyUrl = null,
-    ) {
-    }
+        private ?string $proxyUrl = null,
+    ) {}
 
     public function getMe(string $botToken): TelegramBotInfo
     {

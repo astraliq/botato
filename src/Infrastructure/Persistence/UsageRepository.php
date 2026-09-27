@@ -12,10 +12,10 @@ use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class UsageRepository implements UsageRepositoryInterface
+final readonly class UsageRepository implements UsageRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function registerPeerMessage(

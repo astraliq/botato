@@ -8,9 +8,9 @@ use App\Domain\Security\SecretEncryptorInterface;
 use InvalidArgumentException;
 use RuntimeException;
 
-final class SodiumSecretEncryptor implements SecretEncryptorInterface
+final readonly class SodiumSecretEncryptor implements SecretEncryptorInterface
 {
-    private readonly string $key;
+    private string $key;
 
     public function __construct(string $appSecret)
     {

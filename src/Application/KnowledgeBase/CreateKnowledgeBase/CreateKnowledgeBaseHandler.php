@@ -13,12 +13,12 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
-final class CreateKnowledgeBaseHandler
+final readonly class CreateKnowledgeBaseHandler
 {
     public function __construct(
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly ChannelRepositoryInterface $channelRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private ChannelRepositoryInterface $channelRepository,
     ) {}
 
     public function handle(string $userId, string $title, string $summary = ''): KnowledgeBase

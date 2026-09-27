@@ -9,11 +9,11 @@ use App\Domain\User\User;
 use App\Domain\User\UserRepositoryInterface;
 use RuntimeException;
 
-final class GetCurrentUserHandler
+final readonly class GetCurrentUserHandler
 {
     public function __construct(
-        private readonly AuthSessionInterface $authSession,
-        private readonly UserRepositoryInterface $userRepository,
+        private AuthSessionInterface $authSession,
+        private UserRepositoryInterface $userRepository,
     ) {}
 
     public function handle(): User

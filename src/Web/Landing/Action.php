@@ -9,13 +9,13 @@ use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class Action
+final readonly class Action
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly UrlGeneratorInterface $urlGenerator,
-        private readonly PlanRepositoryInterface $planRepository,
-        private readonly string $mailerFrom,
+        private WebViewRenderer $viewRenderer,
+        private UrlGeneratorInterface $urlGenerator,
+        private PlanRepositoryInterface $planRepository,
+        private string $mailerFrom,
     ) {}
 
     public function __invoke(): ResponseInterface

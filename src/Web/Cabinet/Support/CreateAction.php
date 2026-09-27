@@ -14,13 +14,13 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class CreateAction
+final readonly class CreateAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly CreateSupportTicketHandler $createSupportTicketHandler,
-        private readonly ListSupportTicketsHandler $listSupportTicketsHandler,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private CreateSupportTicketHandler $createSupportTicketHandler,
+        private ListSupportTicketsHandler $listSupportTicketsHandler,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

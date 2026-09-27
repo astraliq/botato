@@ -12,11 +12,11 @@ use App\Domain\Ai\AiProviderRepositoryInterface;
 use JsonException;
 use RuntimeException;
 
-final class AiTunnelChatClient implements AiChatClientInterface
+final readonly class AiTunnelChatClient implements AiChatClientInterface
 {
     public function __construct(
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
-        private readonly int $timeoutSeconds = 60,
+        private AiProviderRepositoryInterface $aiProviderRepository,
+        private int $timeoutSeconds = 60,
     ) {}
 
     public function chat(array $messages, ?int $maxTokens = null): AiChatResult

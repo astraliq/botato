@@ -14,12 +14,12 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class UpdateAction
+final readonly class UpdateAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly UpdateProfileHandler $updateProfileHandler,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private UpdateProfileHandler $updateProfileHandler,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
