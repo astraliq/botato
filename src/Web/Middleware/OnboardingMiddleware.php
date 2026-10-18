@@ -13,12 +13,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\Router\UrlGeneratorInterface;
 
 /** Редирект в онбординг, пока пользователь не завершил первичную настройку. */
-final class OnboardingMiddleware implements MiddlewareInterface
+final readonly class OnboardingMiddleware implements MiddlewareInterface
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly ResponseFactoryInterface $responseFactory,
-        private readonly UrlGeneratorInterface $urlGenerator,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private ResponseFactoryInterface $responseFactory,
+        private UrlGeneratorInterface $urlGenerator,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

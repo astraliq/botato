@@ -6,16 +6,16 @@ namespace App\Domain\Conversation;
 
 use DateTimeImmutable;
 
-final class ConversationMessage
+final readonly class ConversationMessage
 {
     public function __construct(
-        private readonly string $id,
-        private readonly string $channelId,
-        private readonly string $peerKey,
-        private readonly ConversationMessageRole $role,
-        private readonly string $content,
-        private readonly ?string $externalId,
-        private readonly DateTimeImmutable $createdAt,
+        private string $id,
+        private string $channelId,
+        private string $peerKey,
+        private ConversationMessageRole $role,
+        private string $content,
+        private ?string $externalId,
+        private DateTimeImmutable $createdAt,
     ) {}
 
     public function getId(): string

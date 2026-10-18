@@ -15,15 +15,15 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class IndexAction
+final readonly class IndexAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
+        private WebViewRenderer $viewRenderer,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
+        private ChannelRepositoryInterface $channelRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

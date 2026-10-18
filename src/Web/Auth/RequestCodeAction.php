@@ -14,12 +14,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final class RequestCodeAction
+final readonly class RequestCodeAction
 {
     public function __construct(
-        private readonly RequestVerificationCodeHandler $handler,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly LoggerInterface $logger,
+        private RequestVerificationCodeHandler $handler,
+        private JsonResponseFactory $jsonResponseFactory,
+        private LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

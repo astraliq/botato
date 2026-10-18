@@ -11,10 +11,10 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
-final class SaveAiModelHandler
+final readonly class SaveAiModelHandler
 {
     public function __construct(
-        private readonly AiProviderRepositoryInterface $aiProviderRepository,
+        private AiProviderRepositoryInterface $aiProviderRepository,
     ) {}
 
     /**

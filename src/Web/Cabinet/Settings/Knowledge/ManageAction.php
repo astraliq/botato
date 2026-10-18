@@ -22,20 +22,20 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final class ManageAction
+final readonly class ManageAction
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly CreateKnowledgeBaseHandler $createKnowledgeBaseHandler,
-        private readonly UpdateKnowledgeBaseHandler $updateKnowledgeBaseHandler,
-        private readonly DeleteKnowledgeBaseHandler $deleteKnowledgeBaseHandler,
-        private readonly AssignKnowledgeBaseToTelegramHandler $assignKnowledgeBaseToTelegramHandler,
-        private readonly CreateKnowledgeArticleHandler $createKnowledgeArticleHandler,
-        private readonly UpdateKnowledgeArticleHandler $updateKnowledgeArticleHandler,
-        private readonly DeleteKnowledgeArticleHandler $deleteKnowledgeArticleHandler,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly LoggerInterface $logger,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private CreateKnowledgeBaseHandler $createKnowledgeBaseHandler,
+        private UpdateKnowledgeBaseHandler $updateKnowledgeBaseHandler,
+        private DeleteKnowledgeBaseHandler $deleteKnowledgeBaseHandler,
+        private AssignKnowledgeBaseToTelegramHandler $assignKnowledgeBaseToTelegramHandler,
+        private CreateKnowledgeArticleHandler $createKnowledgeArticleHandler,
+        private UpdateKnowledgeArticleHandler $updateKnowledgeArticleHandler,
+        private DeleteKnowledgeArticleHandler $deleteKnowledgeArticleHandler,
+        private ChannelRepositoryInterface $channelRepository,
+        private JsonResponseFactory $jsonResponseFactory,
+        private LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

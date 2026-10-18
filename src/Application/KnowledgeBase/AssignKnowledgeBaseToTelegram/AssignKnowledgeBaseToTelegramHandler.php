@@ -11,12 +11,12 @@ use App\Domain\Subscription\SubscriptionRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class AssignKnowledgeBaseToTelegramHandler
+final readonly class AssignKnowledgeBaseToTelegramHandler
 {
     public function __construct(
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private ChannelRepositoryInterface $channelRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
     ) {}
 
     /**

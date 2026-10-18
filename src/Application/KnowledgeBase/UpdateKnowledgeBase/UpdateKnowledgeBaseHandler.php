@@ -9,10 +9,10 @@ use App\Domain\KnowledgeBase\KnowledgeBaseRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class UpdateKnowledgeBaseHandler
+final readonly class UpdateKnowledgeBaseHandler
 {
     public function __construct(
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
     ) {}
 
     public function handle(

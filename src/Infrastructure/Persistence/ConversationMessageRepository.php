@@ -13,10 +13,10 @@ use Ramsey\Uuid\Uuid;
 use RuntimeException;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class ConversationMessageRepository implements ConversationMessageRepositoryInterface
+final readonly class ConversationMessageRepository implements ConversationMessageRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function append(
