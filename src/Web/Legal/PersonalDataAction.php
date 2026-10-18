@@ -7,11 +7,11 @@ namespace App\Web\Legal;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\View\Renderer\WebViewRenderer;
 
-final class PersonalDataAction
+final readonly class PersonalDataAction
 {
     public function __construct(
-        private readonly WebViewRenderer $viewRenderer,
-        private readonly string $mailerFrom,
+        private WebViewRenderer $viewRenderer,
+        private string $mailerFrom,
     ) {}
 
     public function __invoke(): ResponseInterface

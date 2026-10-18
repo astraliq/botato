@@ -26,18 +26,18 @@ use Throwable;
 /**
  * Flush после debounce: собирает сообщения диалога до include_until и отвечает одним запросом к AI.
  */
-final class ProcessTelegramMessageJobHandler
+final readonly class ProcessTelegramMessageJobHandler
 {
     public function __construct(
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository,
-        private readonly UsageRepositoryInterface $usageRepository,
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
-        private readonly ConversationMessageRepositoryInterface $conversationMessageRepository,
-        private readonly AiChatClientInterface $aiChatClient,
-        private readonly TelegramBotApiInterface $telegramBotApi,
-        private readonly LoggerInterface $logger,
+        private ChannelRepositoryInterface $channelRepository,
+        private SubscriptionRepositoryInterface $subscriptionRepository,
+        private UsageRepositoryInterface $usageRepository,
+        private UserRepositoryInterface $userRepository,
+        private KnowledgeArticleRepositoryInterface $knowledgeArticleRepository,
+        private ConversationMessageRepositoryInterface $conversationMessageRepository,
+        private AiChatClientInterface $aiChatClient,
+        private TelegramBotApiInterface $telegramBotApi,
+        private LoggerInterface $logger,
     ) {}
 
     /** @param array<string, mixed> $payload */

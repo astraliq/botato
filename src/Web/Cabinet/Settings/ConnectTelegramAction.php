@@ -16,14 +16,14 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-final class ConnectTelegramAction
+final readonly class ConnectTelegramAction
 {
     public function __construct(
-        private readonly GetCurrentUserHandler $getCurrentUserHandler,
-        private readonly ConnectTelegramChannelHandler $connectTelegramChannelHandler,
-        private readonly ChannelRepositoryInterface $channelRepository,
-        private readonly JsonResponseFactory $jsonResponseFactory,
-        private readonly LoggerInterface $logger,
+        private GetCurrentUserHandler $getCurrentUserHandler,
+        private ConnectTelegramChannelHandler $connectTelegramChannelHandler,
+        private ChannelRepositoryInterface $channelRepository,
+        private JsonResponseFactory $jsonResponseFactory,
+        private LoggerInterface $logger,
     ) {}
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface

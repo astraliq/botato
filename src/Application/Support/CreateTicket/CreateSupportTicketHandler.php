@@ -10,10 +10,10 @@ use DateTimeImmutable;
 use InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
 
-final class CreateSupportTicketHandler
+final readonly class CreateSupportTicketHandler
 {
     public function __construct(
-        private readonly SupportTicketRepositoryInterface $supportTicketRepository,
+        private SupportTicketRepositoryInterface $supportTicketRepository,
     ) {}
 
     public function handle(string $userId, CreateSupportTicketDto $dto): SupportTicket

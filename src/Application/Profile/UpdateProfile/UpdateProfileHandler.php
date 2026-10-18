@@ -11,10 +11,10 @@ use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class UpdateProfileHandler
+final readonly class UpdateProfileHandler
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
+        private UserRepositoryInterface $userRepository,
     ) {}
 
     public function handle(string $userId, UpdateProfileCommand $command): User

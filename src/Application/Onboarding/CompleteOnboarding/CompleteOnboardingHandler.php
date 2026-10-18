@@ -12,12 +12,12 @@ use App\Domain\User\UserRepositoryInterface;
 use DateTimeImmutable;
 use InvalidArgumentException;
 
-final class CompleteOnboardingHandler
+final readonly class CompleteOnboardingHandler
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository,
-        private readonly KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
-        private readonly ChannelRepositoryInterface $channelRepository,
+        private UserRepositoryInterface $userRepository,
+        private KnowledgeBaseRepositoryInterface $knowledgeBaseRepository,
+        private ChannelRepositoryInterface $channelRepository,
     ) {}
 
     /**

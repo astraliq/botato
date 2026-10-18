@@ -13,11 +13,11 @@ use App\Shared\ArrayHelper;
 use DateTimeImmutable;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class AiProviderRepository implements AiProviderRepositoryInterface
+final readonly class AiProviderRepository implements AiProviderRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
-        private readonly SecretEncryptorInterface $secretEncryptor,
+        private ConnectionInterface $connection,
+        private SecretEncryptorInterface $secretEncryptor,
     ) {}
 
     public function findById(string $id): ?AiProvider

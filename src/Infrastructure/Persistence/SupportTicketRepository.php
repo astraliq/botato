@@ -9,10 +9,10 @@ use App\Domain\Support\SupportTicketRepositoryInterface;
 use App\Shared\ArrayHelper;
 use Yiisoft\Db\Connection\ConnectionInterface;
 
-final class SupportTicketRepository implements SupportTicketRepositoryInterface
+final readonly class SupportTicketRepository implements SupportTicketRepositoryInterface
 {
     public function __construct(
-        private readonly ConnectionInterface $connection,
+        private ConnectionInterface $connection,
     ) {}
 
     public function listByUserId(string $userId): array

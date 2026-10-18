@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Domain\Plan;
 
-final class Plan
+final readonly class Plan
 {
     public function __construct(
-        private readonly string $id,
-        private readonly string $code,
-        private readonly string $name,
-        private readonly string $description,
-        private readonly int $sortOrder,
-        private readonly bool $isPopular,
-        private readonly int $priceMonthlyMinor,
-        private readonly int $maxDialogsPerMonth,
-        private readonly int $maxMessagesPerDialog,
-        private readonly ?int $maxChannels,
-        private readonly int $maxKnowledgeBases,
-        private readonly string $buttonLabel,
-        private readonly bool $isActive,
-        private readonly bool $deleted,
+        private string $id,
+        private string $code,
+        private string $name,
+        private string $description,
+        private int $sortOrder,
+        private bool $isPopular,
+        private int $priceMonthlyMinor,
+        private int $maxDialogsPerMonth,
+        private int $maxMessagesPerDialog,
+        private ?int $maxChannels,
+        private int $maxKnowledgeBases,
+        private string $buttonLabel,
+        private bool $isActive,
+        private bool $deleted,
     ) {}
 
     public function getId(): string
